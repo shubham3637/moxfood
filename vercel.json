@@ -1,0 +1,11 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "env": {
+    "MONGODB_URI": "mongodb+srv://gautamtrading:gautamtrading@cluster0.jwprrpo.mongodb.net/gautamtrading?retryWrites=true&w=majority",
+    "CLOUDINARY_CLOUD_NAME": "drx6ryufl",
+    "CLOUDINARY_API_KEY": "674271286781139",
+    "CLOUDINARY_API_SECRET": "-84ePPr7vERpPv-RDzRL0TtiJh0"
+  }
+}
