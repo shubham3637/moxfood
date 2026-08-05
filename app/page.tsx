@@ -5,17 +5,15 @@ import DealsTicker from '@/components/DealsTicker';
 import HeroSlider from '@/components/HeroSlider';
 import FeaturesBar from '@/components/FeaturesBar';
 import DealBanner from '@/components/DealBanner';
-import CategoryCard from '@/components/CategoryCard';
 import ProductCard from '@/components/ProductCard';
 import Testimonials from '@/components/Testimonials';
-import { Search, Sparkles, RefreshCw, ShoppingBag, LayoutGrid, Flame } from 'lucide-react';
+import { Search, Sparkles, RefreshCw, ShoppingBag, Flame } from 'lucide-react';
 
 function StorefrontContent() {
   const [currentCategory, setCurrentCategory] = useState('all');
   const [currentTab, setCurrentTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const [categories, setCategories] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [seeding, setSeeding] = useState(false);
@@ -27,10 +25,6 @@ function StorefrontContent() {
   const fetchInitialData = async () => {
     setLoading(true);
     try {
-      const catRes = await fetch('/api/categories');
-      const catData = await catRes.json();
-      let activeCategories = catData.categories || [];
-
       let url = `/api/products?category=${currentCategory}`;
       if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
       if (currentTab === 'featured') url += `&featured=true`;
@@ -40,33 +34,25 @@ function StorefrontContent() {
       const prodData = await prodRes.json();
       let activeProducts = prodData.products || [];
 
-      if (activeCategories.length === 0 && activeProducts.length === 0) {
+      if (activeProducts.length === 0) {
         setSeeding(true);
         const seedRes = await fetch('/api/seed', { method: 'POST' });
         const seedData = await seedRes.json();
 
         if (seedData.success) {
-          const cRes = await fetch('/api/categories');
           const pRes = await fetch(url);
-          const cD = await cRes.json();
           const pD = await pRes.json();
-          activeCategories = cD.categories || [];
           activeProducts = pD.products || [];
         }
         setSeeding(false);
       }
 
-      setCategories(activeCategories);
       setProducts(activeProducts);
     } catch (error) {
       console.error('Failed to load store data:', error);
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleCategorySelect = (slug: string) => {
-    setCurrentCategory(slug);
   };
 
   const handleTabSelect = (tab: string) => {
@@ -90,50 +76,12 @@ function StorefrontContent() {
       <DealsTicker />
 
       {/* Main Full Width Content Wrapper */}
-      <div className="w-full px-4 md:px-10 lg:px-16 py-6 space-y-12">
+      <div className="w-full px-4 md:px-10 lg:px-16 py-6 space-y-10">
         {/* 1. Full-Width Dynamic Hero Image Slider */}
         <HeroSlider onExploreClick={scrollToProducts} />
 
-        {/* 2. Category Showcase Section - Placed DIRECTLY below Hero Slider */}
-        <section className="space-y-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2.5 font-heading">
-                <LayoutGrid size={24} className="text-pink-600 animate-pulse" />
-                <span>Product Categories</span>
-              </h2>
-              <p className="text-xs text-slate-500 font-medium">Select your desired grocery section to filter items</p>
-            </div>
-            {currentCategory !== 'all' && (
-              <button
-                onClick={() => handleCategorySelect('all')}
-                className="text-xs font-bold text-pink-600 hover:text-pink-800 underline cursor-pointer"
-              >
-                Show All Categories
-              </button>
-            )}
-          </div>
-
-          {/* Category Cards Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4">
-            <CategoryCard
-              category={{ name: 'All Products', altNameGujarati: '', slug: 'all', iconName: 'Sparkles' }}
-              isSelected={currentCategory === 'all'}
-              onClick={() => handleCategorySelect('all')}
-            />
-            {categories.map((cat) => (
-              <CategoryCard
-                key={cat.slug}
-                category={cat}
-                isSelected={currentCategory === cat.slug}
-                onClick={() => handleCategorySelect(cat.slug)}
-              />
-            ))}
-          </div>
-        </section>
-
-        {/* 3. Fresh Grocery Catalog Section - Placed DIRECTLY after Categories */}
-        <section id="products-grid" className="space-y-6 pt-6 border-t border-slate-200">
+        {/* 2. Fresh Grocery Catalog Section - DIRECTLY BELOW Hero Slider */}
+        <section id="products-grid" className="space-y-6 pt-2">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2.5 font-heading">
@@ -214,13 +162,13 @@ function StorefrontContent() {
           )}
         </section>
 
-        {/* 4. Full-Width Features Highlight Bar */}
+        {/* 3. Full-Width Features Highlight Bar */}
         <FeaturesBar />
 
-        {/* 5. Deal of the Day Promotional Banner */}
+        {/* 4. Deal of the Day Promotional Banner */}
         <DealBanner onShopDealsClick={() => handleTabSelect('featured')} />
 
-        {/* 6. Full-Width Customer Testimonials & Stats Counter Section */}
+        {/* 5. Full-Width Customer Testimonials & Stats Counter Section */}
         <Testimonials />
       </div>
     </div>
