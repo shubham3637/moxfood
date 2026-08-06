@@ -4,7 +4,6 @@ import { CartProvider } from '@/context/CartContext';
 import { LanguageProvider } from '@/context/LanguageContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import CartDrawer from '@/components/CartDrawer';
 import FloatingCartBar from '@/components/FloatingCartBar';
 
 export const metadata: Metadata = {
@@ -23,7 +22,6 @@ export default function RootLayout({
         <LanguageProvider>
           <CartProvider>
             <Navbar />
-            <CartDrawer />
             <FloatingCartBar />
             <main className="flex-1">{children}</main>
             <Footer />

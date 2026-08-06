@@ -177,7 +177,7 @@ export default function HeroSlider({ onExploreClick }: HeroSliderProps) {
 
             <div className="hidden sm:flex items-center gap-2 px-4 py-3.5 rounded-2xl bg-blue-900/70 backdrop-blur-md border border-blue-700/60 text-xs font-bold text-pink-300 shadow">
               <Sparkles size={16} className="text-pink-400" />
-              <span>Free Delivery Above ₹499</span>
+              <span>Fast Express Delivery</span>
             </div>
           </div>
         </div>

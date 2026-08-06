@@ -11,7 +11,7 @@ import LanguageSwitcher from '@/components/LanguageSwitcher';
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
-  const { totalItemsCount, toggleCartDrawer } = useCart();
+  const { totalItemsCount } = useCart();
   const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -108,9 +108,9 @@ export default function Navbar() {
             <span>{t('allProductsBtn')}</span>
           </Link>
 
-          {/* Cart Drawer Trigger */}
-          <button
-            onClick={toggleCartDrawer}
+          {/* Direct Checkout Trigger */}
+          <Link
+            href="/checkout"
             className="relative flex items-center gap-1.5 sm:gap-2 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white px-3 sm:px-5 py-2 sm:py-2.5 rounded-full font-extrabold text-xs sm:text-sm transition-all shadow-md shadow-pink-600/30 active:scale-95 cursor-pointer shrink-0"
           >
             <ShoppingBag size={18} className="sm:w-5 sm:h-5" />
@@ -120,7 +120,7 @@ export default function Navbar() {
                 {totalItemsCount}
               </span>
             )}
-          </button>
+          </Link>
 
           {/* Mobile Hamburger Toggle */}
           <button

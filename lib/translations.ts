@@ -3,7 +3,7 @@ export type Language = 'en' | 'gu';
 export const translations = {
   en: {
     // Header & Navbar
-    topNotice: 'Free Express Delivery on orders above ₹499!',
+    topNotice: 'Fast Express Delivery across Anand & Ahmedabad Region!',
     storeSubtitle: 'Grocery Super Store',
     locationTitle: 'Local Store Express Delivery',
     locationSub: 'Anand & Ahmedabad Region',
@@ -15,7 +15,7 @@ export const translations = {
     // Hero & Deals Ticker
     heroTag: 'SUPER SAVINGS • Online Grocery Store',
     heroButton: 'Shop Grocery Deals',
-    freeDeliveryBadge: 'Free Delivery Above ₹499',
+    freeDeliveryBadge: 'Fast Express Delivery',
     qualityBadge: '100% Quality Guaranteed',
     mrpDiscountBadge: 'Up to 25% Off MRP',
     comboTitle: 'Monthly Ration Combo Pack',
@@ -73,14 +73,14 @@ export const translations = {
     // Cart Drawer
     shoppingCart: 'Shopping Cart',
     items: 'Items',
-    unlockedFreeDelivery: '🎉 Congratulations! You unlocked FREE Delivery!',
-    saveFreeDelivery: 'Save on FREE Delivery',
-    addMoreForFree: 'Add ₹{amount} more',
+    unlockedFreeDelivery: 'Standard Store Delivery Charge Applicable',
+    saveFreeDelivery: 'Standard Store Delivery',
+    addMoreForFree: 'Standard Delivery Charge ₹30',
     cartEmpty: 'Your Cart is Empty',
     cartEmptySub: 'Add items from the store catalog to place your order.',
     subtotal: 'Subtotal:',
     deliveryCharge: 'Delivery Charge:',
-    free: 'FREE',
+    free: '₹30',
     grandTotal: 'Grand Total:',
     proceedCheckout: 'Proceed to Checkout',
 
@@ -135,7 +135,7 @@ export const translations = {
   },
   gu: {
     // Header & Navbar
-    topNotice: '₹499 થી વધુ ના ઓર્ડર પર ફ્રી હોમ ડિલિવરી!',
+    topNotice: 'આણંદ અને અમદાવાદ વિસ્તારમાં ઝડપી એક્સપ્રેસ હોમ ડિલિવરી!',
     storeSubtitle: 'કરીયાણા સ્ટોર',
     locationTitle: 'સ્થાનિક સ્ટોર ફાસ્ટ ડિલિવરી',
     locationSub: 'આણંદ અને અમદાવાદ વિસ્તાર',
@@ -147,7 +147,7 @@ export const translations = {
     // Hero & Deals Ticker
     heroTag: 'સુપર બચત • ઓનલાઈન કરિયાણા સ્ટોર',
     heroButton: 'સામાન ખરીદો',
-    freeDeliveryBadge: '₹499 થી વધુ પર ફ્રી ડિલિવરી',
+    freeDeliveryBadge: 'ઝડપી એક્સપ્રેસ ડિલિવરી',
     qualityBadge: '100% શુદ્ધતાની ગેરંટી',
     mrpDiscountBadge: 'MRP પર 25% સુધીની બચત',
     comboTitle: 'મહિનાનો રેશન કોમ્બો પેક',
@@ -205,14 +205,14 @@ export const translations = {
     // Cart Drawer
     shoppingCart: 'તમારું કાર્ટ',
     items: 'વસ્તુઓ',
-    unlockedFreeDelivery: '🎉 અભિનંદન! તમને ફ્રી ડિલિવરી મળી ગઈ છે!',
-    saveFreeDelivery: 'ફ્રી ડિલિવરી નો લાભ લો',
-    addMoreForFree: 'હજુ ₹{amount} નો ઉમેરો કરો',
+    unlockedFreeDelivery: 'સ્ટોર ડિલિવરી ચાર્જ લાગુ',
+    saveFreeDelivery: 'સ્ટોર હોમ ડિલિવરી',
+    addMoreForFree: 'ડિલિવરી ચાર્જ ₹30',
     cartEmpty: 'કાર્ટ ખાલી છે',
     cartEmptySub: 'ઓર્ડર કરવા સામાન ઉમેરો.',
     subtotal: 'સામાનની કિંમત:',
     deliveryCharge: 'ડિલિવરી ચાર્જ:',
-    free: 'મફત (FREE)',
+    free: '₹30',
     grandTotal: 'કુલ ચૂકવવાની રકમ:',
     proceedCheckout: 'ઓર્ડર માટે આગળ વધો',
 

@@ -32,7 +32,6 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const CART_STORAGE_KEY = 'gautam_trading_cart_v1';
-const FREE_DELIVERY_THRESHOLD = 499;
 const STANDARD_DELIVERY_CHARGE = 30;
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -116,7 +115,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const totalItemsCount = items.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const deliveryCharge = items.length === 0 ? 0 : subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : STANDARD_DELIVERY_CHARGE;
+  const deliveryCharge = items.length === 0 ? 0 : STANDARD_DELIVERY_CHARGE;
   const grandTotal = subtotal + deliveryCharge;
 
   return (
@@ -134,7 +133,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         subtotal,
         deliveryCharge,
         grandTotal,
-        freeDeliveryThreshold: FREE_DELIVERY_THRESHOLD,
+        freeDeliveryThreshold: 0,
       }}
     >
       {children}

@@ -81,8 +81,8 @@ export default function Footer() {
             <div className="p-3 bg-blue-900/60 rounded-2xl border border-blue-800 flex items-center gap-3">
               <Truck size={20} className="text-pink-400 shrink-0" />
               <div>
-                <div className="font-extrabold text-white">Free Home Delivery</div>
-                <div className="text-[11px] text-blue-200">On orders above ₹499</div>
+                <div className="font-extrabold text-white">Fast Express Delivery</div>
+                <div className="text-[11px] text-blue-200">Direct store doorstep delivery</div>
               </div>
             </div>
             <div className="p-3 bg-blue-900/60 rounded-2xl border border-blue-800 flex items-center gap-3">
