@@ -193,10 +193,18 @@ export default function AdminOrdersPage() {
                   <div className="text-slate-700 pt-1">
                     <strong>Address:</strong> {ord.customerDetails.address}
                   </div>
-                  <div className="text-slate-500 flex items-center gap-2 pt-0.5 text-[11px]">
-                    <span>Slot: {ord.customerDetails.deliverySlot}</span>
-                    <span>•</span>
-                    <span>Payment Method: <strong>{ord.paymentMethod}</strong></span>
+                  {ord.customerDetails.pincode && (
+                    <div className="text-slate-700">
+                      <strong>PIN Code:</strong> <span className="font-bold text-pink-600">{ord.customerDetails.pincode}</span>
+                    </div>
+                  )}
+                  {ord.customerDetails.landmark && (
+                    <div className="text-slate-500 text-[11px]">
+                      Landmark: {ord.customerDetails.landmark}
+                    </div>
+                  )}
+                  <div className="text-slate-500 pt-0.5 text-[11px]">
+                    Payment Method: <strong>{ord.paymentMethod}</strong>
                   </div>
                 </div>
 
@@ -211,7 +219,7 @@ export default function AdminOrdersPage() {
                       <span className="font-bold">₹{ord.deliveryCharge}</span>
                     </div>
                   </div>
-                  <div className="flex justify-between items-center text-sm font-black text-slate-900 pt-2 border-t border-pink-200">
+                  <div className="flex justify-between items-center text-sm font-black text-slate-900 pt-2 border-t border-pink-200 font-heading">
                     <span>Total Amount:</span>
                     <span className="text-blue-900 text-base">₹{ord.totalAmount}</span>
                   </div>
@@ -237,7 +245,7 @@ export default function AdminOrdersPage() {
                         />
                       )}
                       <div className="min-w-0 flex-1">
-                        <div className="font-bold text-slate-800 truncate">{it.name}</div>
+                        <div className="font-bold text-slate-800 truncate font-heading">{it.name}</div>
                         <div className="text-[11px] text-slate-500">
                           {it.unit} x {it.quantity} = <strong>₹{it.price * it.quantity}</strong>
                         </div>

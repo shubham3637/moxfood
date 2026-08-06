@@ -14,6 +14,7 @@ export interface ICustomerDetails {
   name: string;
   phone: string;
   address: string;
+  pincode?: string;
   landmark?: string;
   deliverySlot?: string;
 }
@@ -51,6 +52,7 @@ const CustomerDetailsSchema = new Schema<ICustomerDetails>(
     name: { type: String, required: true },
     phone: { type: String, required: true },
     address: { type: String, required: true },
+    pincode: { type: String, default: '' },
     landmark: { type: String, default: '' },
     deliverySlot: { type: String, default: 'Anytime Today' },
   },

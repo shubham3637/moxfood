@@ -33,9 +33,15 @@ export async function POST(request: Request) {
 
     const { customerDetails, items, paymentMethod, notes } = body;
 
-    if (!customerDetails || !customerDetails.name || !customerDetails.phone || !customerDetails.address) {
+    if (
+      !customerDetails ||
+      !customerDetails.name ||
+      !customerDetails.phone ||
+      !customerDetails.address ||
+      !customerDetails.pincode
+    ) {
       return NextResponse.json(
-        { success: false, error: 'Customer name, phone, and address are required' },
+        { success: false, error: 'Customer name, phone, address, and 6-digit Pincode are required' },
         { status: 400 }
       );
     }
@@ -52,8 +58,8 @@ export async function POST(request: Request) {
       return acc + Number(item.price) * Number(item.quantity);
     }, 0);
 
-    // Free delivery above ₹499, otherwise ₹30 delivery charge
-    const deliveryCharge = subtotal >= 499 ? 0 : 30;
+    // Fixed ₹30 delivery charge
+    const deliveryCharge = 30;
     const totalAmount = subtotal + deliveryCharge;
 
     // Generate unique Order ID
@@ -67,7 +73,7 @@ export async function POST(request: Request) {
       subtotal,
       deliveryCharge,
       totalAmount,
-      paymentMethod: paymentMethod || 'COD',
+      paymentMethod: paymentMethod || 'UPI',
       paymentStatus: paymentMethod === 'UPI' ? 'Paid' : 'Pending',
       status: 'Pending',
       notes: notes || '',

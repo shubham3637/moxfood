@@ -12,6 +12,7 @@ import {
   ShoppingBag,
   ShieldCheck,
   RefreshCw,
+  Hash,
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -26,9 +27,9 @@ export default function CheckoutPage() {
     name: '',
     phone: '',
     address: '',
+    pincode: '',
     landmark: '',
-    deliverySlot: 'Morning (8:00 AM - 11:00 AM)',
-    paymentMethod: 'UPI' as 'UPI', // Only Online Prepaid UPI Pay
+    paymentMethod: 'UPI' as 'UPI',
     notes: '',
   });
 
@@ -60,13 +61,26 @@ export default function CheckoutPage() {
   };
 
   const handlePlaceOrder = async () => {
-    if (!formData.name.trim() || !formData.phone.trim() || !formData.address.trim()) {
-      setErrorMsg(language === 'gu' ? 'મહેરબાની કરીને તમારું પૂરું નામ, મોબાઈલ નંબર અને સરનામું દાખલ કરો.' : 'Please enter your full name, 10-digit mobile number, and address.');
+    if (!formData.name.trim() || !formData.phone.trim() || !formData.address.trim() || !formData.pincode.trim()) {
+      setErrorMsg(
+        language === 'gu'
+          ? 'મહેરબાની કરીને તમારું પૂરું નામ, મોબાઈલ નંબર, સરનામું અને ૬-અંકનો પીનકોડ દાખલ કરો.'
+          : 'Please enter your full name, 10-digit mobile number, delivery address, and 6-digit Pincode.'
+      );
       return;
     }
 
     if (formData.phone.trim().length < 10) {
-      setErrorMsg(language === 'gu' ? 'મહેરબાની કરીને સાચો 10-અંકનો મોબાઈલ નંબર દાખલ કરો.' : 'Please enter a valid 10-digit mobile number.');
+      setErrorMsg(
+        language === 'gu' ? 'મહેરબાની કરીને સાચો 10-અંકનો મોબાઈલ નંબર દાખલ કરો.' : 'Please enter a valid 10-digit mobile number.'
+      );
+      return;
+    }
+
+    if (formData.pincode.trim().length !== 6) {
+      setErrorMsg(
+        language === 'gu' ? 'મહેરબાની કરીને સાચો 6-અંકનો પીનકોડ દાખલ કરો.' : 'Please enter a valid 6-digit Area Pincode.'
+      );
       return;
     }
 
@@ -79,8 +93,8 @@ export default function CheckoutPage() {
           name: formData.name.trim(),
           phone: formData.phone.trim(),
           address: formData.address.trim(),
+          pincode: formData.pincode.trim(),
           landmark: formData.landmark.trim(),
-          deliverySlot: formData.deliverySlot,
         },
         items: items.map((item) => ({
           productId: item.productId,
@@ -118,8 +132,18 @@ export default function CheckoutPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name.trim() || !formData.phone.trim() || !formData.address.trim()) {
-      setErrorMsg(language === 'gu' ? 'મહેરબાની કરીને તમારું પૂરું નામ, મોબાઈલ નંબર અને સરનામું દાખલ કરો.' : 'Please enter your full name, 10-digit mobile number, and address.');
+    if (!formData.name.trim() || !formData.phone.trim() || !formData.address.trim() || !formData.pincode.trim()) {
+      setErrorMsg(
+        language === 'gu'
+          ? 'મહેરબાની કરીને તમારું પૂરું નામ, મોબાઈલ નંબર, સરનામું અને ૬-અંકનો પીનકોડ દાખલ કરો.'
+          : 'Please enter your full name, 10-digit mobile number, delivery address, and 6-digit Pincode.'
+      );
+      return;
+    }
+    if (formData.pincode.trim().length !== 6) {
+      setErrorMsg(
+        language === 'gu' ? 'મહેરબાની કરીને સાચો 6-અંકનો પીનકોડ દાખલ કરો.' : 'Please enter a valid 6-digit Area Pincode.'
+      );
       return;
     }
     // Show instant UPI QR code modal
@@ -127,7 +151,7 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
+    <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
       {/* UPI QR Code Scanner Modal */}
       <UPIQRModal
         amount={grandTotal}
@@ -159,15 +183,67 @@ export default function CheckoutPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column: Form */}
-        <div className="lg:col-span-7 bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+      <div className="space-y-6">
+        {/* Step 1: Order Summary (PLACED AT THE TOP) */}
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+          <h3 className="font-extrabold text-base text-slate-900 border-b border-slate-100 pb-3 flex items-center justify-between font-heading">
+            <div className="flex items-center gap-2">
+              <ShoppingBag size={20} className="text-blue-900" />
+              <span>1. {t('orderSummary')}</span>
+            </div>
+            <span className="text-xs text-pink-600 font-bold bg-pink-50 px-3 py-1 rounded-full border border-pink-100">
+              {items.reduce((acc, item) => acc + item.quantity, 0)} {t('items')}
+            </span>
+          </h3>
+
+          <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
+            {items.map((item) => (
+              <div key={item.productId} className="flex justify-between items-center text-xs pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-3 min-w-0">
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-12 h-12 object-contain bg-slate-50 p-1 rounded-xl border border-slate-200 shrink-0"
+                  />
+                  <div className="min-w-0">
+                    <div className="font-bold text-slate-900 text-xs sm:text-sm font-heading truncate">
+                      {language === 'gu' && item.altNameGujarati ? item.altNameGujarati : item.name}
+                    </div>
+                    <div className="text-[11px] text-slate-500 font-semibold mt-0.5">
+                      {item.unit} x {item.quantity} (₹{item.price}/unit)
+                    </div>
+                  </div>
+                </div>
+                <div className="font-extrabold text-slate-900 text-sm shrink-0 font-heading">
+                  ₹{item.price * item.quantity}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-2 text-xs pt-2 font-semibold border-t border-slate-100">
+            <div className="flex justify-between text-slate-600">
+              <span>{t('subtotal')}</span>
+              <span className="font-bold text-slate-900">₹{subtotal}</span>
+            </div>
+            <div className="flex justify-between text-slate-600">
+              <span>{t('deliveryCharge')}</span>
+              <span className="font-bold text-pink-600">₹{deliveryCharge}</span>
+            </div>
+            <div className="flex justify-between text-base sm:text-lg font-black text-slate-900 pt-3 border-t border-slate-200 font-heading">
+              <span>{t('payableTotal')}</span>
+              <span className="text-blue-900">₹{grandTotal}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Step 2: Customer Information & Delivery Address (PLACED DIRECTLY BELOW ORDER SUMMARY) */}
+        <div className="bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Step 1: Customer Info */}
             <div className="space-y-4">
-              <h3 className="font-extrabold text-base text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2 font-heading">
-                <User size={18} className="text-pink-600" />
-                <span>{t('custInfo')}</span>
+              <h3 className="font-extrabold text-base text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3 font-heading">
+                <MapPin size={20} className="text-pink-600" />
+                <span>2. {language === 'gu' ? 'ગ્રાહક અને ડિલિવરી સરનામું' : 'Customer & Delivery Address'}</span>
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -175,15 +251,18 @@ export default function CheckoutPage() {
                   <label className="block text-xs font-bold text-slate-700 mb-1">
                     {t('fullName')}
                   </label>
-                  <input
-                    type="text"
-                    name="name"
-                    required
-                    placeholder="e.g. Ramesh Patel"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="w-full bg-slate-50 text-slate-900 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-pink-500 focus:outline-none font-semibold"
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="name"
+                      required
+                      placeholder="e.g. Ramesh Patel"
+                      value={formData.name}
+                      onChange={handleChange}
+                      className="w-full bg-slate-50 text-slate-900 border border-slate-300 rounded-xl pl-9 pr-3.5 py-2.5 text-xs focus:ring-2 focus:ring-pink-500 focus:outline-none font-semibold"
+                    />
+                    <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  </div>
                 </div>
 
                 <div>
@@ -201,14 +280,6 @@ export default function CheckoutPage() {
                   />
                 </div>
               </div>
-            </div>
-
-            {/* Step 2: Delivery Address & Slot */}
-            <div className="space-y-4">
-              <h3 className="font-extrabold text-base text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2 font-heading">
-                <MapPin size={18} className="text-pink-600" />
-                <span>{t('deliveryAddressSlot')}</span>
-              </h3>
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
@@ -218,7 +289,7 @@ export default function CheckoutPage() {
                   name="address"
                   required
                   rows={3}
-                  placeholder="House No, Society / Flat Name, Street & City..."
+                  placeholder="House No, Society / Flat Name, Street & Area..."
                   value={formData.address}
                   onChange={handleChange}
                   className="w-full bg-slate-50 text-slate-900 border border-slate-300 rounded-xl p-3 text-xs focus:ring-2 focus:ring-pink-500 focus:outline-none font-semibold"
@@ -226,6 +297,27 @@ export default function CheckoutPage() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Compulsory Pincode Field */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+                    <span>{language === 'gu' ? '૬-અંકનો પિનકોડ *' : 'Area Pincode (6-digit) *'}</span>
+                    <span className="text-[10px] text-pink-600 font-extrabold">{language === 'gu' ? 'ફરજિયાત' : 'COMPULSORY'}</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="pincode"
+                      required
+                      maxLength={6}
+                      placeholder="e.g. 388001"
+                      value={formData.pincode}
+                      onChange={handleChange}
+                      className="w-full bg-slate-50 text-slate-900 border border-slate-300 rounded-xl pl-9 pr-3.5 py-2.5 text-xs focus:ring-2 focus:ring-pink-500 focus:outline-none font-extrabold tracking-wider"
+                    />
+                    <Hash size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-pink-600" />
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
                     {t('landmark')}
@@ -239,30 +331,29 @@ export default function CheckoutPage() {
                     className="w-full bg-slate-50 text-slate-900 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-pink-500 focus:outline-none font-semibold"
                   />
                 </div>
+              </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    {t('deliverySlot')}
-                  </label>
-                  <select
-                    name="deliverySlot"
-                    value={formData.deliverySlot}
-                    onChange={handleChange}
-                    className="w-full bg-slate-50 text-slate-900 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-pink-500 focus:outline-none cursor-pointer font-semibold"
-                  >
-                    <option value="Morning (8:00 AM - 11:00 AM)">Morning (8:00 AM - 11:00 AM)</option>
-                    <option value="Afternoon (12:00 PM - 3:00 PM)">Afternoon (12:00 PM - 3:00 PM)</option>
-                    <option value="Evening (4:00 PM - 8:00 PM)">Evening (4:00 PM - 8:00 PM)</option>
-                  </select>
-                </div>
+              {/* Special Instructions */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  {t('orderNotes')}
+                </label>
+                <input
+                  type="text"
+                  name="notes"
+                  placeholder="e.g. Call before coming for delivery..."
+                  value={formData.notes}
+                  onChange={handleChange}
+                  className="w-full bg-slate-50 text-slate-900 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-pink-500 focus:outline-none font-semibold"
+                />
               </div>
             </div>
 
             {/* Step 3: Payment Method (Prepaid Online UPI Only) */}
-            <div className="space-y-4">
-              <h3 className="font-extrabold text-base text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2 font-heading">
+            <div className="space-y-4 pt-2 border-t border-slate-100">
+              <h3 className="font-extrabold text-base text-slate-900 flex items-center gap-2 font-heading">
                 <CreditCard size={18} className="text-pink-600" />
-                <span>{t('paymentMethodTitle')}</span>
+                <span>3. {t('paymentMethodTitle')}</span>
               </h3>
 
               <div className="bg-pink-50 border-2 border-pink-500 p-4 rounded-2xl space-y-2 text-xs">
@@ -280,25 +371,10 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Special Instructions */}
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                {t('orderNotes')}
-              </label>
-              <input
-                type="text"
-                name="notes"
-                placeholder="e.g. Call before coming for delivery..."
-                value={formData.notes}
-                onChange={handleChange}
-                className="w-full bg-slate-50 text-slate-900 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-pink-500 focus:outline-none font-semibold"
-              />
-            </div>
-
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-extrabold py-4 rounded-2xl shadow-xl shadow-pink-600/30 flex items-center justify-center gap-2 transition-all text-sm disabled:opacity-50 cursor-pointer"
+              className="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-extrabold py-4 rounded-2xl shadow-xl shadow-pink-600/30 flex items-center justify-center gap-2 transition-all text-sm sm:text-base disabled:opacity-50 cursor-pointer font-heading"
             >
               {isSubmitting ? (
                 <>
@@ -313,56 +389,6 @@ export default function CheckoutPage() {
               )}
             </button>
           </form>
-        </div>
-
-        {/* Right Column: Order Summary */}
-        <div className="lg:col-span-5 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4 self-start">
-          <h3 className="font-extrabold text-base text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2 font-heading">
-            <ShoppingBag size={18} className="text-blue-900" />
-            <span>{t('orderSummary')}</span>
-          </h3>
-
-          <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
-            {items.map((item) => (
-              <div key={item.productId} className="flex justify-between items-center text-xs pb-2 border-b border-slate-100">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-10 h-10 object-contain bg-slate-50 p-1 rounded-lg border border-slate-200 shrink-0"
-                  />
-                  <div className="min-w-0">
-                    <div className="font-bold text-slate-800 truncate font-heading">
-                      {language === 'gu' && item.altNameGujarati ? item.altNameGujarati : item.name}
-                    </div>
-                    <div className="text-[11px] text-slate-500 font-semibold">
-                      {item.unit} x {item.quantity}
-                    </div>
-                  </div>
-                </div>
-                <div className="font-extrabold text-slate-900 shrink-0 font-heading">
-                  ₹{item.price * item.quantity}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="space-y-2 text-xs pt-2 font-semibold">
-            <div className="flex justify-between text-slate-600">
-              <span>{t('subtotal')}</span>
-              <span className="font-bold text-slate-900">₹{subtotal}</span>
-            </div>
-            <div className="flex justify-between text-slate-600">
-              <span>{t('deliveryCharge')}</span>
-              <span className="font-bold text-pink-600">
-                {deliveryCharge === 0 ? t('free') : `₹${deliveryCharge}`}
-              </span>
-            </div>
-            <div className="flex justify-between text-base font-black text-slate-900 pt-3 border-t border-slate-200 font-heading">
-              <span>{t('payableTotal')}</span>
-              <span className="text-blue-900">₹{grandTotal}</span>
-            </div>
-          </div>
 
           <div className="bg-blue-50/70 p-3.5 rounded-2xl text-[11px] text-blue-900 space-y-1 border border-blue-100">
             <div className="font-bold flex items-center gap-1">
