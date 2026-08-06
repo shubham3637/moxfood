@@ -13,6 +13,9 @@ import {
   ShieldCheck,
   RefreshCw,
   Hash,
+  Plus,
+  Minus,
+  Trash2,
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -20,7 +23,15 @@ import UPIQRModal from '@/components/UPIQRModal';
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, subtotal, deliveryCharge, grandTotal, clearCart } = useCart();
+  const {
+    items,
+    subtotal,
+    deliveryCharge,
+    grandTotal,
+    updateQuantity,
+    removeFromCart,
+    clearCart,
+  } = useCart();
   const { t, language } = useLanguage();
 
   const [formData, setFormData] = useState({
@@ -47,7 +58,7 @@ export default function CheckoutPage() {
         <p className="text-xs text-slate-500 font-medium">{t('cartEmptySub')}</p>
         <Link
           href="/products"
-          className="inline-flex items-center gap-2 bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold px-5 py-3 rounded-xl shadow transition-colors cursor-pointer"
+          className="inline-flex items-center gap-2 bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold px-5 py-3 rounded-xl shadow transition-colors cursor-pointer font-heading"
         >
           <ArrowLeft size={16} />
           <span>{t('heroButton')}</span>
@@ -167,7 +178,7 @@ export default function CheckoutPage() {
       {/* Navigation link */}
       <Link
         href="/products"
-        className="inline-flex items-center gap-2 text-xs font-bold text-slate-700 hover:text-pink-600 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-sm cursor-pointer"
+        className="inline-flex items-center gap-2 text-xs font-bold text-slate-700 hover:text-pink-600 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-sm cursor-pointer font-heading"
       >
         <ArrowLeft size={16} />
         <span>{t('backToStore')}</span>
@@ -184,21 +195,24 @@ export default function CheckoutPage() {
       )}
 
       <div className="space-y-6">
-        {/* Step 1: Order Summary (PLACED AT THE TOP) */}
+        {/* Step 1: Order Summary with Interactive Quantity Controls & Delete */}
         <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
           <h3 className="font-extrabold text-base text-slate-900 border-b border-slate-100 pb-3 flex items-center justify-between font-heading">
             <div className="flex items-center gap-2">
               <ShoppingBag size={20} className="text-blue-900" />
               <span>1. {t('orderSummary')}</span>
             </div>
-            <span className="text-xs text-pink-600 font-bold bg-pink-50 px-3 py-1 rounded-full border border-pink-100">
+            <span className="text-xs text-pink-600 font-bold bg-pink-50 px-3 py-1 rounded-full border border-pink-100 font-heading">
               {items.reduce((acc, item) => acc + item.quantity, 0)} {t('items')}
             </span>
           </h3>
 
-          <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
+          <div className="space-y-3.5 max-h-96 overflow-y-auto pr-1">
             {items.map((item) => (
-              <div key={item.productId} className="flex justify-between items-center text-xs pb-3 border-b border-slate-100">
+              <div
+                key={item.productId}
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs pb-3 border-b border-slate-100"
+              >
                 <div className="flex items-center gap-3 min-w-0">
                   <img
                     src={item.image}
@@ -210,12 +224,49 @@ export default function CheckoutPage() {
                       {language === 'gu' && item.altNameGujarati ? item.altNameGujarati : item.name}
                     </div>
                     <div className="text-[11px] text-slate-500 font-semibold mt-0.5">
-                      {item.unit} x {item.quantity} (₹{item.price}/unit)
+                      {item.unit} • ₹{item.price} / unit
                     </div>
                   </div>
                 </div>
-                <div className="font-extrabold text-slate-900 text-sm shrink-0 font-heading">
-                  ₹{item.price * item.quantity}
+
+                <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                  {/* Quantity Counter Control (+ / -) */}
+                  <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+                    <button
+                      type="button"
+                      onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                      className="w-7 h-7 rounded-lg bg-white hover:bg-pink-50 hover:text-pink-600 text-slate-700 font-bold flex items-center justify-center transition-colors shadow-sm cursor-pointer"
+                      aria-label="Decrease quantity"
+                    >
+                      <Minus size={14} />
+                    </button>
+                    <span className="w-8 text-center font-black text-slate-900 text-xs font-heading">
+                      {item.quantity}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                      className="w-7 h-7 rounded-lg bg-pink-600 hover:bg-pink-500 text-white font-bold flex items-center justify-center transition-colors shadow-sm cursor-pointer"
+                      aria-label="Increase quantity"
+                    >
+                      <Plus size={14} />
+                    </button>
+                  </div>
+
+                  {/* Subtotal & Delete Trash Button */}
+                  <div className="flex items-center gap-2">
+                    <div className="font-extrabold text-slate-900 text-sm font-heading w-16 text-right">
+                      ₹{item.price * item.quantity}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeFromCart(item.productId)}
+                      className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                      title="Remove item"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -237,7 +288,7 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        {/* Step 2: Customer Information & Delivery Address (PLACED DIRECTLY BELOW ORDER SUMMARY) */}
+        {/* Step 2: Customer Information & Delivery Address */}
         <div className="bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">
@@ -391,7 +442,7 @@ export default function CheckoutPage() {
           </form>
 
           <div className="bg-blue-50/70 p-3.5 rounded-2xl text-[11px] text-blue-900 space-y-1 border border-blue-100">
-            <div className="font-bold flex items-center gap-1">
+            <div className="font-bold flex items-center gap-1 font-heading">
               <ShieldCheck size={14} className="text-pink-600" /> {t('qualityBadge')}
             </div>
             <div>You will receive instant updates and WhatsApp confirmation for your order.</div>
