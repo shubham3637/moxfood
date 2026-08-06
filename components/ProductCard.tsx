@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Plus, Minus, ShoppingBag, Tag } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface ProductCardProps {
   product: {
@@ -24,6 +25,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const { items, addToCart, updateQuantity } = useCart();
+  const { language, t } = useLanguage();
 
   const cartItem = items.find((item) => item.productId === product._id);
   const quantityInCart = cartItem ? cartItem.quantity : 0;
@@ -38,13 +40,15 @@ export default function ProductCard({ product }: ProductCardProps) {
       ? product.images[0]
       : 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80';
 
+  const displayTitle = language === 'gu' && product.altNameGujarati ? product.altNameGujarati : product.name;
+
   return (
     <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group relative">
       {/* Discount Tag */}
       {discountPercent > 0 && (
         <div className="absolute top-3 left-3 z-10 bg-pink-600 text-white text-[10px] font-black px-2 py-0.5 rounded-md flex items-center gap-1 shadow-sm">
           <Tag size={10} />
-          <span>{discountPercent}% OFF</span>
+          <span>{discountPercent}% {t('off')}</span>
         </div>
       )}
 
@@ -52,7 +56,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       <Link href={`/product/${product._id}`} className="block relative aspect-square bg-slate-50 overflow-hidden p-4 cursor-pointer">
         <img
           src={imageUrl}
-          alt={product.name}
+          alt={displayTitle}
           className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
         />
@@ -68,8 +72,8 @@ export default function ProductCard({ product }: ProductCardProps) {
 
           {/* Title */}
           <Link href={`/product/${product._id}`} className="cursor-pointer">
-            <h3 className="font-bold text-slate-900 text-sm line-clamp-2 group-hover:text-pink-600 transition-colors mb-2">
-              {product.name}
+            <h3 className="font-bold text-slate-900 text-sm line-clamp-2 group-hover:text-pink-600 transition-colors mb-2 font-heading">
+              {displayTitle}
             </h3>
           </Link>
         </div>
@@ -78,7 +82,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 mt-2">
           {/* Price View */}
           <div>
-            <div className="text-base font-black text-slate-900 flex items-baseline gap-1.5">
+            <div className="text-base font-black text-slate-900 flex items-baseline gap-1.5 font-heading">
               <span>₹{product.price}</span>
               {product.mrp > product.price && (
                 <span className="text-xs text-slate-400 line-through font-normal">
@@ -86,7 +90,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 </span>
               )}
             </div>
-            <div className="text-[10px] text-slate-400 font-medium">Incl. all taxes</div>
+            <div className="text-[10px] text-slate-400 font-medium">{t('inclTaxes')}</div>
           </div>
 
           {/* Add / Quantity Button */}
@@ -101,7 +105,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               }`}
             >
               <ShoppingBag size={14} />
-              <span>{product.stock > 0 ? 'Add' : 'Out of Stock'}</span>
+              <span>{product.stock > 0 ? t('addToCart') : t('outOfStock')}</span>
             </button>
           ) : (
             <div className="flex items-center bg-blue-900 text-white rounded-xl overflow-hidden shadow-sm">

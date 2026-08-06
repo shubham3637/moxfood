@@ -2,32 +2,41 @@
 
 import React from 'react';
 import { Star, Quote, HeartHandshake, ShieldCheck, Users, Truck, ThumbsUp } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function Testimonials() {
+  const { t, language } = useLanguage();
+
   const stats = [
-    { icon: <Users size={24} className="text-pink-400" />, count: '10,000+', label: 'Happy Local Families' },
-    { icon: <Truck size={24} className="text-pink-400" />, count: '15-30 Min', label: 'Fast Express Delivery' },
-    { icon: <ShieldCheck size={24} className="text-pink-400" />, count: '100%', label: 'Pure Branded Grocery' },
-    { icon: <ThumbsUp size={24} className="text-pink-400" />, count: '4.9 / 5', label: 'Verified Customer Rating' },
+    { icon: <Users size={24} className="text-pink-400" />, count: '10,000+', label: t('statFamilies') },
+    { icon: <Truck size={24} className="text-pink-400" />, count: '15-30 Min', label: t('statSpeed') },
+    { icon: <ShieldCheck size={24} className="text-pink-400" />, count: '100%', label: t('statQuality') },
+    { icon: <ThumbsUp size={24} className="text-pink-400" />, count: '4.9 / 5', label: t('statRating') },
   ];
 
   const reviews = [
     {
-      name: 'Rameshbhai Patel',
-      location: 'Anand Store Customer',
-      comment: 'Ordered wheat flour and edible oil from Gautam Trading. Express home delivery within 20 mins. Superb quality!',
+      name: language === 'gu' ? 'રમેશભાઈ પટેલ' : 'Rameshbhai Patel',
+      location: language === 'gu' ? 'આણંદ સ્ટોર ગ્રાહક' : 'Anand Store Customer',
+      comment: language === 'gu'
+        ? 'ગૌતમ ટ્રેડિંગ માંથી ઘઉંનો લોટ અને તેલ ઓર્ડર કર્યા હતા. 20 મિનિટ માં હોમ ડિલિવરી મળી ગઈ. ક્વોલિટી ખૂબ સરસ છે!'
+        : 'Ordered wheat flour and edible oil from Gautam Trading. Express home delivery within 20 mins. Superb quality!',
       rating: 5,
     },
     {
-      name: 'Sunitaben Shah',
-      location: 'Ahmedabad Customer',
-      comment: 'Better rates than local market and easy UPI payment. Gautam Trading online grocery service is excellent.',
+      name: language === 'gu' ? 'સુનીતાબેન શાહ' : 'Sunitaben Shah',
+      location: language === 'gu' ? 'અમદાવાદ ગ્રાહક' : 'Ahmedabad Customer',
+      comment: language === 'gu'
+        ? 'બજાર કરતા વ્યાજબી ભાવે સામાન મળે છે અને UPI વડે સરળતાથી પેમેન્ટ થઈ ગયું. ગૌતમ ટ્રેડિંગ સર્વિસ બેસ્ટ છે.'
+        : 'Better rates than local market and easy UPI payment. Gautam Trading online grocery service is excellent.',
       rating: 5,
     },
     {
-      name: 'Jayeshbhai Joshi',
-      location: 'Nadiad Customer',
-      comment: 'Desi Toor Dal and Wagh Bakri Tea were fresh. Order receipt on WhatsApp is very convenient.',
+      name: language === 'gu' ? 'જયેશભાઈ જોષી' : 'Jayeshbhai Joshi',
+      location: language === 'gu' ? 'નડિયાદ ગ્રાહક' : 'Nadiad Customer',
+      comment: language === 'gu'
+        ? 'દેશી તુવેર દાળ અને વાઘ બકરી ચા એકદમ તાજી હતી. ઓર્ડર કન્ફર્મેશન ખૂબ જ ફાસ્ટ મળ્યું.'
+        : 'Desi Toor Dal and Wagh Bakri Tea were fresh. Order confirmation on WhatsApp is very convenient.',
       rating: 5,
     },
   ];
@@ -52,10 +61,10 @@ export default function Testimonials() {
       <div className="text-center max-w-xl mx-auto space-y-2">
         <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-pink-600/30 text-pink-300 text-xs font-black border border-pink-500/40 shadow">
           <HeartHandshake size={15} />
-          <span>CUSTOMER TRUST • Verified Local Reviews</span>
+          <span>{t('testimonialsTag')}</span>
         </div>
-        <h3 className="text-2xl md:text-4xl font-black font-heading">What Our Customers Say</h3>
-        <p className="text-xs md:text-sm text-blue-200 font-medium">Trusted by thousands of local families across Anand & Ahmedabad</p>
+        <h3 className="text-2xl md:text-4xl font-black font-heading">{t('testimonialsTitle')}</h3>
+        <p className="text-xs md:text-sm text-blue-200 font-medium">{t('testimonialsSub')}</p>
       </div>
 
       {/* Testimonials Cards Grid */}

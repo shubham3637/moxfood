@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   ArrowLeft,
-  CheckCircle,
   CreditCard,
   QrCode,
   MapPin,
@@ -13,14 +12,15 @@ import {
   ShoppingBag,
   ShieldCheck,
   RefreshCw,
-  Zap,
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { useLanguage } from '@/context/LanguageContext';
 import UPIQRModal from '@/components/UPIQRModal';
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, subtotal, deliveryCharge, grandTotal, clearCart } = useCart();
+  const { t, language } = useLanguage();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -42,14 +42,14 @@ export default function CheckoutPage() {
         <div className="w-16 h-16 rounded-full bg-blue-50 text-blue-900 flex items-center justify-center mx-auto">
           <ShoppingBag size={32} />
         </div>
-        <h2 className="text-xl font-extrabold text-slate-800 font-heading">Your Cart is Empty</h2>
-        <p className="text-xs text-slate-500 font-medium">Please select grocery items from the store to checkout.</p>
+        <h2 className="text-xl font-extrabold text-slate-800 font-heading">{t('cartEmpty')}</h2>
+        <p className="text-xs text-slate-500 font-medium">{t('cartEmptySub')}</p>
         <Link
           href="/products"
           className="inline-flex items-center gap-2 bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold px-5 py-3 rounded-xl shadow transition-colors cursor-pointer"
         >
           <ArrowLeft size={16} />
-          <span>Shop Grocery Now</span>
+          <span>{t('heroButton')}</span>
         </Link>
       </div>
     );
@@ -61,12 +61,12 @@ export default function CheckoutPage() {
 
   const handlePlaceOrder = async () => {
     if (!formData.name.trim() || !formData.phone.trim() || !formData.address.trim()) {
-      setErrorMsg('Please enter your full name, 10-digit mobile number, and address.');
+      setErrorMsg(language === 'gu' ? 'મહેરબાની કરીને તમારું પૂરું નામ, મોબાઈલ નંબર અને સરનામું દાખલ કરો.' : 'Please enter your full name, 10-digit mobile number, and address.');
       return;
     }
 
     if (formData.phone.trim().length < 10) {
-      setErrorMsg('Please enter a valid 10-digit mobile number.');
+      setErrorMsg(language === 'gu' ? 'મહેરબાની કરીને સાચો 10-અંકનો મોબાઈલ નંબર દાખલ કરો.' : 'Please enter a valid 10-digit mobile number.');
       return;
     }
 
@@ -85,7 +85,7 @@ export default function CheckoutPage() {
         items: items.map((item) => ({
           productId: item.productId,
           name: item.name,
-          altNameGujarati: '',
+          altNameGujarati: item.altNameGujarati || '',
           unit: item.unit,
           price: item.price,
           quantity: item.quantity,
@@ -119,7 +119,7 @@ export default function CheckoutPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim() || !formData.phone.trim() || !formData.address.trim()) {
-      setErrorMsg('Please enter your full name, 10-digit mobile number, and address.');
+      setErrorMsg(language === 'gu' ? 'મહેરબાની કરીને તમારું પૂરું નામ, મોબાઈલ નંબર અને સરનામું દાખલ કરો.' : 'Please enter your full name, 10-digit mobile number, and address.');
       return;
     }
     // Show instant UPI QR code modal
@@ -146,11 +146,11 @@ export default function CheckoutPage() {
         className="inline-flex items-center gap-2 text-xs font-bold text-slate-700 hover:text-pink-600 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-sm cursor-pointer"
       >
         <ArrowLeft size={16} />
-        <span>Back to All Products</span>
+        <span>{t('backToStore')}</span>
       </Link>
 
       <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight font-heading">
-        Checkout Order
+        {t('checkoutTitle')}
       </h1>
 
       {errorMsg && (
@@ -167,13 +167,13 @@ export default function CheckoutPage() {
             <div className="space-y-4">
               <h3 className="font-extrabold text-base text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2 font-heading">
                 <User size={18} className="text-pink-600" />
-                <span>1. Customer Information</span>
+                <span>{t('custInfo')}</span>
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Full Name *
+                    {t('fullName')}
                   </label>
                   <input
                     type="text"
@@ -188,7 +188,7 @@ export default function CheckoutPage() {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    WhatsApp Mobile Number *
+                    {t('mobile')}
                   </label>
                   <input
                     type="tel"
@@ -207,12 +207,12 @@ export default function CheckoutPage() {
             <div className="space-y-4">
               <h3 className="font-extrabold text-base text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2 font-heading">
                 <MapPin size={18} className="text-pink-600" />
-                <span>2. Delivery Address & Slot</span>
+                <span>{t('deliveryAddressSlot')}</span>
               </h3>
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Full Delivery Address *
+                  {t('fullAddress')}
                 </label>
                 <textarea
                   name="address"
@@ -228,7 +228,7 @@ export default function CheckoutPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Nearby Landmark
+                    {t('landmark')}
                   </label>
                   <input
                     type="text"
@@ -242,7 +242,7 @@ export default function CheckoutPage() {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Delivery Time Slot
+                    {t('deliverySlot')}
                   </label>
                   <select
                     name="deliverySlot"
@@ -262,20 +262,20 @@ export default function CheckoutPage() {
             <div className="space-y-4">
               <h3 className="font-extrabold text-base text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2 font-heading">
                 <CreditCard size={18} className="text-pink-600" />
-                <span>3. Payment Method (Online Prepaid Only)</span>
+                <span>{t('paymentMethodTitle')}</span>
               </h3>
 
               <div className="bg-pink-50 border-2 border-pink-500 p-4 rounded-2xl space-y-2 text-xs">
                 <div className="flex items-center gap-2 font-black text-pink-900 text-sm font-heading">
                   <QrCode size={20} className="text-pink-600" />
-                  <span>Instant UPI QR Scan & Pay</span>
-                  <span className="bg-pink-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold ml-auto">REQUIRED</span>
+                  <span>{t('prepaidNotice')}</span>
+                  <span className="bg-pink-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold ml-auto">ONLINE PAY</span>
                 </div>
                 <p className="text-pink-900 font-semibold text-xs leading-relaxed">
-                  Only Prepaid Online Payment is available for fast express dispatch. Scan QR code using <strong>GPay, PhonePe, Paytm or BHIM</strong> to complete order.
+                  {t('prepaidDesc')}
                 </p>
                 <div className="text-[11px] text-pink-700 font-bold pt-1">
-                  ⚠️ Cash on Delivery (COD) is not available for this store.
+                  {t('noCodNotice')}
                 </div>
               </div>
             </div>
@@ -283,7 +283,7 @@ export default function CheckoutPage() {
             {/* Special Instructions */}
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                Order Notes / Special Requests
+                {t('orderNotes')}
               </label>
               <input
                 type="text"
@@ -303,12 +303,12 @@ export default function CheckoutPage() {
               {isSubmitting ? (
                 <>
                   <RefreshCw size={18} className="animate-spin" />
-                  <span>Processing Order...</span>
+                  <span>{t('processingOrder')}</span>
                 </>
               ) : (
                 <>
                   <QrCode size={20} />
-                  <span>Scan UPI QR & Pay ₹{grandTotal}</span>
+                  <span>{t('confirmOrder', { amount: grandTotal })}</span>
                 </>
               )}
             </button>
@@ -319,7 +319,7 @@ export default function CheckoutPage() {
         <div className="lg:col-span-5 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4 self-start">
           <h3 className="font-extrabold text-base text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2 font-heading">
             <ShoppingBag size={18} className="text-blue-900" />
-            <span>Order Summary</span>
+            <span>{t('orderSummary')}</span>
           </h3>
 
           <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
@@ -332,39 +332,41 @@ export default function CheckoutPage() {
                     className="w-10 h-10 object-contain bg-slate-50 p-1 rounded-lg border border-slate-200 shrink-0"
                   />
                   <div className="min-w-0">
-                    <div className="font-bold text-slate-800 truncate">{item.name}</div>
+                    <div className="font-bold text-slate-800 truncate font-heading">
+                      {language === 'gu' && item.altNameGujarati ? item.altNameGujarati : item.name}
+                    </div>
                     <div className="text-[11px] text-slate-500 font-semibold">
                       {item.unit} x {item.quantity}
                     </div>
                   </div>
                 </div>
-                <div className="font-extrabold text-slate-900 shrink-0">
+                <div className="font-extrabold text-slate-900 shrink-0 font-heading">
                   ₹{item.price * item.quantity}
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="space-y-2 text-xs pt-2">
+          <div className="space-y-2 text-xs pt-2 font-semibold">
             <div className="flex justify-between text-slate-600">
-              <span>Subtotal:</span>
+              <span>{t('subtotal')}</span>
               <span className="font-bold text-slate-900">₹{subtotal}</span>
             </div>
             <div className="flex justify-between text-slate-600">
-              <span>Delivery Charge:</span>
+              <span>{t('deliveryCharge')}</span>
               <span className="font-bold text-pink-600">
-                {deliveryCharge === 0 ? 'FREE' : `₹${deliveryCharge}`}
+                {deliveryCharge === 0 ? t('free') : `₹${deliveryCharge}`}
               </span>
             </div>
             <div className="flex justify-between text-base font-black text-slate-900 pt-3 border-t border-slate-200 font-heading">
-              <span>Payable Total:</span>
+              <span>{t('payableTotal')}</span>
               <span className="text-blue-900">₹{grandTotal}</span>
             </div>
           </div>
 
           <div className="bg-blue-50/70 p-3.5 rounded-2xl text-[11px] text-blue-900 space-y-1 border border-blue-100">
             <div className="font-bold flex items-center gap-1">
-              <ShieldCheck size={14} className="text-pink-600" /> Prepaid Online UPI Payment Guarantee
+              <ShieldCheck size={14} className="text-pink-600" /> {t('qualityBadge')}
             </div>
             <div>You will receive instant updates and WhatsApp confirmation for your order.</div>
           </div>

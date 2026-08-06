@@ -5,11 +5,14 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { ShoppingBag, Search, MapPin, Store, Menu, X, PhoneCall, ShieldCheck, Zap, Grid } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { useLanguage } from '@/context/LanguageContext';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const { totalItemsCount, toggleCartDrawer } = useCart();
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -34,12 +37,12 @@ export default function Navbar() {
         <div className="flex items-center gap-2 truncate">
           <Zap size={14} className="text-yellow-300 fill-yellow-300 animate-bounce shrink-0" />
           <span className="truncate">
-            <strong>Gautam Trading</strong> • Free Express Delivery on orders above ₹499!
+            <strong>Gautam Trading</strong> • {t('topNotice')}
           </span>
         </div>
         <div className="hidden md:flex items-center gap-5 text-xs font-semibold shrink-0">
           <span className="flex items-center gap-1.5"><PhoneCall size={13} /> +91 98765 43210</span>
-          <span className="flex items-center gap-1.5"><ShieldCheck size={13} /> 100% Certified Pure Grocery</span>
+          <span className="flex items-center gap-1.5"><ShieldCheck size={13} /> {t('qualityBadge')}</span>
         </div>
       </div>
 
@@ -51,11 +54,11 @@ export default function Navbar() {
             <Store size={26} />
           </div>
           <div>
-            <div className="text-xl sm:text-2xl font-black tracking-tight leading-none text-white flex items-center gap-1">
+            <div className="text-xl sm:text-2xl font-black tracking-tight leading-none text-white flex items-center gap-1 font-heading">
               GAUTAM <span className="text-pink-400">TRADING</span>
             </div>
             <div className="text-[11px] text-pink-200 font-bold tracking-wide mt-0.5">
-              Grocery Super Store
+              {t('storeSubtitle')}
             </div>
           </div>
         </Link>
@@ -64,8 +67,8 @@ export default function Navbar() {
         <div className="hidden lg:flex items-center gap-2.5 text-xs bg-blue-900/60 backdrop-blur-md px-4 py-2 rounded-full border border-blue-700/60 shadow-inner">
           <MapPin size={16} className="text-pink-400 shrink-0 animate-pulse" />
           <div className="text-left">
-            <div className="font-extrabold text-blue-100">Local Store Express Delivery</div>
-            <div className="text-pink-300 text-[10px] font-semibold">Anand & Ahmedabad Region</div>
+            <div className="font-extrabold text-blue-100">{t('locationTitle')}</div>
+            <div className="text-pink-300 text-[10px] font-semibold">{t('locationSub')}</div>
           </div>
         </div>
 
@@ -74,10 +77,10 @@ export default function Navbar() {
           <div className="relative group">
             <input
               type="text"
-              placeholder="Search Whole Wheat Atta, Refined Oil, Toor Dal, Tea, Spices..."
+              placeholder={t('searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-blue-900/70 text-white placeholder-blue-300/70 text-sm rounded-full pl-5 pr-12 py-3 border border-blue-700/80 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-blue-900 transition-all shadow-inner font-medium"
+              className="w-full bg-blue-900/70 text-white placeholder-blue-300/70 text-xs sm:text-sm rounded-full pl-5 pr-12 py-3 border border-blue-700/80 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-blue-900 transition-all shadow-inner font-medium"
             />
             <button
               type="submit"
@@ -91,13 +94,16 @@ export default function Navbar() {
 
         {/* Navigation & Cart Actions */}
         <div className="flex items-center gap-3">
+          {/* Language Switcher Pill */}
+          <LanguageSwitcher />
+
           {/* Shop All Products Link */}
           <Link
             href="/products"
             className="hidden md:flex items-center gap-1.5 text-xs font-extrabold px-4 py-2.5 rounded-full bg-blue-900/80 hover:bg-blue-800 text-white transition-all border border-blue-700/80 cursor-pointer shadow-sm hover:border-pink-500/50"
           >
             <Grid size={16} className="text-pink-400" />
-            <span>All Products</span>
+            <span>{t('allProductsBtn')}</span>
           </Link>
 
           {/* Cart Drawer Trigger */}
@@ -106,7 +112,7 @@ export default function Navbar() {
             className="relative flex items-center gap-2 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white px-5 py-2.5 rounded-full font-extrabold text-sm transition-all shadow-lg shadow-pink-600/30 active:scale-95 cursor-pointer"
           >
             <ShoppingBag size={20} />
-            <span className="hidden sm:inline">Cart</span>
+            <span className="hidden sm:inline">{t('cartBtn')}</span>
             {totalItemsCount > 0 && (
               <span className="bg-blue-950 text-white text-xs font-black w-5 h-5 rounded-full flex items-center justify-center ml-0.5 border border-pink-300 shadow-inner animate-pulse">
                 {totalItemsCount}
@@ -130,7 +136,7 @@ export default function Navbar() {
         <form onSubmit={handleSearch} className="relative">
           <input
             type="text"
-            placeholder="Search grocery products..."
+            placeholder={t('searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-blue-900/90 text-white placeholder-blue-300/70 text-xs rounded-full pl-4 pr-10 py-2.5 border border-blue-700 focus:outline-none focus:ring-2 focus:ring-pink-500"
@@ -151,14 +157,14 @@ export default function Navbar() {
               onClick={() => setIsMobileMenuOpen(false)}
               className="py-2 px-3 rounded-xl hover:bg-blue-900 text-blue-100 cursor-pointer flex items-center gap-2"
             >
-              🏠 Store Home Page
+              🏠 Home Page
             </Link>
             <Link
               href="/products"
               onClick={() => setIsMobileMenuOpen(false)}
               className="py-2 px-3 rounded-xl hover:bg-blue-900 text-pink-300 font-bold cursor-pointer flex items-center gap-2"
             >
-              📦 Browse All Products
+              📦 {t('allProductsBtn')}
             </Link>
           </div>
         )}

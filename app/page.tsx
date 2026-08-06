@@ -8,8 +8,10 @@ import DealBanner from '@/components/DealBanner';
 import ProductCard from '@/components/ProductCard';
 import Testimonials from '@/components/Testimonials';
 import { Search, Sparkles, RefreshCw, ShoppingBag, Flame } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 function StorefrontContent() {
+  const { t } = useLanguage();
   const [currentCategory, setCurrentCategory] = useState('all');
   const [currentTab, setCurrentTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -86,14 +88,14 @@ function StorefrontContent() {
             <div>
               <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2.5 font-heading">
                 <ShoppingBag size={26} className="text-blue-900" />
-                <span>Fresh Grocery Catalog</span>
+                <span>{t('catalogTitle')}</span>
               </h2>
               {searchQuery ? (
                 <p className="text-xs text-slate-600 mt-1 font-medium">
                   Search results for &quot;<strong className="text-pink-600">{searchQuery}</strong>&quot; ({products.length} items found)
                 </p>
               ) : (
-                <p className="text-xs text-slate-500 font-medium font-semibold">Fresh & pure grocery items for daily home use</p>
+                <p className="text-xs text-slate-500 font-medium font-semibold">{t('catalogSub')}</p>
               )}
             </div>
 
@@ -105,7 +107,7 @@ function StorefrontContent() {
                   currentTab === 'all' ? 'bg-blue-900 text-white shadow-md' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                All Items
+                {t('filterAll')}
               </button>
               <button
                 onClick={() => handleTabSelect('featured')}
@@ -114,7 +116,7 @@ function StorefrontContent() {
                 }`}
               >
                 <Sparkles size={14} />
-                <span>Featured Deals</span>
+                <span>{t('filterFeatured')}</span>
               </button>
               <button
                 onClick={() => handleTabSelect('trending')}
@@ -123,7 +125,7 @@ function StorefrontContent() {
                 }`}
               >
                 <Flame size={14} />
-                <span>Popular</span>
+                <span>{t('filterPopular')}</span>
               </button>
             </div>
           </div>
@@ -141,15 +143,15 @@ function StorefrontContent() {
               <div className="w-16 h-16 rounded-full bg-pink-100 text-pink-700 flex items-center justify-center mx-auto font-bold text-xl">
                 <Search size={28} />
               </div>
-              <h3 className="font-black text-slate-800 text-lg font-heading">No Products Found</h3>
+              <h3 className="font-black text-slate-800 text-lg font-heading">{t('noProductsFound')}</h3>
               <p className="text-xs text-slate-500 font-medium">
-                No items available for your search or category filter.
+                {t('noProductsSub')}
               </p>
               <button
                 onClick={clearFilters}
                 className="bg-pink-600 hover:bg-pink-500 text-white text-xs font-black px-6 py-3 rounded-2xl shadow-lg transition-all cursor-pointer"
               >
-                Reset Filters
+                {t('resetFilters')}
               </button>
             </div>
           ) : (

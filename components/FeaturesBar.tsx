@@ -2,31 +2,34 @@
 
 import React from 'react';
 import { Truck, ShieldCheck, BadgePercent, CreditCard } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function FeaturesBar() {
+  const { t } = useLanguage();
+
   const features = [
     {
       icon: <Truck size={26} className="text-pink-600 animate-float" />,
-      title: 'Fast Express Delivery',
-      subtitle: 'Direct local store delivery within 15-30 mins to doorstep',
+      title: t('featDeliveryTitle'),
+      subtitle: t('featDeliverySub'),
       badge: 'SPEEDY',
     },
     {
       icon: <ShieldCheck size={26} className="text-blue-900 animate-pulse" />,
-      title: '100% Pure & Fresh',
-      subtitle: 'Branded, lab-tested & quality certified grocery ration',
+      title: t('featQualityTitle'),
+      subtitle: t('featQualitySub'),
       badge: 'VERIFIED',
     },
     {
       icon: <BadgePercent size={26} className="text-pink-600 animate-float" />,
-      title: 'Best Wholesale Rates',
-      subtitle: 'Up to 25% discount off MRP on all daily essential packs',
+      title: t('featPriceTitle'),
+      subtitle: t('featPriceSub'),
       badge: 'DISCOUNTS',
     },
     {
       icon: <CreditCard size={26} className="text-blue-900 animate-pulse" />,
-      title: 'Easy UPI / Cash Pay',
-      subtitle: 'GPay, PhonePe, Paytm QR scanner or Cash on Delivery',
+      title: t('featPayTitle'),
+      subtitle: t('featPaySub'),
       badge: 'SECURE',
     },
   ];

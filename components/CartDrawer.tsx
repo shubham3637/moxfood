@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight, Truck } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function CartDrawer() {
   const {
@@ -17,6 +18,8 @@ export default function CartDrawer() {
     grandTotal,
     freeDeliveryThreshold,
   } = useCart();
+
+  const { t, language } = useLanguage();
 
   if (!isCartOpen) return null;
 
@@ -34,9 +37,9 @@ export default function CartDrawer() {
             <div className="flex items-center gap-2">
               <ShoppingBag size={20} className="text-pink-400" />
               <div>
-                <h2 className="font-extrabold text-base leading-none">Shopping Cart</h2>
-                <p className="text-[11px] text-blue-200 mt-0.5">
-                  {items.reduce((acc, item) => acc + item.quantity, 0)} Items
+                <h2 className="font-extrabold text-base leading-none font-heading">{t('shoppingCart')}</h2>
+                <p className="text-[11px] text-blue-200 mt-0.5 font-semibold">
+                  {items.reduce((acc, item) => acc + item.quantity, 0)} {t('items')}
                 </p>
               </div>
             </div>
@@ -54,16 +57,16 @@ export default function CartDrawer() {
             {subtotal >= freeDeliveryThreshold ? (
               <div className="flex items-center gap-2 text-xs font-bold text-pink-900">
                 <Truck size={16} className="text-pink-600" />
-                <span>🎉 Congratulations! You unlocked FREE Delivery!</span>
+                <span>{t('unlockedFreeDelivery')}</span>
               </div>
             ) : (
               <div>
                 <div className="flex justify-between text-xs font-semibold text-blue-950 mb-1">
-                  <span className="flex items-center gap-1">
+                  <span className="flex items-center gap-1 font-bold">
                     <Truck size={14} className="text-pink-600" />
-                    Save on FREE Delivery
+                    {t('saveFreeDelivery')}
                   </span>
-                  <span className="text-pink-700 font-bold">Add ₹{amountLeftForFreeDelivery} more</span>
+                  <span className="text-pink-700 font-bold">{t('addMoreForFree', { amount: amountLeftForFreeDelivery })}</span>
                 </div>
                 <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
                   <div
@@ -82,34 +85,31 @@ export default function CartDrawer() {
                 <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center mx-auto text-blue-400">
                   <ShoppingBag size={32} />
                 </div>
-                <p className="font-bold text-slate-600 text-sm">Your Cart is Empty</p>
-                <p className="text-xs text-slate-400 max-w-xs mx-auto">
-                  Add items from the store catalog to place your order.
+                <p className="font-extrabold text-slate-700 text-sm font-heading">{t('cartEmpty')}</p>
+                <p className="text-xs text-slate-400 max-w-xs mx-auto font-medium">
+                  {t('cartEmptySub')}
                 </p>
               </div>
             ) : (
               items.map((item) => (
                 <div
                   key={item.productId}
-                  className="flex gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors"
+                  className="flex gap-3 p-3 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors"
                 >
                   <img
                     src={item.image}
                     alt={item.name}
-                    className="w-16 h-16 object-contain bg-white rounded-lg p-1 border border-slate-200 shrink-0"
+                    className="w-16 h-16 object-contain bg-white rounded-xl p-1 border border-slate-200 shrink-0"
                   />
 
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-bold text-xs text-slate-800 line-clamp-1">{item.name}</h4>
-                    {item.altNameGujarati && (
-                      <p className="text-[11px] font-semibold text-pink-600 line-clamp-1">
-                        {item.altNameGujarati}
-                      </p>
-                    )}
-                    <div className="text-[11px] text-slate-500 mt-0.5">Unit: {item.unit}</div>
+                    <h4 className="font-extrabold text-xs text-slate-800 line-clamp-1 font-heading">
+                      {language === 'gu' && item.altNameGujarati ? item.altNameGujarati : item.name}
+                    </h4>
+                    <div className="text-[11px] text-slate-500 font-semibold mt-0.5">Unit: {item.unit}</div>
 
                     <div className="flex items-center justify-between mt-2">
-                      <div className="text-sm font-black text-slate-900">
+                      <div className="text-sm font-black text-slate-900 font-heading">
                         ₹{item.price * item.quantity}
                         <span className="text-[10px] text-slate-400 font-normal ml-1">
                           (₹{item.price}/unit)
@@ -117,7 +117,7 @@ export default function CartDrawer() {
                       </div>
 
                       {/* Quantity Controls */}
-                      <div className="flex items-center bg-white rounded-lg border border-slate-300">
+                      <div className="flex items-center bg-white rounded-xl border border-slate-300">
                         <button
                           onClick={() => updateQuantity(item.productId, item.quantity - 1)}
                           className="w-6 h-6 flex items-center justify-center text-slate-600 hover:bg-slate-100 cursor-pointer"
@@ -152,19 +152,19 @@ export default function CartDrawer() {
           {/* Footer & Checkout Action */}
           {items.length > 0 && (
             <div className="p-4 border-t border-slate-200 bg-white space-y-3">
-              <div className="space-y-1.5 text-xs">
+              <div className="space-y-1.5 text-xs font-semibold">
                 <div className="flex justify-between text-slate-600">
-                  <span>Subtotal:</span>
+                  <span>{t('subtotal')}</span>
                   <span className="font-bold text-slate-800">₹{subtotal}</span>
                 </div>
                 <div className="flex justify-between text-slate-600">
-                  <span>Delivery Charge:</span>
+                  <span>{t('deliveryCharge')}</span>
                   <span className="font-bold text-pink-600">
-                    {deliveryCharge === 0 ? 'FREE' : `₹${deliveryCharge}`}
+                    {deliveryCharge === 0 ? t('free') : `₹${deliveryCharge}`}
                   </span>
                 </div>
-                <div className="flex justify-between text-base font-black text-slate-900 pt-2 border-t border-slate-100">
-                  <span>Grand Total:</span>
+                <div className="flex justify-between text-base font-black text-slate-900 pt-2 border-t border-slate-100 font-heading">
+                  <span>{t('grandTotal')}</span>
                   <span className="text-blue-900">₹{grandTotal}</span>
                 </div>
               </div>
@@ -172,9 +172,9 @@ export default function CartDrawer() {
               <Link
                 href="/checkout"
                 onClick={() => setIsCartOpen(false)}
-                className="w-full bg-pink-600 hover:bg-pink-500 text-white font-extrabold py-3.5 rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer"
+                className="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-extrabold py-3.5 rounded-2xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer text-xs"
               >
-                <span>Proceed to Checkout</span>
+                <span>{t('proceedCheckout')}</span>
                 <ArrowRight size={18} />
               </Link>
             </div>
