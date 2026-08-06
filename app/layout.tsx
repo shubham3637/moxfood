@@ -5,6 +5,7 @@ import { LanguageProvider } from '@/context/LanguageContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import CartDrawer from '@/components/CartDrawer';
+import FloatingCartBar from '@/components/FloatingCartBar';
 
 export const metadata: Metadata = {
   title: 'Gautam Trading - General Grocery Super Store',
@@ -23,6 +24,7 @@ export default function RootLayout({
           <CartProvider>
             <Navbar />
             <CartDrawer />
+            <FloatingCartBar />
             <main className="flex-1">{children}</main>
             <Footer />
           </CartProvider>

@@ -6,7 +6,7 @@ import HeroSlider from '@/components/HeroSlider';
 import FeaturesBar from '@/components/FeaturesBar';
 import ProductCard from '@/components/ProductCard';
 import Testimonials from '@/components/Testimonials';
-import { Search, Sparkles, RefreshCw, ShoppingBag, Flame, Globe } from 'lucide-react';
+import { Search, Sparkles, RefreshCw, Flame, Globe } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
 function StorefrontContent() {
@@ -122,20 +122,16 @@ function StorefrontContent() {
           </div>
         </div>
 
-        {/* 3. Fresh Grocery Catalog Section */}
+        {/* 3. Catalog Products Section */}
         <section id="products-grid" className="space-y-6 pt-2">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2.5 font-heading">
-                <ShoppingBag size={26} className="text-blue-900" />
-                <span>{t('catalogTitle')}</span>
-              </h2>
               {searchQuery ? (
-                <p className="text-xs text-slate-600 mt-1 font-medium">
+                <p className="text-xs text-slate-600 font-medium">
                   Search results for &quot;<strong className="text-pink-600">{searchQuery}</strong>&quot; ({products.length} items found)
                 </p>
               ) : (
-                <p className="text-xs sm:text-sm text-slate-600 font-bold mt-0.5">{t('catalogSub')}</p>
+                <p className="text-sm sm:text-base font-black text-slate-800 font-heading">{t('catalogSub')}</p>
               )}
             </div>
 
