@@ -4,14 +4,13 @@ import React, { useEffect, useState, Suspense } from 'react';
 import DealsTicker from '@/components/DealsTicker';
 import HeroSlider from '@/components/HeroSlider';
 import FeaturesBar from '@/components/FeaturesBar';
-import DealBanner from '@/components/DealBanner';
 import ProductCard from '@/components/ProductCard';
 import Testimonials from '@/components/Testimonials';
-import { Search, Sparkles, RefreshCw, ShoppingBag, Flame } from 'lucide-react';
+import { Search, Sparkles, RefreshCw, ShoppingBag, Flame, Globe } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
 function StorefrontContent() {
-  const { t } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
   const [currentCategory, setCurrentCategory] = useState('all');
   const [currentTab, setCurrentTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -78,11 +77,52 @@ function StorefrontContent() {
       <DealsTicker />
 
       {/* Main Full Width Content Wrapper */}
-      <div className="w-full px-4 md:px-10 lg:px-16 py-6 space-y-10">
+      <div className="w-full px-4 md:px-10 lg:px-16 py-6 space-y-8">
         {/* 1. Full-Width Dynamic Hero Image Slider */}
         <HeroSlider onExploreClick={scrollToProducts} />
 
-        {/* 2. Fresh Grocery Catalog Section - DIRECTLY BELOW Hero Slider */}
+        {/* 2. Language Selection Switcher Bar */}
+        <div className="bg-gradient-to-r from-blue-950 via-blue-900 to-indigo-950 p-4 sm:p-5 rounded-3xl border border-blue-800 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4 text-white">
+          <div className="flex items-center gap-3 text-center sm:text-left">
+            <div className="w-10 h-10 rounded-2xl bg-pink-600/30 text-pink-300 border border-pink-500/40 flex items-center justify-center shrink-0">
+              <Globe size={20} className="animate-pulse" />
+            </div>
+            <div>
+              <h3 className="font-extrabold text-sm sm:text-base font-heading">
+                {language === 'gu' ? 'સ્ટોર ભાષા પસંદ કરો (Select Language)' : 'Select Store Language'}
+              </h3>
+              <p className="text-[11px] sm:text-xs text-blue-200 font-medium">
+                {language === 'gu' ? 'ગુજરાતી અને ઈંગ્લીશ બંને માં સામાન જોઈ શકાશે' : 'Switch store language between English & Gujarati'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center bg-blue-950 p-1.5 rounded-2xl border border-blue-800 text-xs font-black shadow-inner gap-2 shrink-0">
+            <button
+              onClick={() => setLanguage('en')}
+              className={`px-4 sm:px-5 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+                language === 'en'
+                  ? 'bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-lg shadow-pink-600/30'
+                  : 'text-blue-200 hover:text-white hover:bg-blue-900'
+              }`}
+            >
+              <span>🇬🇧 ENGLISH</span>
+            </button>
+
+            <button
+              onClick={() => setLanguage('gu')}
+              className={`px-4 sm:px-5 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+                language === 'gu'
+                  ? 'bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-lg shadow-pink-600/30'
+                  : 'text-blue-200 hover:text-white hover:bg-blue-900'
+              }`}
+            >
+              <span>🇮🇳 ગુજરાતી</span>
+            </button>
+          </div>
+        </div>
+
+        {/* 3. Fresh Grocery Catalog Section */}
         <section id="products-grid" className="space-y-6 pt-2">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -95,15 +135,15 @@ function StorefrontContent() {
                   Search results for &quot;<strong className="text-pink-600">{searchQuery}</strong>&quot; ({products.length} items found)
                 </p>
               ) : (
-                <p className="text-xs text-slate-500 font-medium font-semibold">{t('catalogSub')}</p>
+                <p className="text-xs sm:text-sm text-slate-600 font-bold mt-0.5">{t('catalogSub')}</p>
               )}
             </div>
 
-            {/* Filter Tabs */}
-            <div className="flex items-center bg-slate-200/80 p-1.5 rounded-2xl gap-1.5 text-xs font-extrabold shrink-0 self-start sm:self-auto shadow-inner">
+            {/* Filter Tabs: All items, Combo, Newly launched */}
+            <div className="flex items-center bg-slate-200/80 p-1.5 rounded-2xl gap-1.5 text-xs font-extrabold shrink-0 self-start sm:self-auto shadow-inner overflow-x-auto max-w-full">
               <button
                 onClick={() => handleTabSelect('all')}
-                className={`px-4 py-2.5 rounded-xl transition-all cursor-pointer ${
+                className={`px-4 py-2.5 rounded-xl transition-all cursor-pointer whitespace-nowrap ${
                   currentTab === 'all' ? 'bg-blue-900 text-white shadow-md' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -111,21 +151,21 @@ function StorefrontContent() {
               </button>
               <button
                 onClick={() => handleTabSelect('featured')}
-                className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+                className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
                   currentTab === 'featured' ? 'bg-pink-600 text-white shadow-md' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 <Sparkles size={14} />
-                <span>{t('filterFeatured')}</span>
+                <span>{t('filterCombo')}</span>
               </button>
               <button
                 onClick={() => handleTabSelect('trending')}
-                className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+                className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
                   currentTab === 'trending' ? 'bg-blue-800 text-white shadow-md' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 <Flame size={14} />
-                <span>{t('filterPopular')}</span>
+                <span>{t('filterNew')}</span>
               </button>
             </div>
           </div>
@@ -164,11 +204,8 @@ function StorefrontContent() {
           )}
         </section>
 
-        {/* 3. Full-Width Features Highlight Bar */}
+        {/* 4. Full-Width Features Highlight Bar */}
         <FeaturesBar />
-
-        {/* 4. Deal of the Day Promotional Banner */}
-        <DealBanner onShopDealsClick={() => handleTabSelect('featured')} />
 
         {/* 5. Full-Width Customer Testimonials & Stats Counter Section */}
         <Testimonials />

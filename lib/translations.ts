@@ -40,10 +40,10 @@ export const translations = {
 
     // Catalog & Filter
     catalogTitle: 'Fresh Grocery Catalog',
-    catalogSub: 'Fresh & pure grocery items for daily home use',
+    catalogSub: 'Healthy seeds, dry fruits and grocery',
     filterAll: 'All Items',
-    filterFeatured: 'Featured Deals',
-    filterPopular: 'Popular',
+    filterCombo: 'Combo',
+    filterNew: 'Newly Launched',
     categoryTitle: 'Product Categories',
     categorySub: 'Select your desired grocery section to filter items',
     showAllCategories: 'Show All Categories',
@@ -172,10 +172,10 @@ export const translations = {
 
     // Catalog & Filter
     catalogTitle: 'તાજો કરીયાણા નો સામાન',
-    catalogSub: 'રોજિંદા ઉપયોગ માટે શુદ્ધ અને તાજો સામાન',
+    catalogSub: 'ડ્રાય ફ્રૂટ્સ, સીડ્સ અને તાજો સામાન',
     filterAll: 'તમામ સામાન',
-    filterFeatured: 'ખાસ ઓફર',
-    filterPopular: 'લોકપ્રિય',
+    filterCombo: 'કોમ્બો',
+    filterNew: 'નવો સામાન',
     categoryTitle: 'કરિયાણાની વર્ગો',
     categorySub: 'તમારો મનપસંદ સામગ્રી વિભાગ પસંદ કરો',
     showAllCategories: 'તમામ કેટેગરી બતાવો',
