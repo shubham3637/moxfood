@@ -1,8 +1,5 @@
 import mongoose from 'mongoose';
-
-const MONGODB_URI =
-  process.env.MONGODB_URI ||
-  'mongodb+srv://gautamtrading:gautamtrading@cluster0.jwprrpo.mongodb.net/gautamtrading?retryWrites=true&w=majority';
+import { MONGODB_URI } from '@/lib/constants';
 
 /**
  * Global is used here to maintain a cached connection across hot reloads
@@ -26,10 +23,6 @@ if (!global.mongooseCache) {
 }
 
 async function dbConnect() {
-  if (!MONGODB_URI) {
-    throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
-  }
-
   if (cached.conn) {
     return cached.conn;
   }
