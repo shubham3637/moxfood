@@ -5,4 +5,4 @@ export const CLOUDINARY_CLOUD_NAME = 'drx6ryufl';
 export const CLOUDINARY_API_KEY = '674271286781139';
 export const CLOUDINARY_API_SECRET = '-84ePPr7vERpPv-RDzRL0TtiJh0';
 
-export const APP_URL = 'https://guatamtrading.vercel.app';
+export const APP_URL = 'https://moxfood.com';

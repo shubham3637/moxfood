@@ -6,7 +6,7 @@ import HeroSlider from '@/components/HeroSlider';
 import FeaturesBar from '@/components/FeaturesBar';
 import ProductCard from '@/components/ProductCard';
 import Testimonials from '@/components/Testimonials';
-import { Search, Sparkles, RefreshCw, Flame, Globe } from 'lucide-react';
+import { Search, Sparkles, RefreshCw, Flame, Globe, Leaf } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
 function StorefrontContent() {
@@ -73,6 +73,11 @@ function StorefrontContent() {
 
   return (
     <div className="w-full flex flex-col items-center">
+      {/* Primary Semantic H1 for SEO */}
+      <h1 className="sr-only">
+        Moxfood - Buy Premium Healthy Seeds, Pumpkin Seeds, Chia Seeds, Sunflower Seeds & Dry Fruits Online
+      </h1>
+
       {/* 0. Live Offers Marquee Ticker */}
       <DealsTicker />
 
@@ -131,7 +136,7 @@ function StorefrontContent() {
                   Search results for &quot;<strong className="text-pink-600">{searchQuery}</strong>&quot; ({products.length} items found)
                 </p>
               ) : (
-                <p className="text-sm sm:text-base font-black text-slate-800 font-heading">{t('catalogSub')}</p>
+                <h2 className="text-sm sm:text-base font-black text-slate-800 font-heading">{t('catalogSub')}</h2>
               )}
             </div>
 
@@ -203,7 +208,40 @@ function StorefrontContent() {
         {/* 4. Full-Width Features Highlight Bar */}
         <FeaturesBar />
 
-        {/* 5. Full-Width Customer Testimonials & Stats Counter Section */}
+        {/* 5. Rich SEO Keyword Section for Healthy Seeds & Superfoods */}
+        <section className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-4">
+          <div className="flex items-center gap-2 text-pink-600">
+            <Leaf size={22} />
+            <h2 className="text-lg sm:text-xl font-black text-slate-900 font-heading">
+              Moxfood - Premium Healthy Seeds, Superfoods & Nutrient-Rich Grocery
+            </h2>
+          </div>
+
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
+            Welcome to <strong>Moxfood</strong>, your ultimate destination to buy 100% pure, raw, and roasted <strong>healthy seeds online</strong> at wholesale prices. We offer a comprehensive selection of nutrient-dense superfoods including <strong>Pumpkin Seeds, Chia Seeds, Sunflower Seeds, Flax Seeds, Watermelon Seeds, Muskmelon Seeds</strong>, and specially curated <strong>7-in-1 Super Seeds Mixes</strong>. Whether you are looking for diet seeds for weight management, energy-boosting daily snacks, or premium dry fruits and nuts, Moxfood brings fresh quality straight from local store to your doorstep.
+          </p>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 text-xs font-bold text-slate-700">
+            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+              <span className="text-pink-600 font-heading block">🎃 Pumpkin Seeds</span>
+              <span className="text-[11px] text-slate-500 font-medium">Raw & Roasted AAA Grade</span>
+            </div>
+            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+              <span className="text-pink-600 font-heading block">🌱 Organic Chia Seeds</span>
+              <span className="text-[11px] text-slate-500 font-medium">Rich in Omega-3 & Fibre</span>
+            </div>
+            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+              <span className="text-pink-600 font-heading block">🌻 Sunflower Seeds</span>
+              <span className="text-[11px] text-slate-500 font-medium">Pure Vitamin E Superfood</span>
+            </div>
+            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+              <span className="text-pink-600 font-heading block">🥜 Seed Mixes & Nuts</span>
+              <span className="text-[11px] text-slate-500 font-medium">Roasted Salted & Raw Packs</span>
+            </div>
+          </div>
+        </section>
+
+        {/* 6. Full-Width Customer Testimonials & Stats Counter Section */}
         <Testimonials />
       </div>
     </div>
