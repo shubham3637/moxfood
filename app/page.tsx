@@ -17,7 +17,6 @@ function StorefrontContent() {
 
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [seeding, setSeeding] = useState(false);
 
   useEffect(() => {
     fetchInitialData();
@@ -33,20 +32,7 @@ function StorefrontContent() {
 
       const prodRes = await fetch(url);
       const prodData = await prodRes.json();
-      let activeProducts = prodData.products || [];
-
-      if (activeProducts.length === 0) {
-        setSeeding(true);
-        const seedRes = await fetch('/api/seed', { method: 'POST' });
-        const seedData = await seedRes.json();
-
-        if (seedData.success) {
-          const pRes = await fetch(url);
-          const pD = await pRes.json();
-          activeProducts = pD.products || [];
-        }
-        setSeeding(false);
-      }
+      const activeProducts = prodData.products || [];
 
       setProducts(activeProducts);
     } catch (error) {
@@ -172,12 +158,10 @@ function StorefrontContent() {
           </div>
 
           {/* Loading State */}
-          {loading || seeding ? (
+          {loading ? (
             <div className="text-center py-20 space-y-3">
               <RefreshCw size={36} className="animate-spin text-pink-600 mx-auto" />
-              <p className="text-sm font-bold text-slate-700">
-                {seeding ? 'Seeding store grocery items...' : 'Loading grocery products...'}
-              </p>
+              <p className="text-sm font-bold text-slate-700">Loading grocery products...</p>
             </div>
           ) : products.length === 0 ? (
             <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-sm space-y-4 max-w-md mx-auto my-8 animate-fade-in">
