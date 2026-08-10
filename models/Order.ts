@@ -26,9 +26,12 @@ export interface IOrder extends Document {
   subtotal: number;
   deliveryCharge: number;
   totalAmount: number;
-  paymentMethod: 'COD' | 'UPI';
+  paymentMethod: 'COD' | 'UPI' | 'RAZORPAY';
   paymentStatus: 'Pending' | 'Paid';
   status: 'Pending' | 'Processing' | 'Out for Delivery' | 'Delivered' | 'Cancelled';
+  razorpayOrderId?: string;
+  razorpayPaymentId?: string;
+  razorpaySignature?: string;
   notes?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -67,13 +70,16 @@ const OrderSchema: Schema<IOrder> = new Schema(
     subtotal: { type: Number, required: true },
     deliveryCharge: { type: Number, required: true, default: 0 },
     totalAmount: { type: Number, required: true },
-    paymentMethod: { type: String, enum: ['COD', 'UPI'], default: 'COD' },
+    paymentMethod: { type: String, enum: ['COD', 'UPI', 'RAZORPAY'], default: 'RAZORPAY' },
     paymentStatus: { type: String, enum: ['Pending', 'Paid'], default: 'Pending' },
     status: {
       type: String,
       enum: ['Pending', 'Processing', 'Out for Delivery', 'Delivered', 'Cancelled'],
       default: 'Pending',
     },
+    razorpayOrderId: { type: String, default: '' },
+    razorpayPaymentId: { type: String, default: '' },
+    razorpaySignature: { type: String, default: '' },
     notes: { type: String, default: '' },
   },
   { timestamps: true }
