@@ -10,8 +10,11 @@ import {
   Upload,
   RefreshCw,
 } from 'lucide-react';
+import { compressImageFile } from '@/lib/imageUtils';
+import { useToast } from '@/context/ToastContext';
 
 export default function AdminProductsPage() {
+  const { showError, showSuccess } = useToast();
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,11 +28,11 @@ export default function AdminProductsPage() {
   const [formData, setFormData] = useState({
     name: '',
     altNameGujarati: '',
-    category: 'atta-rice',
+    category: 'seeds-superfoods',
     price: '',
     mrp: '',
     stock: '50',
-    unit: '1 kg',
+    unit: '250 g',
     imageUrl: '',
     description: '',
     isFeatured: false,
@@ -52,8 +55,9 @@ export default function AdminProductsPage() {
 
       setProducts(pData.products || []);
       setCategories(cData.categories || []);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to fetch product list:', err);
+      showError('Failed to load products list from server.');
     } finally {
       setLoading(false);
     }
@@ -64,11 +68,11 @@ export default function AdminProductsPage() {
     setFormData({
       name: '',
       altNameGujarati: '',
-      category: categories.length > 0 ? categories[0].slug : 'atta-rice',
+      category: categories.length > 0 ? categories[0].slug : 'seeds-superfoods',
       price: '',
       mrp: '',
       stock: '50',
-      unit: '1 kg',
+      unit: '250 g',
       imageUrl: '',
       description: '',
       isFeatured: false,
@@ -86,7 +90,7 @@ export default function AdminProductsPage() {
       price: String(product.price),
       mrp: String(product.mrp),
       stock: String(product.stock),
-      unit: product.unit || '1 kg',
+      unit: product.unit || '250 g',
       imageUrl: Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : '',
       description: product.description || '',
       isFeatured: Boolean(product.isFeatured),
@@ -101,22 +105,33 @@ export default function AdminProductsPage() {
 
     setUploadingImage(true);
     try {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64String = reader.result as string;
-        const res = await fetch('/api/upload', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ image: base64String }),
-        });
-        const data = await res.json();
-        if (data.success && data.url) {
-          setFormData((prev) => ({ ...prev, imageUrl: data.url }));
+      // 1. Client-side compression to prevent 413 Request Entity Too Large error
+      const compressedBase64 = await compressImageFile(file);
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: compressedBase64 }),
+      });
+
+      if (!res.ok) {
+        if (res.status === 413) {
+          throw new Error('Image size too large. Please select a smaller photo.');
         }
-      };
-      reader.readAsDataURL(file);
-    } catch (err) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Upload failed with status ${res.status}`);
+      }
+
+      const data = await res.json();
+      if (data.success && data.url) {
+        setFormData((prev) => ({ ...prev, imageUrl: data.url }));
+        showSuccess('Product image uploaded successfully!');
+      } else {
+        throw new Error(data.error || 'Failed to process uploaded image.');
+      }
+    } catch (err: any) {
       console.error('Failed to upload image:', err);
+      showError(err.message || 'Failed to upload image. Please try again.');
     } finally {
       setUploadingImage(false);
     }
@@ -125,7 +140,7 @@ export default function AdminProductsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.price || !formData.mrp) {
-      alert('Product name, price, and MRP are required.');
+      showError('Product name, selling price, and MRP are required.');
       return;
     }
 
@@ -161,13 +176,14 @@ export default function AdminProductsPage() {
 
       const data = await res.json();
       if (data.success) {
+        showSuccess(editingId ? 'Product updated successfully!' : 'New product saved successfully!');
         setIsModalOpen(false);
         fetchProductsAndCategories();
       } else {
-        alert('Error: ' + data.error);
+        showError(data.error || 'Failed to save product.');
       }
     } catch (err: any) {
-      alert('Failed: ' + err.message);
+      showError('Network Error: ' + err.message);
     }
   };
 
@@ -177,12 +193,13 @@ export default function AdminProductsPage() {
         const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
         const data = await res.json();
         if (data.success) {
+          showSuccess(`Product "${name}" deleted.`);
           fetchProductsAndCategories();
         } else {
-          alert('Error: ' + data.error);
+          showError(data.error || 'Failed to delete product.');
         }
       } catch (err: any) {
-        alert('Failed: ' + err.message);
+        showError('Error deleting product: ' + err.message);
       }
     }
   };
@@ -198,15 +215,15 @@ export default function AdminProductsPage() {
       {/* Header & Add Button */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight font-heading">
             Products Management
           </h1>
-          <p className="text-xs text-slate-500">Manage all grocery products, pricing, and stock inventory</p>
+          <p className="text-xs text-slate-500 font-medium">Manage all Moxfood healthy seeds & grocery products</p>
         </div>
 
         <button
           onClick={handleOpenAddModal}
-          className="bg-pink-600 hover:bg-pink-500 text-white font-extrabold text-xs px-4 py-3 rounded-xl shadow flex items-center gap-1.5 transition-colors self-start sm:self-auto cursor-pointer"
+          className="bg-pink-600 hover:bg-pink-500 text-white font-extrabold text-xs px-4 py-3 rounded-xl shadow flex items-center gap-1.5 transition-colors self-start sm:self-auto cursor-pointer font-heading"
         >
           <Plus size={18} />
           <span>Add New Product</span>
@@ -221,7 +238,7 @@ export default function AdminProductsPage() {
             placeholder="Search products by name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-slate-50 text-slate-900 text-xs rounded-xl pl-9 pr-4 py-2.5 border border-slate-300 focus:ring-2 focus:ring-pink-500 focus:outline-none"
+            className="w-full bg-slate-50 text-slate-900 text-xs font-semibold rounded-xl pl-9 pr-4 py-2.5 border border-slate-300 focus:ring-2 focus:ring-pink-500 focus:outline-none"
           />
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
         </div>
@@ -250,7 +267,7 @@ export default function AdminProductsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-slate-200 text-slate-500 font-bold bg-slate-50">
+                <tr className="border-b border-slate-200 text-slate-500 font-bold bg-slate-50 font-heading">
                   <th className="py-3.5 px-4">Image</th>
                   <th className="py-3.5 px-4">Product Name</th>
                   <th className="py-3.5 px-4">Category</th>
@@ -275,11 +292,11 @@ export default function AdminProductsPage() {
                       />
                     </td>
                     <td className="py-3 px-4">
-                      <div className="font-bold text-slate-800">{prod.name}</div>
+                      <div className="font-bold text-slate-800 font-heading">{prod.name}</div>
                     </td>
                     <td className="py-3 px-4 font-semibold text-slate-600">{prod.category}</td>
                     <td className="py-3 px-4 font-mono">{prod.unit}</td>
-                    <td className="py-3 px-4 font-extrabold text-slate-900">
+                    <td className="py-3 px-4 font-extrabold text-slate-900 font-heading">
                       ₹{prod.price} <span className="text-[10px] text-slate-400 line-through">₹{prod.mrp}</span>
                     </td>
                     <td className="py-3 px-4">
@@ -322,7 +339,7 @@ export default function AdminProductsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm overflow-y-auto">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative my-8">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-              <h3 className="font-extrabold text-slate-900 text-base">
+              <h3 className="font-extrabold text-slate-900 text-base font-heading">
                 {editingId ? 'Edit Product' : 'Add New Product'}
               </h3>
               <button
@@ -333,13 +350,13 @@ export default function AdminProductsPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+            <form onSubmit={handleSubmit} className="space-y-4 text-xs font-semibold">
               <div>
                 <label className="block font-bold text-slate-700 mb-1">Product Name *</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Fortune Refined Sunflower Oil"
+                  placeholder="e.g. Moxfood Raw Pumpkin Seeds"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-pink-500 focus:outline-none"
@@ -367,7 +384,7 @@ export default function AdminProductsPage() {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. 5 kg, 1 Litre, 500 g"
+                    placeholder="e.g. 250 g, 500 g, 1 kg"
                     value={formData.unit}
                     onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
                     className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-pink-500 focus:outline-none"
@@ -381,7 +398,7 @@ export default function AdminProductsPage() {
                   <input
                     type="number"
                     required
-                    placeholder="135"
+                    placeholder="199"
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                     className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-pink-500 focus:outline-none"
@@ -393,7 +410,7 @@ export default function AdminProductsPage() {
                   <input
                     type="number"
                     required
-                    placeholder="160"
+                    placeholder="260"
                     value={formData.mrp}
                     onChange={(e) => setFormData({ ...formData, mrp: e.target.value })}
                     className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-pink-500 focus:outline-none"
@@ -413,22 +430,22 @@ export default function AdminProductsPage() {
                 </div>
               </div>
 
-              {/* Cloudinary Upload Widget */}
+              {/* Upload Image Control */}
               <div>
                 <label className="block font-bold text-slate-700 mb-1">
-                  Product Image (Cloudinary Upload or Image URL)
+                  Product Image (Auto-Compressed Upload)
                 </label>
                 <div className="flex items-center gap-2">
                   <input
                     type="text"
-                    placeholder="Image URL or upload file below..."
+                    placeholder="Image URL or select image file..."
                     value={formData.imageUrl}
                     onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                     className="flex-1 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-pink-500 focus:outline-none"
                   />
-                  <label className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-3 py-2 rounded-xl cursor-pointer flex items-center gap-1 shrink-0">
+                  <label className="bg-pink-600 hover:bg-pink-500 text-white font-extrabold px-3 py-2 rounded-xl cursor-pointer flex items-center gap-1 shrink-0 font-heading">
                     <Upload size={14} />
-                    <span>{uploadingImage ? 'Uploading...' : 'Upload Image'}</span>
+                    <span>{uploadingImage ? 'Compressing...' : 'Upload Image'}</span>
                     <input
                       type="file"
                       accept="image/*"
@@ -444,7 +461,7 @@ export default function AdminProductsPage() {
                       alt="Preview"
                       className="w-12 h-12 object-contain rounded border border-slate-200 bg-slate-50"
                     />
-                    <span className="text-[11px] text-pink-600 font-semibold">Image Loaded</span>
+                    <span className="text-[11px] text-emerald-600 font-bold">Image Compressed & Uploaded</span>
                   </div>
                 )}
               </div>
@@ -484,7 +501,7 @@ export default function AdminProductsPage() {
 
               <button
                 type="submit"
-                className="w-full bg-pink-600 hover:bg-pink-500 text-white font-extrabold py-3 rounded-xl shadow-lg transition-all text-xs cursor-pointer"
+                className="w-full bg-pink-600 hover:bg-pink-500 text-white font-extrabold py-3 rounded-xl shadow-lg transition-all text-xs cursor-pointer font-heading"
               >
                 {editingId ? 'Update Product' : 'Save Product'}
               </button>

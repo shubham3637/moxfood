@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { CartProvider } from '@/context/CartContext';
 import { LanguageProvider } from '@/context/LanguageContext';
+import { ToastProvider } from '@/context/ToastContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import FloatingCartBar from '@/components/FloatingCartBar';
@@ -93,12 +94,14 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen flex flex-col bg-slate-50 text-slate-900 antialiased selection:bg-pink-600 selection:text-white">
         <LanguageProvider>
-          <CartProvider>
-            <Navbar />
-            <FloatingCartBar />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </CartProvider>
+          <ToastProvider>
+            <CartProvider>
+              <Navbar />
+              <FloatingCartBar />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </CartProvider>
+          </ToastProvider>
         </LanguageProvider>
       </body>
     </html>

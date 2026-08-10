@@ -6,7 +6,6 @@ import Link from 'next/link';
 import {
   ArrowLeft,
   CreditCard,
-  QrCode,
   MapPin,
   User,
   ShoppingBag,
@@ -20,10 +19,12 @@ import {
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { useToast } from '@/context/ToastContext';
 import { RAZORPAY_KEY_ID } from '@/lib/constants';
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const { showError, showSuccess } = useToast();
   const {
     items,
     subtotal,
@@ -87,25 +88,28 @@ export default function CheckoutPage() {
     e.preventDefault();
 
     if (!formData.name.trim() || !formData.phone.trim() || !formData.address.trim() || !formData.pincode.trim()) {
-      setErrorMsg(
+      const msg =
         language === 'gu'
           ? 'મહેરબાની કરીને તમારું પૂરું નામ, મોબાઈલ નંબર, સરનામું અને ૬-અંકનો પીનકોડ દાખલ કરો.'
-          : 'Please enter your full name, 10-digit mobile number, delivery address, and 6-digit Pincode.'
-      );
+          : 'Please enter your full name, 10-digit mobile number, delivery address, and 6-digit Pincode.';
+      setErrorMsg(msg);
+      showError(msg);
       return;
     }
 
     if (formData.phone.trim().length < 10) {
-      setErrorMsg(
-        language === 'gu' ? 'મહેરબાની કરીને સાચો 10-અંકનો મોબાઈલ નંબર દાખલ કરો.' : 'Please enter a valid 10-digit mobile number.'
-      );
+      const msg =
+        language === 'gu' ? 'મહેરબાની કરીને સાચો 10-અંકનો મોબાઈલ નંબર દાખલ કરો.' : 'Please enter a valid 10-digit mobile number.';
+      setErrorMsg(msg);
+      showError(msg);
       return;
     }
 
     if (formData.pincode.trim().length !== 6) {
-      setErrorMsg(
-        language === 'gu' ? 'મહેરબાની કરીને સાચો 6-અંકનો પીનકોડ દાખલ કરો.' : 'Please enter a valid 6-digit Area Pincode.'
-      );
+      const msg =
+        language === 'gu' ? 'મહેરબાની કરીને સાચો 6-અંકનો પીનકોડ દાખલ કરો.' : 'Please enter a valid 6-digit Area Pincode.';
+      setErrorMsg(msg);
+      showError(msg);
       return;
     }
 
@@ -123,7 +127,9 @@ export default function CheckoutPage() {
       const orderData = await orderRes.json();
 
       if (!orderData.success || !orderData.order) {
-        setErrorMsg(orderData.error || 'Failed to initiate Razorpay payment. Please try again.');
+        const failMsg = orderData.error || 'Failed to initiate Razorpay payment. Please try again.';
+        setErrorMsg(failMsg);
+        showError(failMsg);
         setIsSubmitting(false);
         return;
       }
@@ -173,13 +179,18 @@ export default function CheckoutPage() {
             const verifyData = await verifyRes.json();
 
             if (verifyData.success && verifyData.order) {
+              showSuccess('Payment Successful! Redirecting to order receipt...');
               clearCart();
               router.push(`/order-success/${verifyData.order.orderId}`);
             } else {
-              setErrorMsg('Payment verification failed. Please contact store support.');
+              const vErr = 'Payment verification failed. Please contact store support.';
+              setErrorMsg(vErr);
+              showError(vErr);
             }
           } catch (err: any) {
-            setErrorMsg('Verification Error: ' + err.message);
+            const vErr = 'Verification Error: ' + err.message;
+            setErrorMsg(vErr);
+            showError(vErr);
           } finally {
             setIsSubmitting(false);
           }
@@ -187,6 +198,7 @@ export default function CheckoutPage() {
         modal: {
           ondismiss: function () {
             setIsSubmitting(false);
+            showError('Payment cancelled or closed.');
           },
         },
         prefill: {
@@ -201,7 +213,9 @@ export default function CheckoutPage() {
       const razorpayInstance = new (window as any).Razorpay(options);
       razorpayInstance.open();
     } catch (err: any) {
-      setErrorMsg('Razorpay Error: ' + err.message);
+      const errStr = 'Razorpay Error: ' + err.message;
+      setErrorMsg(errStr);
+      showError(errStr);
       setIsSubmitting(false);
     }
   };
@@ -222,7 +236,7 @@ export default function CheckoutPage() {
       </h1>
 
       {errorMsg && (
-        <div className="p-4 bg-red-100 border border-red-300 text-red-800 text-xs font-extrabold rounded-2xl">
+        <div className="p-4 bg-red-100 border border-red-300 text-red-800 text-xs font-extrabold rounded-2xl animate-shake">
           ⚠️ {errorMsg}
         </div>
       )}

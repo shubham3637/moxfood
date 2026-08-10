@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Plus, Minus, ShoppingBag, Tag } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { useToast } from '@/context/ToastContext';
 
 interface ProductCardProps {
   product: {
@@ -26,6 +27,7 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const { items, addToCart, updateQuantity } = useCart();
   const { language, t } = useLanguage();
+  const { showSuccess } = useToast();
 
   const cartItem = items.find((item) => item.productId === product._id);
   const quantityInCart = cartItem ? cartItem.quantity : 0;
@@ -41,6 +43,11 @@ export default function ProductCard({ product }: ProductCardProps) {
       : 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80';
 
   const displayTitle = language === 'gu' && product.altNameGujarati ? product.altNameGujarati : product.name;
+
+  const handleAddToCart = () => {
+    addToCart(product, 1);
+    showSuccess(`${product.name} added to cart!`);
+  };
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group relative">
@@ -96,11 +103,11 @@ export default function ProductCard({ product }: ProductCardProps) {
           {/* Add / Quantity Button */}
           {quantityInCart === 0 ? (
             <button
-              onClick={() => addToCart(product, 1)}
+              onClick={handleAddToCart}
               disabled={product.stock <= 0}
               className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer ${
                 product.stock > 0
-                  ? 'bg-pink-600 hover:bg-pink-500 text-white'
+                  ? 'bg-pink-600 hover:bg-pink-500 text-white font-heading'
                   : 'bg-slate-200 text-slate-400 cursor-not-allowed'
               }`}
             >
@@ -116,7 +123,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               >
                 <Minus size={14} />
               </button>
-              <span className="w-7 text-center text-xs font-bold bg-blue-950 py-1">
+              <span className="w-7 text-center text-xs font-bold bg-blue-950 py-1 font-heading">
                 {quantityInCart}
               </span>
               <button
