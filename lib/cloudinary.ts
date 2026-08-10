@@ -11,7 +11,7 @@ export async function uploadImageToCloudinary(fileString: string): Promise<strin
   try {
     if (CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET) {
       const result = await cloudinary.uploader.upload(fileString, {
-        folder: 'gautam_trading_products',
+        folder: 'moxfood_products',
       });
       return result.secure_url;
     }

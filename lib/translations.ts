@@ -4,22 +4,22 @@ export const translations = {
   en: {
     // Header & Navbar
     topNotice: 'Fast Express Delivery across Anand & Ahmedabad Region!',
-    storeSubtitle: 'Grocery Super Store',
+    storeSubtitle: 'Healthy Seeds & Grocery Super Store',
     locationTitle: 'Local Store Express Delivery',
     locationSub: 'Anand & Ahmedabad Region',
-    searchPlaceholder: 'Search Whole Wheat Atta, Refined Oil, Toor Dal, Tea, Spices...',
+    searchPlaceholder: 'Search Pumpkin Seeds, Chia Seeds, Sunflower Seeds, Atta, Oil...',
     allProductsBtn: 'All Products',
     cartBtn: 'Cart',
     adminPanel: 'Admin Panel',
 
     // Hero & Deals Ticker
-    heroTag: 'SUPER SAVINGS • Online Grocery Store',
-    heroButton: 'Shop Grocery Deals',
+    heroTag: 'SUPER SAVINGS • Moxfood Online Store',
+    heroButton: 'Shop Healthy Seeds & Grocery',
     freeDeliveryBadge: 'Fast Express Delivery',
     qualityBadge: '100% Quality Guaranteed',
     mrpDiscountBadge: 'Up to 25% Off MRP',
     comboTitle: 'Monthly Ration Combo Pack',
-    comboDesc: 'Aashirvaad Chakki Atta + Fortune Oil + Desi Toor Dal + Premium Tea at exclusive combo discount!',
+    comboDesc: 'Pumpkin Seeds + Chia Seeds + Sunflower Seeds + Grocery Ration at exclusive combo discount!',
     totalSavings: 'Total Savings',
 
     // Features Bar
@@ -34,18 +34,18 @@ export const translations = {
 
     // Deal Banner
     dealTag: 'LIMITED TIME OFFER • Special Today Discounts',
-    dealTitle: "Today's Super Grocery Deals",
-    dealSub: 'Save ₹50 to ₹150 on Whole Wheat Atta, Edible Oil & Family Tea Packs!',
+    dealTitle: "Today's Super Healthy Deals",
+    dealSub: 'Save on Pumpkin Seeds, Chia Seeds, Cooking Oil & Family Tea Packs!',
     dealButton: 'View Special Offers',
 
     // Catalog & Filter
-    catalogTitle: 'Fresh Grocery Catalog',
+    catalogTitle: 'Fresh Healthy Seeds & Grocery Catalog',
     catalogSub: 'Healthy seeds, dry fruits and grocery',
     filterAll: 'All Items',
     filterCombo: 'Combo',
     filterNew: 'Newly Launched',
     categoryTitle: 'Product Categories',
-    categorySub: 'Select your desired grocery section to filter items',
+    categorySub: 'Select your desired section to filter items',
     showAllCategories: 'Show All Categories',
     noProductsFound: 'No Products Found',
     noProductsSub: 'No items available for your search or category filter.',
@@ -111,7 +111,7 @@ export const translations = {
 
     // Order Success
     orderSuccessTitle: 'Thank you! Your Order Has Been Received.',
-    orderSuccessSub: 'Thank you for shopping at Gautam Trading.',
+    orderSuccessSub: 'Thank you for shopping at Moxfood.',
     orderId: 'Order ID:',
     sendWhatsAppReceipt: 'Send Order Receipt to Store on WhatsApp',
     backToHome: 'Back to Home',
@@ -123,11 +123,11 @@ export const translations = {
     testimonialsSub: 'Trusted by thousands of local families across Anand & Ahmedabad',
     statFamilies: 'Happy Local Families',
     statSpeed: 'Fast Express Delivery',
-    statQuality: 'Pure Branded Grocery',
+    statQuality: 'Pure Healthy Superfoods',
     statRating: 'Verified Customer Rating',
 
     // Footer
-    storeDesc: 'Order fresh whole wheat flour, sunflower oil, desi pulses, spices, and household essentials at best prices online.',
+    storeDesc: 'Order raw & roasted Pumpkin Seeds, Chia Seeds, Sunflower Seeds, Flax Seeds, spices, and daily healthy grocery at best prices online.',
     contactLocation: 'Contact & Store Location',
     storeServices: 'Store Services',
     rightsReserved: 'All Rights Reserved.',
@@ -136,22 +136,22 @@ export const translations = {
   gu: {
     // Header & Navbar
     topNotice: 'આણંદ અને અમદાવાદ વિસ્તારમાં ઝડપી એક્સપ્રેસ હોમ ડિલિવરી!',
-    storeSubtitle: 'કરીયાણા સ્ટોર',
+    storeSubtitle: 'હેલ્ધી સીડ્સ અને મોક્સફૂડ સ્ટોર',
     locationTitle: 'સ્થાનિક સ્ટોર ફાસ્ટ ડિલિવરી',
     locationSub: 'આણંદ અને અમદાવાદ વિસ્તાર',
-    searchPlaceholder: 'ઘઉંનો લોટ, કપાસિયા તેલ, તુવેર દાળ, ચા, મસાલા શોધો...',
+    searchPlaceholder: 'પમ્પકિન સીડ્સ, ચિયા સીડ્સ, અળસી, તેલ, ચા, મસાલા શોધો...',
     allProductsBtn: 'તમામ સામાન',
     cartBtn: 'કાર્ટ',
     adminPanel: 'એડમિન પેનલ',
 
     // Hero & Deals Ticker
-    heroTag: 'સુપર બચત • ઓનલાઈન કરિયાણા સ્ટોર',
-    heroButton: 'સામાન ખરીદો',
+    heroTag: 'સુપર બચત • ઓનલાઈન મોક્સફૂડ સ્ટોર',
+    heroButton: 'સીડ્સ અને સામાન ખરીદો',
     freeDeliveryBadge: 'ઝડપી એક્સપ્રેસ ડિલિવરી',
     qualityBadge: '100% શુદ્ધતાની ગેરંટી',
     mrpDiscountBadge: 'MRP પર 25% સુધીની બચત',
     comboTitle: 'મહિનાનો રેશન કોમ્બો પેક',
-    comboDesc: 'આશીર્વાદ ચક્કી લોટ + ફોર્ચ્યુન તેલ + દેશી તુવેર દાળ + ચા પર વિશેષ બચત!',
+    comboDesc: 'પમ્પકિન સીડ્સ + ચિયા સીડ્સ + તાજો સામાન પર વિશેષ બચત!',
     totalSavings: 'કુલ બચત',
 
     // Features Bar
@@ -167,16 +167,16 @@ export const translations = {
     // Deal Banner
     dealTag: 'મર્યાદિત સમય ઓફર • આજના સુપર ડિસ્કાઉન્ટ',
     dealTitle: 'આજના સુપર ધમાકા ડિસ્કાઉન્ટ',
-    dealSub: 'ઘઉંનો લોટ, સીંગતેલ/કપાસિયા તેલ અને ચા ના પેકેટ પર વિશેષ બચત!',
+    dealSub: 'પમ્પકિન સીડ્સ, ચિયા સીડ્સ, તેલ અને ચા ના પેકેટ પર વિશેષ બચત!',
     dealButton: 'ઓફર પ્રોડક્ટ્સ જુઓ',
 
     // Catalog & Filter
-    catalogTitle: 'તાજો કરીયાણા નો સામાન',
+    catalogTitle: 'તાજો હેલ્ધી સામાન',
     catalogSub: 'ડ્રાય ફ્રૂટ્સ, સીડ્સ અને તાજો સામાન',
     filterAll: 'તમામ સામાન',
     filterCombo: 'કોમ્બો',
     filterNew: 'નવો સામાન',
-    categoryTitle: 'કરિયાણાની વર્ગો',
+    categoryTitle: 'સામાગ્રી વિભાગો',
     categorySub: 'તમારો મનપસંદ સામગ્રી વિભાગ પસંદ કરો',
     showAllCategories: 'તમામ કેટેગરી બતાવો',
     noProductsFound: 'કોઈ પ્રોડક્ટ મળી નથી',
@@ -243,7 +243,7 @@ export const translations = {
 
     // Order Success
     orderSuccessTitle: 'ઓર્ડર સફળતાપૂર્વક સ્વીકારાયો છે!',
-    orderSuccessSub: 'ગૌતમ ટ્રેડિંગમાંથી ખરીદી કરવા બદલ આભાર.',
+    orderSuccessSub: 'મોક્સફૂડ (Moxfood) માંથી ખરીદી કરવા બદલ આભાર.',
     orderId: 'ઓર્ડર નંબર:',
     sendWhatsAppReceipt: 'વોટ્સએપ પર રસીદ મોકલો',
     backToHome: 'મુખ્ય પેજ પર જાઓ',
@@ -252,14 +252,14 @@ export const translations = {
     // Testimonials & Stats
     testimonialsTag: 'ગ્રાહકોનો સંતોષ • ચકાસેલા રીવ્યુઝ',
     testimonialsTitle: 'અમારા ગ્રાહકો શું કહે છે?',
-    testimonialsSub: 'હજારો સ્થાનિક પરિવારો નો વિશ્વાસ - ગૌતમ ટ્રેડિંગ',
+    testimonialsSub: 'હજારો સ્થાનિક પરિવારો નો વિશ્વાસ - મોક્સફૂડ (Moxfood)',
     statFamilies: 'સંતોષ્ટ પરિવારો',
     statSpeed: 'ઝડપી હોમ ડિલિવરી',
     statQuality: '૧૦૦% શુદ્ધ સામાન',
     statRating: 'ગ્રાહક રેટિંગ',
 
     // Footer
-    storeDesc: 'ઘઉંનો લોટ, સીંગતેલ, કપાસિયા તેલ, દેશી તુવેર દાળ, ચા અને મસાલા બજાર ભાવે ઓર્ડર કરો.',
+    storeDesc: 'પમ્પકિન સીડ્સ, ચિયા સીડ્સ, અળસી, સૂર્યમુખી ના બીજ અને રોજિંદો સામાન બજાર ભાવે ઓર્ડર કરો.',
     contactLocation: 'સંપર્ક અને સ્ટોર લોકેશન',
     storeServices: 'અમારી સેવાઓ',
     rightsReserved: 'તમામ હકો અનામત છે.',

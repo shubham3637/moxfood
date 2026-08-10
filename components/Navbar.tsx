@@ -37,7 +37,7 @@ export default function Navbar() {
         <div className="flex items-center gap-1.5 truncate">
           <Zap size={13} className="text-yellow-300 fill-yellow-300 animate-bounce shrink-0" />
           <span className="truncate">
-            <strong>Gautam Trading</strong> • {t('topNotice')}
+            <strong>Moxfood</strong> • {t('topNotice')}
           </span>
         </div>
         <div className="hidden md:flex items-center gap-5 text-xs font-semibold shrink-0">
@@ -55,7 +55,7 @@ export default function Navbar() {
           </div>
           <div>
             <div className="text-base sm:text-2xl font-black tracking-tight leading-none text-white flex items-center gap-1 font-heading">
-              GAUTAM <span className="text-pink-400">TRADING</span>
+              MOX<span className="text-pink-400">FOOD</span>
             </div>
             <div className="text-[10px] sm:text-[11px] text-pink-200 font-bold tracking-wide mt-0.5">
               {t('storeSubtitle')}
@@ -111,7 +111,7 @@ export default function Navbar() {
           {/* Direct Checkout Trigger */}
           <Link
             href="/checkout"
-            className="relative flex items-center gap-1.5 sm:gap-2 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white px-3 sm:px-5 py-2 sm:py-2.5 rounded-full font-extrabold text-xs sm:text-sm transition-all shadow-md shadow-pink-600/30 active:scale-95 cursor-pointer shrink-0"
+            className="relative flex items-center gap-1.5 sm:gap-2 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white px-3 sm:px-5 py-2 sm:py-2.5 rounded-full font-extrabold text-xs sm:text-sm transition-all shadow-md shadow-pink-600/30 active:scale-95 cursor-pointer shrink-0 font-heading"
           >
             <ShoppingBag size={18} className="sm:w-5 sm:h-5" />
             <span className="hidden sm:inline">{t('cartBtn')}</span>

@@ -6,33 +6,33 @@ import { Language, translations } from '@/lib/translations';
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: keyof typeof translations['en'], vars?: Record<string, string | number>) => string;
+  t: (key: string, params?: Record<string, string | number>) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
+export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>('en');
 
   useEffect(() => {
-    const savedLang = localStorage.getItem('gautamLanguage') as Language;
-    if (savedLang === 'en' || savedLang === 'gu') {
+    const savedLang = localStorage.getItem('moxfoodLanguage') as Language;
+    if (savedLang && (savedLang === 'en' || savedLang === 'gu')) {
       setLanguageState(savedLang);
     }
   }, []);
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
-    localStorage.setItem('gautamLanguage', lang);
+    localStorage.setItem('moxfoodLanguage', lang);
   };
 
-  const t = (key: keyof typeof translations['en'], vars?: Record<string, string | number>): string => {
-    const langDict = translations[language] || translations['en'];
-    let text = langDict[key] || translations['en'][key] || String(key);
+  const t = (key: string, params?: Record<string, string | number>): string => {
+    const langDict = translations[language] || translations.en;
+    let text = (langDict as any)[key] || (translations.en as any)[key] || key;
 
-    if (vars) {
-      Object.keys(vars).forEach((varKey) => {
-        text = text.replace(new RegExp(`\\{${varKey}\\}`, 'g'), String(vars[varKey]));
+    if (params) {
+      Object.keys(params).forEach((paramKey) => {
+        text = text.replace(new RegExp(`\\{${paramKey}\\}`, 'g'), String(params[paramKey]));
       });
     }
 
@@ -44,12 +44,12 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       {children}
     </LanguageContext.Provider>
   );
-}
+};
 
-export function useLanguage() {
+export const useLanguage = () => {
   const context = useContext(LanguageContext);
   if (!context) {
     throw new Error('useLanguage must be used within a LanguageProvider');
   }
   return context;
-}
+};

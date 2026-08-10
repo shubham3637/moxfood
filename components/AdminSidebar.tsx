@@ -1,175 +1,116 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
   Package,
-  FolderTree,
   ShoppingBag,
-  Store,
-  Database,
-  ArrowLeft,
-  CheckCircle2,
+  Grid,
   Image as ImageIcon,
   LogOut,
-  Menu,
-  X,
+  Store,
+  ChevronRight,
 } from 'lucide-react';
 
 export default function AdminSidebar() {
   const pathname = usePathname();
-  const [isSeeding, setIsSeeding] = useState(false);
-  const [seedMessage, setSeedMessage] = useState('');
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const router = useRouter();
 
-  const handleSeedDatabase = async () => {
-    if (confirm('Are you sure you want to reset & seed initial grocery store data?')) {
-      setIsSeeding(true);
-      setSeedMessage('');
-      try {
-        const res = await fetch('/api/seed?force=true', { method: 'POST' });
-        const data = await res.json();
-        if (data.success) {
-          setSeedMessage('Data seeded successfully!');
-          setTimeout(() => {
-            window.location.reload();
-          }, 1000);
-        } else {
-          setSeedMessage('Error: ' + data.error);
-        }
-      } catch (err: any) {
-        setSeedMessage('Failed: ' + err.message);
-      } finally {
-        setIsSeeding(false);
-      }
+  const menuItems = [
+    {
+      name: 'Dashboard Overview',
+      path: '/admin',
+      icon: LayoutDashboard,
+    },
+    {
+      name: 'Manage Products',
+      path: '/admin/products',
+      icon: Package,
+    },
+    {
+      name: 'Manage Categories',
+      path: '/admin/categories',
+      icon: Grid,
+    },
+    {
+      name: 'Manage Orders',
+      path: '/admin/orders',
+      icon: ShoppingBag,
+    },
+    {
+      name: 'Manage Hero Banners',
+      path: '/admin/banners',
+      icon: ImageIcon,
+    },
+  ];
+
+  const handleLogout = () => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('moxfoodAdminAuth');
+      router.push('/');
     }
   };
 
-  const handleLogout = () => {
-    sessionStorage.removeItem('gautamAdminAuth');
-    window.location.href = '/';
-  };
-
-  const navItems = [
-    { label: 'Dashboard', href: '/admin', icon: <LayoutDashboard size={18} /> },
-    { label: 'Hero Banners', href: '/admin/banners', icon: <ImageIcon size={18} /> },
-    { label: 'Products', href: '/admin/products', icon: <Package size={18} /> },
-    { label: 'Categories', href: '/admin/categories', icon: <FolderTree size={18} /> },
-    { label: 'Orders', href: '/admin/orders', icon: <ShoppingBag size={18} /> },
-  ];
-
   return (
-    <>
-      {/* Mobile Sticky Admin Header Bar */}
-      <div className="md:hidden sticky top-0 z-50 w-full bg-blue-950 text-white p-3.5 flex items-center justify-between border-b border-blue-900 shadow-md">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-pink-600 text-white flex items-center justify-center font-bold text-base">
-            <Store size={18} />
+    <aside className="w-full md:w-64 bg-blue-950 text-slate-300 p-6 flex flex-col justify-between shrink-0 min-h-[calc(100vh-64px)] border-r border-blue-900 shadow-xl">
+      <div className="space-y-6">
+        {/* Brand */}
+        <div className="flex items-center gap-3 pb-4 border-b border-blue-900">
+          <div className="w-10 h-10 rounded-xl bg-pink-600 text-white flex items-center justify-center font-bold text-xl shadow-lg">
+            <Store size={22} />
           </div>
           <div>
-            <div className="font-extrabold text-white text-sm font-heading leading-tight">Admin Portal</div>
-            <div className="text-[10px] text-pink-400 font-semibold">Gautam Trading</div>
+            <div className="font-black text-white text-lg leading-none font-heading">
+              Admin Portal
+            </div>
+            <div className="text-[10px] text-pink-400 font-semibold">Moxfood</div>
           </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="space-y-1.5">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.path;
+
+            return (
+              <Link
+                key={item.path}
+                href={item.path}
+                className={`flex items-center justify-between px-4 py-3 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                  isActive
+                    ? 'bg-pink-600 text-white shadow-lg shadow-pink-600/30'
+                    : 'text-slate-300 hover:bg-blue-900/60 hover:text-white'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Icon size={18} className={isActive ? 'text-white' : 'text-slate-400'} />
+                  <span>{item.name}</span>
+                </div>
+                {isActive && <ChevronRight size={14} className="text-white" />}
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* Footer Info & Logout */}
+      <div className="pt-6 border-t border-blue-900 space-y-4">
+        <div className="bg-blue-900/40 p-3 rounded-xl border border-blue-800 text-[11px] text-slate-400 space-y-1">
+          <div className="font-bold text-white">System Status</div>
+          <div>Moxfood Store Backend Connected</div>
         </div>
 
         <button
-          onClick={() => setIsMobileOpen(!isMobileOpen)}
-          className="p-1.5 text-blue-200 hover:text-white rounded-lg bg-blue-900 border border-blue-800 cursor-pointer"
-          aria-label="Toggle admin menu"
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center gap-2 bg-red-900/30 hover:bg-red-600 text-red-300 hover:text-white px-4 py-3 rounded-2xl text-xs font-bold transition-all border border-red-800/40 cursor-pointer"
         >
-          {isMobileOpen ? <X size={22} /> : <Menu size={22} />}
+          <LogOut size={16} />
+          <span>Exit Admin Panel</span>
         </button>
       </div>
-
-      {/* Backdrop overlay for mobile drawer */}
-      {isMobileOpen && (
-        <div
-          className="md:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm cursor-pointer"
-          onClick={() => setIsMobileOpen(false)}
-        />
-      )}
-
-      {/* Admin Sidebar Container */}
-      <aside
-        className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-blue-950 text-slate-300 flex flex-col justify-between shrink-0 min-h-screen border-r border-blue-900 transition-transform duration-300 ${
-          isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-        }`}
-      >
-        <div className="p-4 space-y-6">
-          {/* Brand Header (Desktop) */}
-          <div className="hidden md:flex items-center gap-2.5 pb-4 border-b border-blue-900">
-            <div className="w-9 h-9 rounded-xl bg-pink-600 text-white flex items-center justify-center font-bold text-lg shadow-md">
-              <Store size={20} />
-            </div>
-            <div>
-              <div className="font-extrabold text-white text-base leading-tight font-heading">Admin Panel</div>
-              <div className="text-xs text-pink-400 font-bold">Gautam Trading Store</div>
-            </div>
-          </div>
-
-          {/* Navigation Items */}
-          <nav className="space-y-1.5">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setIsMobileOpen(false)}
-                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${
-                    isActive
-                      ? 'bg-pink-600 text-white shadow-md'
-                      : 'text-blue-200 hover:text-white hover:bg-blue-900'
-                  }`}
-                >
-                  {item.icon}
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-
-        {/* Footer Actions */}
-        <div className="p-4 border-t border-blue-900 space-y-3">
-          {/* Seed Database Button */}
-          <button
-            onClick={handleSeedDatabase}
-            disabled={isSeeding}
-            className="w-full bg-blue-900 hover:bg-blue-850 text-pink-300 border border-blue-800 py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-colors disabled:opacity-50 cursor-pointer"
-          >
-            <Database size={16} />
-            <span>{isSeeding ? 'Seeding DB...' : 'Reset & Seed Grocery Data'}</span>
-          </button>
-
-          {seedMessage && (
-            <div className="text-[11px] text-pink-400 font-semibold text-center flex items-center justify-center gap-1">
-              <CheckCircle2 size={12} /> {seedMessage}
-            </div>
-          )}
-
-          {/* Logout Button */}
-          <button
-            onClick={handleLogout}
-            className="w-full bg-red-950 hover:bg-red-900 text-red-300 border border-red-800/80 py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
-          >
-            <LogOut size={16} />
-            <span>Logout Admin</span>
-          </button>
-
-          {/* Return to Storefront */}
-          <Link
-            href="/"
-            onClick={() => setIsMobileOpen(false)}
-            className="w-full bg-pink-600 hover:bg-pink-500 text-white py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-colors shadow cursor-pointer"
-          >
-            <ArrowLeft size={16} />
-            <span>Back to Storefront</span>
-          </Link>
-        </div>
-      </aside>
-    </>
+    </aside>
   );
 }

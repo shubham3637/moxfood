@@ -19,11 +19,11 @@ interface HeroSliderProps {
 
 const defaultFallbackBanners: BannerItem[] = [
   {
-    title: 'Super Saver Ration Combo Deals',
-    subtitle: 'Save up to 25% on Whole Wheat Atta, Edible Oil & Desi Pulses!',
+    title: 'Moxfood Premium Healthy Seeds & Superfoods',
+    subtitle: 'Buy 100% Raw & Roasted Pumpkin Seeds, Chia Seeds, Sunflower Seeds & Seed Mixes!',
     image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1600&q=80',
-    link: '/products?category=atta-rice',
-    buttonText: 'Shop Ration Deals',
+    link: '/products?category=seeds-superfoods',
+    buttonText: 'Shop Healthy Seeds',
   },
   {
     title: 'Fresh & Pure Cooking Oils',
@@ -137,13 +137,13 @@ export default function HeroSlider({ onExploreClick }: HeroSliderProps) {
           {/* Top Tag Pill */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full bg-pink-600/40 text-pink-200 text-[11px] sm:text-xs font-black border border-pink-500/50 backdrop-blur-md self-start animate-fade-in shadow-xl">
             <Zap size={13} className="text-yellow-300 fill-yellow-300 shrink-0" />
-            <span>GAUTAM TRADING • Daily Super Offers</span>
+            <span>MOXFOOD • Daily Super Offers</span>
           </div>
 
           {/* Title */}
-          <h1 className="text-2xl sm:text-4xl md:text-6xl font-black tracking-tight leading-[1.15] drop-shadow-lg text-white font-heading animate-zoom-in line-clamp-3">
+          <h2 className="text-2xl sm:text-4xl md:text-6xl font-black tracking-tight leading-[1.15] drop-shadow-lg text-white font-heading animate-zoom-in line-clamp-3">
             {currentBanner.title}
-          </h1>
+          </h2>
 
           {/* Subtitle */}
           {currentBanner.subtitle && (
@@ -169,13 +169,13 @@ export default function HeroSlider({ onExploreClick }: HeroSliderProps) {
             <Link
               href={currentBanner.link || '/products'}
               onClick={onExploreClick}
-              className="bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-2xl font-black text-xs sm:text-sm shadow-xl shadow-pink-600/40 transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2 cursor-pointer shrink-0"
+              className="bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-2xl font-black text-xs sm:text-sm shadow-xl shadow-pink-600/40 transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2 cursor-pointer shrink-0 font-heading"
             >
               <ShoppingBag size={18} />
               <span>{currentBanner.buttonText || 'Shop Grocery Deals'}</span>
             </Link>
 
-            <div className="hidden sm:flex items-center gap-2 px-4 py-3.5 rounded-2xl bg-blue-900/70 backdrop-blur-md border border-blue-700/60 text-xs font-bold text-pink-300 shadow">
+            <div className="hidden sm:flex items-center gap-2 px-4 py-3.5 rounded-2xl bg-blue-900/70 backdrop-blur-md border border-blue-700/60 text-xs font-bold text-pink-300 shadow font-heading">
               <Sparkles size={16} className="text-pink-400" />
               <span>Fast Express Delivery</span>
             </div>

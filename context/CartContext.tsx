@@ -31,7 +31,7 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-const CART_STORAGE_KEY = 'gautam_trading_cart_v1';
+const CART_STORAGE_KEY = 'moxfood_cart_v1';
 const STANDARD_DELIVERY_CHARGE = 30;
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

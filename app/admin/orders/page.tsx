@@ -71,7 +71,7 @@ export default function AdminOrdersPage() {
   };
 
   const getWhatsAppUpdateUrl = (order: any) => {
-    const text = `Hello ${order.customerDetails.name},\n\nYour Gautam Trading Order #${order.orderId} status has been updated to: *${order.status}*.\n\nTotal Amount: ₹${order.totalAmount}\nContact us for any questions. Thank you!`;
+    const text = `Hello ${order.customerDetails.name},\n\nYour Moxfood Order #${order.orderId} status has been updated to: *${order.status}*.\n\nTotal Amount: ₹${order.totalAmount}\nContact us for any questions. Thank you!`;
     return `https://wa.me/91${order.customerDetails.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(text)}`;
   };
 
@@ -79,14 +79,14 @@ export default function AdminOrdersPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+        <h1 className="text-2xl font-black text-slate-900 tracking-tight font-heading">
           Order Management
         </h1>
-        <p className="text-xs text-slate-500">Track customer orders and update delivery & payment statuses</p>
+        <p className="text-xs text-slate-500 font-medium">Track customer orders and update delivery & payment statuses</p>
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex flex-wrap gap-2 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm text-xs font-bold">
+      <div className="flex flex-wrap gap-2 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm text-xs font-bold font-heading">
         {['all', 'Pending', 'Processing', 'Out for Delivery', 'Delivered', 'Cancelled'].map((st) => (
           <button
             key={st}
@@ -110,8 +110,8 @@ export default function AdminOrdersPage() {
       ) : orders.length === 0 ? (
         <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-sm space-y-2">
           <ShoppingBag size={32} className="text-slate-300 mx-auto" />
-          <h3 className="font-extrabold text-slate-800 text-base">No Orders Found</h3>
-          <p className="text-xs text-slate-400">No orders found for this status filter.</p>
+          <h3 className="font-extrabold text-slate-800 text-base font-heading">No Orders Found</h3>
+          <p className="text-xs text-slate-400 font-medium">No orders found for this status filter.</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -154,7 +154,7 @@ export default function AdminOrdersPage() {
                   <select
                     value={ord.status}
                     onChange={(e) => handleStatusChange(ord.orderId, e.target.value)}
-                    className={`text-xs font-extrabold px-3 py-1.5 rounded-xl border focus:outline-none cursor-pointer ${
+                    className={`text-xs font-extrabold px-3 py-1.5 rounded-xl border focus:outline-none cursor-pointer font-heading ${
                       ord.status === 'Delivered'
                         ? 'bg-blue-900 text-white border-blue-950'
                         : ord.status === 'Out for Delivery'
@@ -175,14 +175,14 @@ export default function AdminOrdersPage() {
 
               {/* Customer Info & WhatsApp Chat */}
               <div className="grid grid-cols-1 md:grid-cols-12 gap-4 text-xs">
-                <div className="md:col-span-8 bg-slate-50 p-4 rounded-2xl border border-slate-200/60 space-y-1.5">
-                  <div className="font-bold text-slate-900 text-sm flex items-center justify-between">
+                <div className="md:col-span-8 bg-slate-50 p-4 rounded-2xl border border-slate-200/60 space-y-1.5 font-medium">
+                  <div className="font-bold text-slate-900 text-sm flex items-center justify-between font-heading">
                     <span>{ord.customerDetails.name}</span>
                     <a
                       href={getWhatsAppUpdateUrl(ord)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="bg-pink-600 hover:bg-pink-500 text-white px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 text-[11px] cursor-pointer"
+                      className="bg-pink-600 hover:bg-pink-500 text-white px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 text-[11px] cursor-pointer font-heading"
                     >
                       <MessageSquare size={12} /> WhatsApp Update
                     </a>
@@ -208,34 +208,34 @@ export default function AdminOrdersPage() {
                   </div>
                 </div>
 
-                <div className="md:col-span-4 bg-pink-50/60 p-4 rounded-2xl border border-pink-200/80 flex flex-col justify-between">
+                <div className="md:col-span-4 bg-pink-50/60 p-4 rounded-2xl border border-pink-200/80 flex flex-col justify-between font-semibold">
                   <div className="space-y-1 text-slate-700">
                     <div className="flex justify-between">
                       <span>Subtotal:</span>
-                      <span className="font-bold">₹{ord.subtotal}</span>
+                      <span className="font-bold text-slate-900 font-heading">₹{ord.subtotal}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Delivery Charge:</span>
-                      <span className="font-bold">₹{ord.deliveryCharge}</span>
+                      <span className="font-bold text-pink-600 font-heading">₹{ord.deliveryCharge}</span>
                     </div>
                   </div>
                   <div className="flex justify-between items-center text-sm font-black text-slate-900 pt-2 border-t border-pink-200 font-heading">
                     <span>Total Amount:</span>
-                    <span className="text-blue-900 text-base">₹{ord.totalAmount}</span>
+                    <span className="text-blue-900 text-base font-heading">₹{ord.totalAmount}</span>
                   </div>
                 </div>
               </div>
 
               {/* Items Breakdown */}
               <div className="space-y-2">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 font-heading">
                   Ordered Items ({ord.items.length} Items):
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                   {ord.items.map((it: any, i: number) => (
                     <div
                       key={i}
-                      className="bg-white p-2.5 rounded-xl border border-slate-200 flex items-center gap-2.5 text-xs"
+                      className="bg-white p-2.5 rounded-xl border border-slate-200 flex items-center gap-2.5 text-xs font-medium"
                     >
                       {it.image && (
                         <img

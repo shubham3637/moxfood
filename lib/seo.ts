@@ -25,7 +25,7 @@ export const DEFAULT_KEYWORDS = [
   'keto seeds mix',
   'diet seeds for weight loss',
   'fresh grocery seeds',
-  'gautam trading moxfood',
+  'moxfood online store',
 ];
 
 export function getCanonicalUrl(path = ''): string {
@@ -82,7 +82,7 @@ export function generateStoreSchema() {
     telephone: '+91-9876543210',
     address: {
       '@type': 'PostalAddress',
-      streetAddress: 'Main Market, Shop No. 12, Station Road',
+      streetAddress: 'Main Market, Moxfood Shop No. 12, Station Road',
       addressLocality: 'Anand',
       addressRegion: 'Gujarat',
       postalCode: '388001',

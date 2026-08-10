@@ -59,7 +59,7 @@ export default function OrderSuccessPage(props: { params: Promise<{ id: string }
   }
 
   const storePhone = '919876543210';
-  const whatsappText = `🛒 *GAUTAM TRADING - ORDER RECEIPT* 🛒
+  const whatsappText = `🛒 *MOXFOOD - ORDER RECEIPT* 🛒
 *Order ID:* #${order.orderId}
 *Customer Name:* ${order.customerDetails.name}
 *Phone Number:* ${order.customerDetails.phone}
@@ -92,7 +92,7 @@ Please process home delivery for this order. Thank you!`;
             Thank you! Your Order Has Been Received.
           </h1>
           <p className="text-xs text-slate-500 mt-1 font-medium">
-            Thank you for shopping at Gautam Trading.
+            Thank you for shopping at Moxfood.
           </p>
         </div>
 
@@ -167,7 +167,7 @@ Please process home delivery for this order. Thank you!`;
               Payment Status: <span className="font-bold text-pink-600">{order.paymentStatus}</span>
             </div>
             <div className="pt-1">
-              Status: <span className="bg-pink-100 text-pink-900 font-bold px-2 py-0.5 rounded text-[11px] border border-pink-200">{order.status}</span>
+              Status: <span className="bg-pink-100 text-pink-900 font-bold px-2 py-0.5 rounded text-[11px] border border-pink-200 font-heading">{order.status}</span>
             </div>
           </div>
         </div>
