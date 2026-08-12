@@ -39,16 +39,14 @@ export default function AdminProductsPage() {
     category: 'seeds-superfoods',
     price: '',
     mrp: '',
-    stock: '50',
-    unit: '250 g',
+    stock: '',
+    unit: '',
     imageUrl: '',
     description: '',
     isFeatured: false,
     isTrending: false,
     variants: [
-      { unit: '250 g', price: '', mrp: '', stock: '50' },
-      { unit: '500 g', price: '', mrp: '', stock: '30' },
-      { unit: '1 kg', price: '', mrp: '', stock: '20' },
+      { unit: '', price: '', mrp: '', stock: '' },
     ] as ProductVariant[],
   });
 
@@ -84,16 +82,14 @@ export default function AdminProductsPage() {
       category: categories.length > 0 ? categories[0].slug : 'seeds-superfoods',
       price: '',
       mrp: '',
-      stock: '50',
-      unit: '250 g',
+      stock: '',
+      unit: '',
       imageUrl: '',
       description: '',
       isFeatured: false,
       isTrending: false,
       variants: [
-        { unit: '250 g', price: '', mrp: '', stock: '50' },
-        { unit: '500 g', price: '', mrp: '', stock: '30' },
-        { unit: '1 kg', price: '', mrp: '', stock: '20' },
+        { unit: '', price: '', mrp: '', stock: '' },
       ],
     });
     setIsModalOpen(true);
@@ -108,14 +104,14 @@ export default function AdminProductsPage() {
             unit: v.unit || '',
             price: String(v.price ?? ''),
             mrp: String(v.mrp ?? ''),
-            stock: String(v.stock ?? 50),
+            stock: String(v.stock ?? ''),
           }))
         : [
             {
-              unit: product.unit || '250 g',
+              unit: product.unit || '',
               price: String(product.price ?? ''),
               mrp: String(product.mrp ?? ''),
-              stock: String(product.stock ?? 50),
+              stock: String(product.stock ?? ''),
             },
           ];
 
@@ -125,8 +121,8 @@ export default function AdminProductsPage() {
       category: product.category || (categories.length > 0 ? categories[0].slug : 'seeds-superfoods'),
       price: String(product.price ?? ''),
       mrp: String(product.mrp ?? ''),
-      stock: String(product.stock ?? 50),
-      unit: product.unit || '250 g',
+      stock: String(product.stock ?? ''),
+      unit: product.unit || '',
       imageUrl: Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : '',
       description: product.description || '',
       isFeatured: Boolean(product.isFeatured),
@@ -139,7 +135,7 @@ export default function AdminProductsPage() {
   const handleAddVariantRow = () => {
     setFormData((prev) => ({
       ...prev,
-      variants: [...prev.variants, { unit: '', price: '', mrp: '', stock: '50' }],
+      variants: [...prev.variants, { unit: '', price: '', mrp: '', stock: '' }],
     }));
   };
 
@@ -209,13 +205,13 @@ export default function AdminProductsPage() {
         unit: String(v.unit).trim(),
         price: Number(v.price),
         mrp: Number(v.mrp),
-        stock: Number(v.stock || 50),
+        stock: Number(v.stock || 0),
       }));
 
-    const primaryUnit = validVariants.length > 0 ? validVariants[0].unit : (formData.unit.trim() || '250 g');
+    const primaryUnit = validVariants.length > 0 ? validVariants[0].unit : (formData.unit.trim() || '1 Pack');
     const primaryPrice = validVariants.length > 0 ? validVariants[0].price : Number(formData.price || 0);
     const primaryMrp = validVariants.length > 0 ? validVariants[0].mrp : Number(formData.mrp || 0);
-    const primaryStock = validVariants.length > 0 ? validVariants[0].stock : Number(formData.stock || 50);
+    const primaryStock = validVariants.length > 0 ? validVariants[0].stock : Number(formData.stock || 0);
 
     const payload = {
       name: formData.name.trim(),
@@ -479,7 +475,7 @@ export default function AdminProductsPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-pink-900 font-extrabold font-heading">
                     <Scale size={18} />
-                    <span>Manage Weight Variants & Prices (અલગ અલગ વજન અને ભાવ)</span>
+                    <span>Manage Weight Variants & Prices (વજન અને ભાવ)</span>
                   </div>
                   <button
                     type="button"
