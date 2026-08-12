@@ -4,17 +4,37 @@ import Product from '@/models/Product';
 import ProductDetailClient from '@/components/ProductDetailClient';
 import { getCanonicalUrl, generateProductSchema, SITE_NAME } from '@/lib/seo';
 import Link from 'next/link';
-import { ArrowLeft, Home } from 'lucide-react';
+import { Home } from 'lucide-react';
+import mongoose from 'mongoose';
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
+async function findProductByIdOrSlug(idOrSlug: string) {
+  await dbConnect();
+
+  // Try finding by slug first (clean URL)
+  let product = await Product.findOne({ slug: idOrSlug.toLowerCase().trim() }).lean();
+
+  // If not found by slug and it's a valid ObjectId, try finding by _id
+  if (!product && mongoose.Types.ObjectId.isValid(idOrSlug)) {
+    product = await Product.findById(idOrSlug).lean();
+  }
+
+  // Fallback: match slug with hyphens or regex
+  if (!product) {
+    const slugified = idOrSlug.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
+    product = await Product.findOne({ slug: slugified }).lean();
+  }
+
+  return product;
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
   try {
-    await dbConnect();
-    const product = await Product.findById(id).lean();
+    const product: any = await findProductByIdOrSlug(id);
 
     if (!product) {
       return {
@@ -33,7 +53,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         ? product.images[0]
         : getCanonicalUrl('/og-image.jpg');
 
-    const canonical = getCanonicalUrl(`/product/${id}`);
+    const canonical = getCanonicalUrl(`/product/${product.slug || product._id}`);
 
     return {
       title,
@@ -84,8 +104,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
   let product: any = null;
 
   try {
-    await dbConnect();
-    const rawProduct = await Product.findById(id).lean();
+    const rawProduct = await findProductByIdOrSlug(id);
     if (rawProduct) {
       product = JSON.parse(JSON.stringify(rawProduct));
     }

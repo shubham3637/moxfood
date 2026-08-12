@@ -17,6 +17,7 @@ interface ProductVariant {
 interface ProductCardProps {
   product: {
     _id: string;
+    slug?: string;
     name: string;
     altNameGujarati?: string;
     category: string;
@@ -36,6 +37,8 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { items, addToCart, updateQuantity } = useCart();
   const { language, t } = useLanguage();
   const { showSuccess } = useToast();
+
+  const productUrl = `/product/${product.slug || product._id}`;
 
   const hasVariants = Array.isArray(product.variants) && product.variants.length > 0;
   const initialVariant = hasVariants ? product.variants![0] : null;
@@ -86,8 +89,8 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
       )}
 
-      {/* Product Image Link */}
-      <Link href={`/product/${product._id}`} className="block relative aspect-square bg-slate-50 overflow-hidden p-4 cursor-pointer">
+      {/* Product Image Link with SEO slug */}
+      <Link href={productUrl} className="block relative aspect-square bg-slate-50 overflow-hidden p-4 cursor-pointer">
         <img
           src={imageUrl}
           alt={displayTitle}
@@ -123,8 +126,8 @@ export default function ProductCard({ product }: ProductCardProps) {
             </div>
           )}
 
-          {/* Title */}
-          <Link href={`/product/${product._id}`} className="cursor-pointer">
+          {/* Title with SEO slug */}
+          <Link href={productUrl} className="cursor-pointer">
             <h3 className="font-bold text-slate-900 text-sm line-clamp-2 group-hover:text-pink-600 transition-colors mb-1 font-heading">
               {displayTitle}
             </h3>

@@ -1,6 +1,15 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Product from '@/models/Product';
+import mongoose from 'mongoose';
+
+async function findProduct(idOrSlug: string) {
+  let product = await Product.findOne({ slug: idOrSlug.toLowerCase().trim() });
+  if (!product && mongoose.Types.ObjectId.isValid(idOrSlug)) {
+    product = await Product.findById(idOrSlug);
+  }
+  return product;
+}
 
 export async function GET(
   request: Request,
@@ -9,7 +18,7 @@ export async function GET(
   try {
     await dbConnect();
     const { id } = await props.params;
-    const product = await Product.findById(id);
+    const product = await findProduct(id);
 
     if (!product) {
       return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });
@@ -30,10 +39,22 @@ export async function PUT(
     const { id } = await props.params;
     const body = await request.json();
 
-    const updatedProduct = await Product.findByIdAndUpdate(id, body, {
-      new: true,
-      runValidators: true,
-    });
+    if (body.name && !body.slug) {
+      body.slug = body.name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    }
+
+    let updatedProduct;
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      updatedProduct = await Product.findByIdAndUpdate(id, body, {
+        new: true,
+        runValidators: true,
+      });
+    } else {
+      updatedProduct = await Product.findOneAndUpdate({ slug: id.toLowerCase() }, body, {
+        new: true,
+        runValidators: true,
+      });
+    }
 
     if (!updatedProduct) {
       return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });
@@ -53,7 +74,12 @@ export async function DELETE(
     await dbConnect();
     const { id } = await props.params;
 
-    const deletedProduct = await Product.findByIdAndDelete(id);
+    let deletedProduct;
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      deletedProduct = await Product.findByIdAndDelete(id);
+    } else {
+      deletedProduct = await Product.findOneAndDelete({ slug: id.toLowerCase() });
+    }
 
     if (!deletedProduct) {
       return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });

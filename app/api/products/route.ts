@@ -55,33 +55,45 @@ export async function POST(request: Request) {
 
     const {
       name,
+      slug: customSlug,
       altNameGujarati,
       category,
       price,
       mrp,
       stock,
       unit,
+      variants,
       images,
       description,
       isFeatured,
       isTrending,
     } = body;
 
-    if (!name || !category || price === undefined || mrp === undefined || stock === undefined) {
+    if (!name || !category) {
       return NextResponse.json(
-        { success: false, error: 'Name, category, price, MRP, and stock are required' },
+        { success: false, error: 'Name and category are required' },
         { status: 400 }
       );
     }
 
+    const generatedSlug =
+      customSlug ||
+      name
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+
     const product = await Product.create({
       name,
+      slug: generatedSlug,
       altNameGujarati: altNameGujarati || '',
       category,
-      price: Number(price),
-      mrp: Number(mrp),
-      stock: Number(stock),
-      unit: unit || '1 kg',
+      price: Number(price || 0),
+      mrp: Number(mrp || 0),
+      stock: Number(stock || 0),
+      unit: unit || '1 Pack',
+      variants: Array.isArray(variants) ? variants : [],
       images: Array.isArray(images) ? images : images ? [images] : [],
       description: description || '',
       isFeatured: Boolean(isFeatured),

@@ -9,6 +9,7 @@ export interface IProductVariant {
 
 export interface IProduct extends Document {
   name: string;
+  slug: string;
   altNameGujarati?: string;
   category: string; // Slug or Name
   price: number;
@@ -37,6 +38,7 @@ const ProductVariantSchema = new Schema<IProductVariant>(
 const ProductSchema: Schema<IProduct> = new Schema(
   {
     name: { type: String, required: true, trim: true },
+    slug: { type: String, trim: true, lowercase: true, index: true },
     altNameGujarati: { type: String, trim: true, default: '' },
     category: { type: String, required: true, trim: true, index: true },
     price: { type: Number, required: true, min: 0 },
@@ -51,6 +53,13 @@ const ProductSchema: Schema<IProduct> = new Schema(
   },
   { timestamps: true }
 );
+
+// Pre-save hook to ensure slug is generated
+ProductSchema.pre('save', function (this: IProduct) {
+  if (!this.slug && this.name) {
+    this.slug = this.name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  }
+});
 
 const Product: Model<IProduct> =
   mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);
