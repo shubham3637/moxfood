@@ -61,7 +61,7 @@ export default function CheckoutPage() {
   const [pincodeStatus, setPincodeStatus] = useState<PincodeStatus>({
     loading: false,
     verified: false,
-    isGujarat: true, // Default estimate to Gujarat rate (₹40/kg)
+    isGujarat: false,
     stateName: '',
     district: '',
     error: '',
@@ -85,18 +85,6 @@ export default function CheckoutPage() {
 
   // Postal Pincode API Check Function
   const checkPincodeState = async (pincode: string) => {
-    if (!/^\d{6}$/.test(pincode)) {
-      setPincodeStatus({
-        loading: false,
-        verified: false,
-        isGujarat: true,
-        stateName: '',
-        district: '',
-        error: '',
-      });
-      return;
-    }
-
     setPincodeStatus((prev) => ({ ...prev, loading: true, error: '' }));
 
     try {
@@ -127,7 +115,7 @@ export default function CheckoutPage() {
         setPincodeStatus({
           loading: false,
           verified: false,
-          isGujarat: true,
+          isGujarat: false,
           stateName: '',
           district: '',
           error: 'Invalid 6-digit Pincode. Please check your area pincode.',
@@ -138,18 +126,28 @@ export default function CheckoutPage() {
       setPincodeStatus({
         loading: false,
         verified: false,
-        isGujarat: true,
+        isGujarat: false,
         stateName: '',
         district: '',
-        error: 'Failed to verify pincode automatically. Base shipping rate applied.',
+        error: 'Failed to verify Pincode automatically.',
       });
     }
   };
 
-  // Trigger Pincode API check on typing 6 digits
+  // Trigger Pincode API check ONLY on 6 digits; Reset/Hide banner when pincode is modified/deleted!
   useEffect(() => {
-    if (formData.pincode.trim().length === 6) {
-      checkPincodeState(formData.pincode.trim());
+    const cleanPin = formData.pincode.trim();
+    if (cleanPin.length === 6) {
+      checkPincodeState(cleanPin);
+    } else {
+      setPincodeStatus({
+        loading: false,
+        verified: false,
+        isGujarat: false,
+        stateName: '',
+        district: '',
+        error: cleanPin.length > 0 && cleanPin.length < 6 ? 'Please enter complete 6-digit pincode' : '',
+      });
     }
   }, [formData.pincode]);
 
@@ -172,9 +170,9 @@ export default function CheckoutPage() {
     );
   }
 
-  // Calculate dynamic weight & state-based delivery charge
-  const ratePerKg = pincodeStatus.verified ? (pincodeStatus.isGujarat ? 40 : 70) : 40; // ₹40/kg for Gujarat, ₹70/kg for Out of Gujarat
-  const deliveryCharge = billableKg * ratePerKg;
+  // Calculate dynamic shipping fee ONLY when pincode is verified
+  const ratePerKg = pincodeStatus.verified ? (pincodeStatus.isGujarat ? 40 : 70) : 0;
+  const deliveryCharge = pincodeStatus.verified ? billableKg * ratePerKg : 0;
   const payableTotal = subtotal + deliveryCharge;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -202,9 +200,11 @@ export default function CheckoutPage() {
       return;
     }
 
-    if (formData.pincode.trim().length !== 6) {
+    if (formData.pincode.trim().length !== 6 || !pincodeStatus.verified) {
       const msg =
-        language === 'gu' ? 'મહેરબાની કરીને સાચો 6-અંકનો પીનકોડ દાખલ કરો.' : 'Please enter a valid 6-digit Area Pincode.';
+        language === 'gu'
+          ? 'મહેરબાની કરીને સાચો 6-અંકનો પિનકોડ દાખલ કરી વેરિફાય કરો.'
+          : 'Please enter a valid 6-digit Pincode to calculate shipping fee.';
       setErrorMsg(msg);
       showError(msg);
       return;
@@ -442,34 +442,46 @@ export default function CheckoutPage() {
               <span className="font-mono text-slate-800 font-bold">
                 {totalWeightGrams < 1000 ? `${totalWeightGrams} g` : `${(totalWeightGrams / 1000).toFixed(1)} kg`}{' '}
                 <span className="text-[10px] text-pink-600 font-sans font-bold bg-pink-50 px-1.5 py-0.5 rounded border border-pink-100">
-                  (Charge: {billableKg} kg)
+                  (Chargable: {billableKg} kg)
                 </span>
               </span>
             </div>
 
-            {/* Delivery Charge Row with State Rate Badge */}
+            {/* Delivery Charge Row - Rendered ONLY when verified */}
             <div className="flex justify-between items-center text-slate-600">
               <div className="flex items-center gap-1">
                 <Truck size={14} className="text-blue-900" />
                 <span>Shipping Fee:</span>
-                <span className="text-[11px] text-slate-500 font-normal">
-                  ({billableKg} kg × ₹{ratePerKg})
-                </span>
+                {pincodeStatus.verified && (
+                  <span className="text-[11px] text-slate-500 font-normal font-mono">
+                    ({billableKg} kg × ₹{ratePerKg})
+                  </span>
+                )}
               </div>
-              <span className="font-bold text-pink-600 font-heading text-sm">₹{deliveryCharge}</span>
+              {pincodeStatus.verified ? (
+                <span className="font-bold text-pink-600 font-heading text-sm">₹{deliveryCharge}</span>
+              ) : (
+                <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                  Enter Pincode Below
+                </span>
+              )}
             </div>
 
-            {/* Pincode & State Location Banner */}
-            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200 text-[11px] space-y-1">
-              {pincodeStatus.loading ? (
+            {/* Pincode & Location Status Banner - ONLY SHOWN AFTER 6-DIGIT PINCODE IS VERIFIED OR LOADING */}
+            {pincodeStatus.loading && (
+              <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200 text-[11px]">
                 <div className="flex items-center gap-2 text-slate-600 font-bold">
                   <RefreshCw size={14} className="animate-spin text-pink-600" />
                   <span>Checking Postal Pincode & State...</span>
                 </div>
-              ) : pincodeStatus.verified ? (
-                <div className="flex items-center justify-between text-emerald-800 font-extrabold font-heading">
+              </div>
+            )}
+
+            {pincodeStatus.verified && (
+              <div className="bg-emerald-50/70 p-3 rounded-2xl border border-emerald-200 text-[11px] animate-fade-in">
+                <div className="flex items-center justify-between text-emerald-900 font-extrabold font-heading">
                   <span className="flex items-center gap-1.5">
-                    <CheckCircle2 size={16} className="text-emerald-600" />
+                    <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
                     <span>
                       {pincodeStatus.isGujarat
                         ? `📍 Gujarat (${pincodeStatus.district || 'State'})`
@@ -480,29 +492,15 @@ export default function CheckoutPage() {
                     {pincodeStatus.isGujarat ? 'Rate: ₹40 / kg' : 'Rate: ₹70 / kg'}
                   </span>
                 </div>
-              ) : (
-                <div className="flex items-center justify-between text-slate-600 font-bold">
-                  <span className="flex items-center gap-1.5">
-                    <MapPin size={14} className="text-pink-600" />
-                    <span>
-                      {language === 'gu'
-                        ? 'ચોક્કસ શિપિંગ ચાર્જ માટે ૬-અંકનો પિનકોડ દાખલ કરો'
-                        : 'Enter 6-digit Area Pincode below to calculate exact shipping rate'}
-                    </span>
-                  </span>
-                  <span className="text-[10px] text-pink-600 font-bold bg-pink-50 px-2 py-0.5 rounded border border-pink-100">
-                    Guj: ₹40/kg | Other: ₹70/kg
-                  </span>
-                </div>
-              )}
+              </div>
+            )}
 
-              {pincodeStatus.error && (
-                <div className="flex items-center gap-1.5 text-red-600 font-bold pt-0.5">
-                  <AlertCircle size={14} />
-                  <span>{pincodeStatus.error}</span>
-                </div>
-              )}
-            </div>
+            {pincodeStatus.error && (
+              <div className="bg-red-50 p-3 rounded-2xl border border-red-200 text-[11px] flex items-center gap-1.5 text-red-600 font-bold">
+                <AlertCircle size={14} className="shrink-0" />
+                <span>{pincodeStatus.error}</span>
+              </div>
+            )}
 
             <div className="flex justify-between text-base sm:text-lg font-black text-slate-900 pt-3 border-t border-slate-200 font-heading">
               <span>{t('payableTotal')}</span>
