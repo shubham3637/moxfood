@@ -9,9 +9,17 @@ import {
   X,
   Upload,
   RefreshCw,
+  Scale,
 } from 'lucide-react';
 import { compressImageFile } from '@/lib/imageUtils';
 import { useToast } from '@/context/ToastContext';
+
+interface ProductVariant {
+  unit: string;
+  price: string | number;
+  mrp: string | number;
+  stock: string | number;
+}
 
 export default function AdminProductsPage() {
   const { showError, showSuccess } = useToast();
@@ -37,6 +45,11 @@ export default function AdminProductsPage() {
     description: '',
     isFeatured: false,
     isTrending: false,
+    variants: [
+      { unit: '250 g', price: '', mrp: '', stock: '50' },
+      { unit: '500 g', price: '', mrp: '', stock: '30' },
+      { unit: '1 kg', price: '', mrp: '', stock: '20' },
+    ] as ProductVariant[],
   });
 
   useEffect(() => {
@@ -77,26 +90,72 @@ export default function AdminProductsPage() {
       description: '',
       isFeatured: false,
       isTrending: false,
+      variants: [
+        { unit: '250 g', price: '', mrp: '', stock: '50' },
+        { unit: '500 g', price: '', mrp: '', stock: '30' },
+        { unit: '1 kg', price: '', mrp: '', stock: '20' },
+      ],
     });
     setIsModalOpen(true);
   };
 
   const handleOpenEditModal = (product: any) => {
     setEditingId(product._id);
+
+    const existingVariants: ProductVariant[] =
+      Array.isArray(product.variants) && product.variants.length > 0
+        ? product.variants.map((v: any) => ({
+            unit: v.unit || '',
+            price: String(v.price ?? ''),
+            mrp: String(v.mrp ?? ''),
+            stock: String(v.stock ?? 50),
+          }))
+        : [
+            {
+              unit: product.unit || '250 g',
+              price: String(product.price ?? ''),
+              mrp: String(product.mrp ?? ''),
+              stock: String(product.stock ?? 50),
+            },
+          ];
+
     setFormData({
-      name: product.name,
+      name: product.name || '',
       altNameGujarati: product.altNameGujarati || '',
-      category: product.category,
-      price: String(product.price),
-      mrp: String(product.mrp),
-      stock: String(product.stock),
+      category: product.category || (categories.length > 0 ? categories[0].slug : 'seeds-superfoods'),
+      price: String(product.price ?? ''),
+      mrp: String(product.mrp ?? ''),
+      stock: String(product.stock ?? 50),
       unit: product.unit || '250 g',
       imageUrl: Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : '',
       description: product.description || '',
       isFeatured: Boolean(product.isFeatured),
       isTrending: Boolean(product.isTrending),
+      variants: existingVariants,
     });
     setIsModalOpen(true);
+  };
+
+  const handleAddVariantRow = () => {
+    setFormData((prev) => ({
+      ...prev,
+      variants: [...prev.variants, { unit: '', price: '', mrp: '', stock: '50' }],
+    }));
+  };
+
+  const handleRemoveVariantRow = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      variants: prev.variants.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleVariantChange = (index: number, field: keyof ProductVariant, value: string) => {
+    setFormData((prev) => {
+      const updated = [...prev.variants];
+      updated[index] = { ...updated[index], [field]: value };
+      return { ...prev, variants: updated };
+    });
   };
 
   const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -105,7 +164,6 @@ export default function AdminProductsPage() {
 
     setUploadingImage(true);
     try {
-      // 1. Client-side compression to prevent 413 Request Entity Too Large error
       const compressedBase64 = await compressImageFile(file);
 
       const res = await fetch('/api/upload', {
@@ -139,19 +197,35 @@ export default function AdminProductsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.price || !formData.mrp) {
-      showError('Product name, selling price, and MRP are required.');
+    if (!formData.name) {
+      showError('Product name is required.');
       return;
     }
+
+    // Process valid variants
+    const validVariants = formData.variants
+      .filter((v) => v.unit && v.price && v.mrp)
+      .map((v) => ({
+        unit: String(v.unit).trim(),
+        price: Number(v.price),
+        mrp: Number(v.mrp),
+        stock: Number(v.stock || 50),
+      }));
+
+    const primaryUnit = validVariants.length > 0 ? validVariants[0].unit : (formData.unit.trim() || '250 g');
+    const primaryPrice = validVariants.length > 0 ? validVariants[0].price : Number(formData.price || 0);
+    const primaryMrp = validVariants.length > 0 ? validVariants[0].mrp : Number(formData.mrp || 0);
+    const primaryStock = validVariants.length > 0 ? validVariants[0].stock : Number(formData.stock || 50);
 
     const payload = {
       name: formData.name.trim(),
       altNameGujarati: '',
       category: formData.category,
-      price: Number(formData.price),
-      mrp: Number(formData.mrp),
-      stock: Number(formData.stock),
-      unit: formData.unit.trim(),
+      price: primaryPrice,
+      mrp: primaryMrp,
+      stock: primaryStock,
+      unit: primaryUnit,
+      variants: validVariants,
       images: formData.imageUrl ? [formData.imageUrl] : [],
       description: formData.description.trim(),
       isFeatured: formData.isFeatured,
@@ -218,7 +292,7 @@ export default function AdminProductsPage() {
           <h1 className="text-2xl font-black text-slate-900 tracking-tight font-heading">
             Products Management
           </h1>
-          <p className="text-xs text-slate-500 font-medium">Manage all Moxfood healthy seeds & grocery products</p>
+          <p className="text-xs text-slate-500 font-medium">Manage Moxfood healthy seeds & multiple weight/size variants</p>
         </div>
 
         <button
@@ -271,8 +345,8 @@ export default function AdminProductsPage() {
                   <th className="py-3.5 px-4">Image</th>
                   <th className="py-3.5 px-4">Product Name</th>
                   <th className="py-3.5 px-4">Category</th>
-                  <th className="py-3.5 px-4">Unit</th>
-                  <th className="py-3.5 px-4">Price / MRP</th>
+                  <th className="py-3.5 px-4">Available Weight Variants</th>
+                  <th className="py-3.5 px-4">Base Price / MRP</th>
                   <th className="py-3.5 px-4">Stock</th>
                   <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
@@ -295,7 +369,27 @@ export default function AdminProductsPage() {
                       <div className="font-bold text-slate-800 font-heading">{prod.name}</div>
                     </td>
                     <td className="py-3 px-4 font-semibold text-slate-600">{prod.category}</td>
-                    <td className="py-3 px-4 font-mono">{prod.unit}</td>
+                    
+                    {/* Weight Variants list badge */}
+                    <td className="py-3 px-4">
+                      {Array.isArray(prod.variants) && prod.variants.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {prod.variants.map((v: any, i: number) => (
+                            <span
+                              key={i}
+                              className="bg-blue-50 text-blue-900 border border-blue-200 text-[10px] font-bold px-2 py-0.5 rounded-md font-mono"
+                            >
+                              {v.unit}: ₹{v.price}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="font-mono text-slate-700 bg-slate-100 px-2 py-0.5 rounded text-[11px]">
+                          {prod.unit}
+                        </span>
+                      )}
+                    </td>
+
                     <td className="py-3 px-4 font-extrabold text-slate-900 font-heading">
                       ₹{prod.price} <span className="text-[10px] text-slate-400 line-through">₹{prod.mrp}</span>
                     </td>
@@ -337,10 +431,10 @@ export default function AdminProductsPage() {
       {/* Add / Edit Product Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative my-8">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 space-y-4 shadow-2xl relative my-8">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
               <h3 className="font-extrabold text-slate-900 text-base font-heading">
-                {editingId ? 'Edit Product' : 'Add New Product'}
+                {editingId ? 'Edit Product & Weight Variants' : 'Add New Product with Weight Variants'}
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -350,20 +444,20 @@ export default function AdminProductsPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4 text-xs font-semibold">
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">Product Name *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Moxfood Raw Pumpkin Seeds"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-pink-500 focus:outline-none"
-                />
-              </div>
-
+            <form onSubmit={handleSubmit} className="space-y-5 text-xs font-semibold">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Product Name *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Moxfood Raw Pumpkin Seeds"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-pink-500 focus:outline-none"
+                  />
+                </div>
+
                 <div>
                   <label className="block font-bold text-slate-700 mb-1">Category *</label>
                   <select
@@ -378,55 +472,93 @@ export default function AdminProductsPage() {
                     ))}
                   </select>
                 </div>
-
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Unit Size *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. 250 g, 500 g, 1 kg"
-                    value={formData.unit}
-                    onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-pink-500 focus:outline-none"
-                  />
-                </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Selling Price (₹) *</label>
-                  <input
-                    type="number"
-                    required
-                    placeholder="199"
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-pink-500 focus:outline-none"
-                  />
+              {/* Weight Variants Manager Section */}
+              <div className="bg-pink-50/50 p-4 rounded-2xl border border-pink-200 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-pink-900 font-extrabold font-heading">
+                    <Scale size={18} />
+                    <span>Manage Weight Variants & Prices (અલગ અલગ વજન અને ભાવ)</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAddVariantRow}
+                    className="bg-pink-600 hover:bg-pink-500 text-white font-extrabold text-[11px] px-3 py-1.5 rounded-lg flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    <Plus size={14} />
+                    <span>Add Weight Variant</span>
+                  </button>
                 </div>
 
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">MRP (₹) *</label>
-                  <input
-                    type="number"
-                    required
-                    placeholder="260"
-                    value={formData.mrp}
-                    onChange={(e) => setFormData({ ...formData, mrp: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-pink-500 focus:outline-none"
-                  />
-                </div>
+                <div className="space-y-2">
+                  {formData.variants.map((v, idx) => (
+                    <div
+                      key={idx}
+                      className="bg-white p-3 rounded-xl border border-slate-200 grid grid-cols-12 gap-2 items-center shadow-sm"
+                    >
+                      <div className="col-span-3">
+                        <label className="text-[10px] text-slate-500 block font-bold mb-0.5">Weight / Unit</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. 250 g, 500 g, 1 kg"
+                          value={v.unit}
+                          onChange={(e) => handleVariantChange(idx, 'unit', e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-mono focus:ring-2 focus:ring-pink-500"
+                        />
+                      </div>
 
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Stock Quantity *</label>
-                  <input
-                    type="number"
-                    required
-                    placeholder="50"
-                    value={formData.stock}
-                    onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-pink-500 focus:outline-none"
-                  />
+                      <div className="col-span-3">
+                        <label className="text-[10px] text-slate-500 block font-bold mb-0.5">Selling Price (₹)</label>
+                        <input
+                          type="number"
+                          required
+                          placeholder="Price"
+                          value={v.price}
+                          onChange={(e) => handleVariantChange(idx, 'price', e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-pink-500 font-extrabold"
+                        />
+                      </div>
+
+                      <div className="col-span-3">
+                        <label className="text-[10px] text-slate-500 block font-bold mb-0.5">MRP (₹)</label>
+                        <input
+                          type="number"
+                          required
+                          placeholder="MRP"
+                          value={v.mrp}
+                          onChange={(e) => handleVariantChange(idx, 'mrp', e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-pink-500"
+                        />
+                      </div>
+
+                      <div className="col-span-2">
+                        <label className="text-[10px] text-slate-500 block font-bold mb-0.5">Stock</label>
+                        <input
+                          type="number"
+                          required
+                          placeholder="Stock"
+                          value={v.stock}
+                          onChange={(e) => handleVariantChange(idx, 'stock', e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-pink-500"
+                        />
+                      </div>
+
+                      <div className="col-span-1 text-right pt-3">
+                        {formData.variants.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveVariantRow(idx)}
+                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                            title="Remove weight option"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
 

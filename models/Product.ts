@@ -1,5 +1,12 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
+export interface IProductVariant {
+  unit: string;
+  price: number;
+  mrp: number;
+  stock: number;
+}
+
 export interface IProduct extends Document {
   name: string;
   altNameGujarati?: string;
@@ -7,7 +14,8 @@ export interface IProduct extends Document {
   price: number;
   mrp: number;
   stock: number;
-  unit: string; // e.g. "1 kg", "500 g", "1 Litre", "1 Packet"
+  unit: string; // Default or Primary unit, e.g. "250 g"
+  variants?: IProductVariant[];
   images: string[];
   description?: string;
   isFeatured: boolean;
@@ -15,6 +23,16 @@ export interface IProduct extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
+
+const ProductVariantSchema = new Schema<IProductVariant>(
+  {
+    unit: { type: String, required: true, trim: true },
+    price: { type: Number, required: true, min: 0 },
+    mrp: { type: Number, required: true, min: 0 },
+    stock: { type: Number, required: true, default: 0, min: 0 },
+  },
+  { _id: false }
+);
 
 const ProductSchema: Schema<IProduct> = new Schema(
   {
@@ -25,6 +43,7 @@ const ProductSchema: Schema<IProduct> = new Schema(
     mrp: { type: Number, required: true, min: 0 },
     stock: { type: Number, required: true, default: 0, min: 0 },
     unit: { type: String, required: true, default: '1 kg' },
+    variants: { type: [ProductVariantSchema], default: [] },
     images: { type: [String], default: [] },
     description: { type: String, default: '' },
     isFeatured: { type: Boolean, default: false },

@@ -11,20 +11,39 @@ import {
   Truck,
   Tag,
   CheckCircle,
+  Scale,
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useLanguage } from '@/context/LanguageContext';
+
+interface ProductVariant {
+  unit: string;
+  price: number;
+  mrp: number;
+  stock: number;
+}
 
 export default function ProductDetailClient({ product }: { product: any }) {
   const { addToCart } = useCart();
   const { t, language } = useLanguage();
 
+  const hasVariants = Array.isArray(product.variants) && product.variants.length > 0;
+  const initialVariant = hasVariants ? product.variants[0] : null;
+
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(initialVariant);
   const [quantity, setQuantity] = useState(1);
   const [addedMessage, setAddedMessage] = useState(false);
 
+  const currentUnit = selectedVariant ? selectedVariant.unit : product.unit;
+  const currentPrice = selectedVariant ? selectedVariant.price : product.price;
+  const currentMrp = selectedVariant ? selectedVariant.mrp : product.mrp;
+  const currentStock = selectedVariant ? selectedVariant.stock : product.stock;
+
+  const cartId = product._id ? `${product._id}_${currentUnit}` : product._id;
+
   const discountPercent =
-    product.mrp > product.price
-      ? Math.round(((product.mrp - product.price) / product.mrp) * 100)
+    currentMrp > currentPrice
+      ? Math.round(((currentMrp - currentPrice) / currentMrp) * 100)
       : 0;
 
   const imageUrl =
@@ -33,9 +52,17 @@ export default function ProductDetailClient({ product }: { product: any }) {
       : 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80';
 
   const handleAddToCart = () => {
-    addToCart(product, quantity);
+    const itemToAdd = {
+      ...product,
+      cartId,
+      unit: currentUnit,
+      price: currentPrice,
+      mrp: currentMrp,
+      stock: currentStock,
+    };
+    addToCart(itemToAdd, quantity);
     setAddedMessage(true);
-    setTimeout(() => setAddedMessage(false), 2000);
+    setTimeout(() => setAddedMessage(false), 2500);
   };
 
   return (
@@ -77,12 +104,12 @@ export default function ProductDetailClient({ product }: { product: any }) {
               </span>
               <span
                 className={`text-xs font-bold px-3 py-1 rounded-full font-heading ${
-                  product.stock > 0
+                  currentStock > 0
                     ? 'bg-pink-100 text-pink-900'
                     : 'bg-red-100 text-red-700'
                 }`}
               >
-                {product.stock > 0 ? t('inStock') : t('outOfStock')}
+                {currentStock > 0 ? t('inStock') : t('outOfStock')}
               </span>
             </div>
 
@@ -96,12 +123,39 @@ export default function ProductDetailClient({ product }: { product: any }) {
               )}
             </div>
 
-            {/* Unit */}
-            <div className="text-xs font-bold text-slate-600">
-              {t('unitPackSize')}{' '}
-              <span className="text-blue-950 bg-blue-50 px-2.5 py-0.5 rounded font-mono border border-blue-100">
-                {product.unit}
-              </span>
+            {/* Weight Variant Selector Buttons */}
+            <div className="space-y-2">
+              <div className="text-xs font-bold text-slate-700 flex items-center gap-1.5 font-heading">
+                <Scale size={14} className="text-pink-600" />
+                <span>Select Weight / Pack Size (વજન પસંદ કરો):</span>
+              </div>
+
+              {hasVariants ? (
+                <div className="flex flex-wrap gap-2">
+                  {product.variants.map((v: ProductVariant, idx: number) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setSelectedVariant(v)}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex flex-col items-center cursor-pointer font-heading ${
+                        currentUnit === v.unit
+                          ? 'bg-pink-600 text-white shadow-lg ring-2 ring-pink-400'
+                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                      }`}
+                    >
+                      <span className="font-extrabold font-mono text-sm">{v.unit}</span>
+                      <span className="text-[11px] opacity-90">₹{v.price}</span>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-xs font-bold text-slate-600">
+                  {t('unitPackSize')}{' '}
+                  <span className="text-blue-950 bg-blue-50 px-2.5 py-0.5 rounded font-mono border border-blue-100">
+                    {currentUnit}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Pricing Card */}
@@ -109,18 +163,18 @@ export default function ProductDetailClient({ product }: { product: any }) {
               <div>
                 <div className="text-xs text-pink-900 font-semibold mb-0.5">{t('specialPrice')}</div>
                 <div className="text-3xl font-black text-slate-900 flex items-baseline gap-2 font-heading">
-                  <span>₹{product.price}</span>
-                  {product.mrp > product.price && (
+                  <span>₹{currentPrice}</span>
+                  {currentMrp > currentPrice && (
                     <span className="text-sm font-normal text-slate-400 line-through">
-                      ₹{product.mrp}
+                      ₹{currentMrp}
                     </span>
                   )}
                 </div>
               </div>
-              {product.mrp > product.price && (
+              {currentMrp > currentPrice && (
                 <div className="text-right text-xs text-pink-900 font-extrabold">
                   {t('yourSavings')} <br />
-                  <span className="text-base text-pink-600 font-heading">₹{product.mrp - product.price}</span>
+                  <span className="text-base text-pink-600 font-heading">₹{currentMrp - currentPrice}</span>
                 </div>
               )}
             </div>
@@ -138,7 +192,7 @@ export default function ProductDetailClient({ product }: { product: any }) {
 
           {/* Add to Cart Actions */}
           <div className="space-y-4 pt-4 border-t border-slate-200">
-            {product.stock > 0 ? (
+            {currentStock > 0 ? (
               <div className="flex flex-col sm:flex-row gap-4 items-center">
                 {/* Quantity Controls */}
                 <div className="flex items-center bg-slate-100 rounded-xl p-1 border border-slate-300 w-full sm:w-auto justify-center">
@@ -149,7 +203,7 @@ export default function ProductDetailClient({ product }: { product: any }) {
                   >
                     <Minus size={16} />
                   </button>
-                  <span className="w-12 text-center font-extrabold text-sm text-slate-900 font-heading">
+                  <span className="w-12 text-center font-extrabold text-sm text-slate-900 font-heading font-mono">
                     {quantity}
                   </span>
                   <button
@@ -168,7 +222,7 @@ export default function ProductDetailClient({ product }: { product: any }) {
                 >
                   <ShoppingBag size={20} />
                   <span>
-                    {t('addToCart')} ({quantity})
+                    {t('addToCart')} ({quantity}) - {currentUnit}
                   </span>
                 </button>
               </div>
@@ -183,7 +237,7 @@ export default function ProductDetailClient({ product }: { product: any }) {
               <div className="p-3 bg-blue-900 text-white rounded-xl text-xs font-extrabold flex items-center justify-between animate-fade-in shadow-md font-heading">
                 <span className="flex items-center gap-2">
                   <CheckCircle size={16} className="text-pink-400" />
-                  {t('addedSuccess')}
+                  {t('addedSuccess')} ({currentUnit})
                 </span>
                 <Link href="/checkout" className="underline text-pink-300 hover:text-white cursor-pointer font-heading">
                   {t('viewCart')}

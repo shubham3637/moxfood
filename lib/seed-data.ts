@@ -74,7 +74,7 @@ export const seedCategories = [
 ];
 
 export const seedProducts = [
-  // Moxfood Healthy Seeds Range
+  // Moxfood Healthy Seeds Range with Multiple Weight Options
   {
     name: 'Moxfood Raw Pumpkin Seeds (AAA Grade)',
     altNameGujarati: 'મોક્સફૂડ દેશી પમ્પકિન સીડ્સ (કોળા ના બી)',
@@ -83,6 +83,11 @@ export const seedProducts = [
     mrp: 260,
     stock: 100,
     unit: '250 g',
+    variants: [
+      { unit: '250 g', price: 199, mrp: 260, stock: 100 },
+      { unit: '500 g', price: 380, mrp: 500, stock: 60 },
+      { unit: '1 kg', price: 720, mrp: 950, stock: 40 },
+    ],
     images: [
       'https://images.unsplash.com/photo-1509358271058-acd02cc93858?auto=format&fit=crop&w=600&q=80',
     ],
@@ -98,6 +103,11 @@ export const seedProducts = [
     mrp: 230,
     stock: 90,
     unit: '250 g',
+    variants: [
+      { unit: '250 g', price: 180, mrp: 230, stock: 90 },
+      { unit: '500 g', price: 340, mrp: 440, stock: 50 },
+      { unit: '1 kg', price: 650, mrp: 850, stock: 30 },
+    ],
     images: [
       'https://images.unsplash.com/photo-1514944288352-1ee824ae44a7?auto=format&fit=crop&w=600&q=80',
     ],
@@ -113,6 +123,11 @@ export const seedProducts = [
     mrp: 195,
     stock: 85,
     unit: '250 g',
+    variants: [
+      { unit: '250 g', price: 150, mrp: 195, stock: 85 },
+      { unit: '500 g', price: 280, mrp: 370, stock: 45 },
+      { unit: '1 kg', price: 520, mrp: 700, stock: 25 },
+    ],
     images: [
       'https://images.unsplash.com/photo-1509358271058-acd02cc93858?auto=format&fit=crop&w=600&q=80',
     ],
@@ -128,6 +143,11 @@ export const seedProducts = [
     mrp: 160,
     stock: 110,
     unit: '250 g',
+    variants: [
+      { unit: '250 g', price: 120, mrp: 160, stock: 110 },
+      { unit: '500 g', price: 220, mrp: 300, stock: 70 },
+      { unit: '1 kg', price: 410, mrp: 580, stock: 35 },
+    ],
     images: [
       'https://images.unsplash.com/photo-1514944288352-1ee824ae44a7?auto=format&fit=crop&w=600&q=80',
     ],
@@ -143,6 +163,11 @@ export const seedProducts = [
     mrp: 320,
     stock: 75,
     unit: '250 g',
+    variants: [
+      { unit: '250 g', price: 240, mrp: 320, stock: 75 },
+      { unit: '500 g', price: 450, mrp: 600, stock: 40 },
+      { unit: '1 kg', price: 860, mrp: 1150, stock: 20 },
+    ],
     images: [
       'https://images.unsplash.com/photo-1509358271058-acd02cc93858?auto=format&fit=crop&w=600&q=80',
     ],
@@ -158,6 +183,11 @@ export const seedProducts = [
     mrp: 210,
     stock: 65,
     unit: '250 g',
+    variants: [
+      { unit: '250 g', price: 165, mrp: 210, stock: 65 },
+      { unit: '500 g', price: 310, mrp: 400, stock: 35 },
+      { unit: '1 kg', price: 590, mrp: 760, stock: 20 },
+    ],
     images: [
       'https://images.unsplash.com/photo-1509358271058-acd02cc93858?auto=format&fit=crop&w=600&q=80',
     ],
@@ -175,6 +205,10 @@ export const seedProducts = [
     mrp: 410,
     stock: 45,
     unit: '5 kg',
+    variants: [
+      { unit: '5 kg', price: 365, mrp: 410, stock: 45 },
+      { unit: '10 kg', price: 710, mrp: 800, stock: 30 },
+    ],
     images: [
       'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=600&q=80',
     ],
@@ -190,6 +224,10 @@ export const seedProducts = [
     mrp: 160,
     stock: 60,
     unit: '1 Litre',
+    variants: [
+      { unit: '1 Litre', price: 135, mrp: 160, stock: 60 },
+      { unit: '5 Litre Pouch', price: 650, mrp: 780, stock: 25 },
+    ],
     images: [
       'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=600&q=80',
     ],
@@ -205,6 +243,10 @@ export const seedProducts = [
     mrp: 185,
     stock: 50,
     unit: '1 kg',
+    variants: [
+      { unit: '1 kg', price: 160, mrp: 185, stock: 50 },
+      { unit: '5 kg Pack', price: 775, mrp: 900, stock: 25 },
+    ],
     images: [
       'https://images.unsplash.com/photo-1515543237350-b3eea1ec8082?auto=format&fit=crop&w=600&q=80',
     ],
@@ -220,6 +262,11 @@ export const seedProducts = [
     mrp: 290,
     stock: 35,
     unit: '500 g',
+    variants: [
+      { unit: '250 g', price: 135, mrp: 150, stock: 50 },
+      { unit: '500 g', price: 260, mrp: 290, stock: 35 },
+      { unit: '1 kg', price: 500, mrp: 560, stock: 20 },
+    ],
     images: [
       'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=600&q=80',
     ],

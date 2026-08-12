@@ -66,7 +66,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addToCart = (product: any, quantityToAdd: number = 1) => {
     setItems((prevItems) => {
-      const id = product._id || product.id || product.productId;
+      // Support weight variant unique ID: product.cartId or product._id + unit
+      const id =
+        product.cartId ||
+        (product._id ? `${product._id}_${product.unit || 'default'}` : (product.id || product.productId));
+
       const existingIndex = prevItems.findIndex((item) => item.productId === id);
 
       if (existingIndex > -1) {
@@ -79,8 +83,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           name: product.name,
           altNameGujarati: product.altNameGujarati || '',
           unit: product.unit || '1 kg',
-          price: product.price,
-          mrp: product.mrp || product.price,
+          price: Number(product.price),
+          mrp: Number(product.mrp || product.price),
           quantity: quantityToAdd,
           image: Array.isArray(product.images) && product.images.length > 0
             ? product.images[0]
