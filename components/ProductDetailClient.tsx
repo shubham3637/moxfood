@@ -12,6 +12,8 @@ import {
   Tag,
   CheckCircle,
   Scale,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -26,6 +28,15 @@ interface ProductVariant {
 export default function ProductDetailClient({ product }: { product: any }) {
   const { addToCart } = useCart();
   const { t, language } = useLanguage();
+
+  const imageList: string[] =
+    Array.isArray(product.images) && product.images.length > 0
+      ? product.images
+      : product.image
+      ? [product.image]
+      : ['https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80'];
+
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   const hasVariants = Array.isArray(product.variants) && product.variants.length > 0;
   const initialVariant = hasVariants ? product.variants[0] : null;
@@ -46,10 +57,13 @@ export default function ProductDetailClient({ product }: { product: any }) {
       ? Math.round(((currentMrp - currentPrice) / currentMrp) * 100)
       : 0;
 
-  const imageUrl =
-    Array.isArray(product.images) && product.images.length > 0
-      ? product.images[0]
-      : 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80';
+  const handlePrevImage = () => {
+    setActiveImageIndex((prev) => (prev === 0 ? imageList.length - 1 : prev - 1));
+  };
+
+  const handleNextImage = () => {
+    setActiveImageIndex((prev) => (prev === imageList.length - 1 ? 0 : prev + 1));
+  };
 
   const handleAddToCart = () => {
     const itemToAdd = {
@@ -78,20 +92,67 @@ export default function ProductDetailClient({ product }: { product: any }) {
 
       {/* Main Details Grid */}
       <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-lg grid grid-cols-1 md:grid-cols-12 gap-8 p-6 md:p-8">
-        {/* Left: Image Container */}
-        <div className="md:col-span-6 flex flex-col items-center justify-center bg-blue-50/50 rounded-2xl p-6 relative border border-blue-100">
-          {discountPercent > 0 && (
-            <div className="absolute top-4 left-4 bg-pink-600 text-white text-xs font-extrabold px-3 py-1 rounded-lg flex items-center gap-1 shadow font-heading">
-              <Tag size={12} />
-              <span>{discountPercent}% DISCOUNT</span>
+        {/* Left: Image Container & Gallery */}
+        <div className="md:col-span-6 flex flex-col space-y-4">
+          {/* Main Active Image View */}
+          <div className="flex flex-col items-center justify-center bg-blue-50/50 rounded-3xl p-6 relative border border-blue-100 min-h-[320px] sm:min-h-[400px]">
+            {discountPercent > 0 && (
+              <div className="absolute top-4 left-4 bg-pink-600 text-white text-xs font-extrabold px-3 py-1 rounded-lg flex items-center gap-1 shadow font-heading z-10">
+                <Tag size={12} />
+                <span>{discountPercent}% DISCOUNT</span>
+              </div>
+            )}
+
+            <img
+              src={imageList[activeImageIndex]}
+              alt={`${product.name} photo ${activeImageIndex + 1}`}
+              className="max-h-96 w-full object-contain hover:scale-105 transition-transform duration-300"
+            />
+
+            {/* Navigation Arrows for Multiple Photos */}
+            {imageList.length > 1 && (
+              <>
+                <button
+                  onClick={handlePrevImage}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-slate-800 p-2 rounded-full shadow-lg border border-slate-200 transition-all cursor-pointer"
+                  title="Previous Photo"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+
+                <button
+                  onClick={handleNextImage}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-slate-800 p-2 rounded-full shadow-lg border border-slate-200 transition-all cursor-pointer"
+                  title="Next Photo"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Interactive Multiple Photos Thumbnail Strip */}
+          {imageList.length > 1 && (
+            <div className="flex items-center gap-3 overflow-x-auto pb-2 pt-1 px-1">
+              {imageList.map((url, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setActiveImageIndex(idx)}
+                  className={`w-16 h-16 rounded-2xl border-2 p-1 bg-white shrink-0 transition-all cursor-pointer overflow-hidden ${
+                    activeImageIndex === idx
+                      ? 'border-pink-600 ring-2 ring-pink-300 shadow-md scale-105'
+                      : 'border-slate-200 opacity-70 hover:opacity-100 hover:border-slate-300'
+                  }`}
+                >
+                  <img
+                    src={url}
+                    alt={`Thumbnail ${idx + 1}`}
+                    className="w-full h-full object-contain rounded-xl"
+                  />
+                </button>
+              ))}
             </div>
           )}
-
-          <img
-            src={imageUrl}
-            alt={product.name}
-            className="max-h-96 w-full object-contain hover:scale-105 transition-transform duration-300"
-          />
         </div>
 
         {/* Right: Info & Actions */}

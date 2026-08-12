@@ -10,6 +10,8 @@ import {
   Upload,
   RefreshCw,
   Scale,
+  Image as ImageIcon,
+  Images,
 } from 'lucide-react';
 import { compressImageFile } from '@/lib/imageUtils';
 import { useToast } from '@/context/ToastContext';
@@ -32,6 +34,7 @@ export default function AdminProductsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [manualUrlInput, setManualUrlInput] = useState('');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -41,7 +44,7 @@ export default function AdminProductsPage() {
     mrp: '',
     stock: '',
     unit: '',
-    imageUrl: '',
+    images: [] as string[],
     description: '',
     isFeatured: false,
     isTrending: false,
@@ -76,6 +79,7 @@ export default function AdminProductsPage() {
 
   const handleOpenAddModal = () => {
     setEditingId(null);
+    setManualUrlInput('');
     setFormData({
       name: '',
       altNameGujarati: '',
@@ -84,7 +88,7 @@ export default function AdminProductsPage() {
       mrp: '',
       stock: '',
       unit: '',
-      imageUrl: '',
+      images: [],
       description: '',
       isFeatured: false,
       isTrending: false,
@@ -97,6 +101,7 @@ export default function AdminProductsPage() {
 
   const handleOpenEditModal = (product: any) => {
     setEditingId(product._id);
+    setManualUrlInput('');
 
     const existingVariants: ProductVariant[] =
       Array.isArray(product.variants) && product.variants.length > 0
@@ -115,6 +120,13 @@ export default function AdminProductsPage() {
             },
           ];
 
+    const existingImages: string[] =
+      Array.isArray(product.images) && product.images.length > 0
+        ? product.images
+        : product.image
+        ? [product.image]
+        : [];
+
     setFormData({
       name: product.name || '',
       altNameGujarati: product.altNameGujarati || '',
@@ -123,7 +135,7 @@ export default function AdminProductsPage() {
       mrp: String(product.mrp ?? ''),
       stock: String(product.stock ?? ''),
       unit: product.unit || '',
-      imageUrl: Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : '',
+      images: existingImages,
       description: product.description || '',
       isFeatured: Boolean(product.isFeatured),
       isTrending: Boolean(product.isTrending),
@@ -154,41 +166,68 @@ export default function AdminProductsPage() {
     });
   };
 
-  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  // Upload Multiple Images simultaneously
+  const handleMultipleImagesUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
     setUploadingImage(true);
+    const uploadedUrls: string[] = [];
+
     try {
-      const compressedBase64 = await compressImageFile(file);
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        // 1. Client-side compression
+        const compressedBase64 = await compressImageFile(file);
 
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: compressedBase64 }),
-      });
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: compressedBase64 }),
+        });
 
-      if (!res.ok) {
-        if (res.status === 413) {
-          throw new Error('Image size too large. Please select a smaller photo.');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.url) {
+            uploadedUrls.push(data.url);
+          }
         }
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || `Upload failed with status ${res.status}`);
       }
 
-      const data = await res.json();
-      if (data.success && data.url) {
-        setFormData((prev) => ({ ...prev, imageUrl: data.url }));
-        showSuccess('Product image uploaded successfully!');
+      if (uploadedUrls.length > 0) {
+        setFormData((prev) => ({
+          ...prev,
+          images: [...prev.images, ...uploadedUrls],
+        }));
+        showSuccess(`${uploadedUrls.length} photo(s) uploaded successfully!`);
       } else {
-        throw new Error(data.error || 'Failed to process uploaded image.');
+        showError('Failed to upload selected photos.');
       }
     } catch (err: any) {
-      console.error('Failed to upload image:', err);
-      showError(err.message || 'Failed to upload image. Please try again.');
+      console.error('Failed to upload image gallery:', err);
+      showError(err.message || 'Failed to upload photos.');
     } finally {
       setUploadingImage(false);
+      // Reset file input
+      e.target.value = '';
     }
+  };
+
+  const handleAddManualUrl = () => {
+    if (!manualUrlInput.trim()) return;
+    setFormData((prev) => ({
+      ...prev,
+      images: [...prev.images, manualUrlInput.trim()],
+    }));
+    setManualUrlInput('');
+    showSuccess('Photo URL added!');
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index),
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -222,7 +261,7 @@ export default function AdminProductsPage() {
       stock: primaryStock,
       unit: primaryUnit,
       variants: validVariants,
-      images: formData.imageUrl ? [formData.imageUrl] : [],
+      images: formData.images,
       description: formData.description.trim(),
       isFeatured: formData.isFeatured,
       isTrending: formData.isTrending,
@@ -288,7 +327,7 @@ export default function AdminProductsPage() {
           <h1 className="text-2xl font-black text-slate-900 tracking-tight font-heading">
             Products Management
           </h1>
-          <p className="text-xs text-slate-500 font-medium">Manage Moxfood healthy seeds & multiple weight/size variants</p>
+          <p className="text-xs text-slate-500 font-medium">Manage Moxfood healthy seeds, multiple weight variants & photos gallery</p>
         </div>
 
         <button
@@ -338,7 +377,7 @@ export default function AdminProductsPage() {
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="border-b border-slate-200 text-slate-500 font-bold bg-slate-50 font-heading">
-                  <th className="py-3.5 px-4">Image</th>
+                  <th className="py-3.5 px-4">Photos</th>
                   <th className="py-3.5 px-4">Product Name</th>
                   <th className="py-3.5 px-4">Category</th>
                   <th className="py-3.5 px-4">Available Weight Variants</th>
@@ -348,76 +387,90 @@ export default function AdminProductsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filteredProducts.map((prod) => (
-                  <tr key={prod._id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3 px-4">
-                      <img
-                        src={
-                          Array.isArray(prod.images) && prod.images.length > 0
-                            ? prod.images[0]
-                            : 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=100&q=80'
-                        }
-                        alt={prod.name}
-                        className="w-10 h-10 object-contain rounded-lg bg-slate-50 p-1 border border-slate-200"
-                      />
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="font-bold text-slate-800 font-heading">{prod.name}</div>
-                    </td>
-                    <td className="py-3 px-4 font-semibold text-slate-600">{prod.category}</td>
-                    
-                    {/* Weight Variants list badge */}
-                    <td className="py-3 px-4">
-                      {Array.isArray(prod.variants) && prod.variants.length > 0 ? (
-                        <div className="flex flex-wrap gap-1">
-                          {prod.variants.map((v: any, i: number) => (
-                            <span
-                              key={i}
-                              className="bg-blue-50 text-blue-900 border border-blue-200 text-[10px] font-bold px-2 py-0.5 rounded-md font-mono"
-                            >
-                              {v.unit}: ₹{v.price}
-                            </span>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="font-mono text-slate-700 bg-slate-100 px-2 py-0.5 rounded text-[11px]">
-                          {prod.unit}
-                        </span>
-                      )}
-                    </td>
+                {filteredProducts.map((prod) => {
+                  const imgList = Array.isArray(prod.images) && prod.images.length > 0 ? prod.images : [];
+                  const mainImg = imgList.length > 0 ? imgList[0] : 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=100&q=80';
 
-                    <td className="py-3 px-4 font-extrabold text-slate-900 font-heading">
-                      ₹{prod.price} <span className="text-[10px] text-slate-400 line-through">₹{prod.mrp}</span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span
-                        className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold ${
-                          prod.stock <= 5
-                            ? 'bg-amber-100 text-amber-800'
-                            : 'bg-blue-100 text-blue-900'
-                        }`}
-                      >
-                        {prod.stock} left
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-right space-x-2">
-                      <button
-                        onClick={() => handleOpenEditModal(prod)}
-                        className="p-1.5 text-slate-600 hover:text-blue-900 bg-slate-100 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-                        title="Edit product"
-                      >
-                        <Edit2 size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(prod._id, prod.name)}
-                        className="p-1.5 text-slate-600 hover:text-red-700 bg-slate-100 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                        title="Delete product"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                  return (
+                    <tr key={prod._id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-3 px-4">
+                        <div className="relative inline-block">
+                          <img
+                            src={mainImg}
+                            alt={prod.name}
+                            className="w-11 h-11 object-contain rounded-xl bg-slate-50 p-1 border border-slate-200"
+                          />
+                          {imgList.length > 1 && (
+                            <span className="absolute -top-1.5 -right-1.5 bg-pink-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full shadow border border-white font-mono">
+                              +{imgList.length - 1}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="font-bold text-slate-800 font-heading">{prod.name}</div>
+                        {imgList.length > 1 && (
+                          <div className="text-[10px] text-slate-400 font-semibold flex items-center gap-1 mt-0.5">
+                            <Images size={11} className="text-pink-600" />
+                            <span>{imgList.length} photos gallery</span>
+                          </div>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 font-semibold text-slate-600">{prod.category}</td>
+                      
+                      {/* Weight Variants list badge */}
+                      <td className="py-3 px-4">
+                        {Array.isArray(prod.variants) && prod.variants.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {prod.variants.map((v: any, i: number) => (
+                              <span
+                                key={i}
+                                className="bg-blue-50 text-blue-900 border border-blue-200 text-[10px] font-bold px-2 py-0.5 rounded-md font-mono"
+                              >
+                                {v.unit}: ₹{v.price}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="font-mono text-slate-700 bg-slate-100 px-2 py-0.5 rounded text-[11px]">
+                            {prod.unit}
+                          </span>
+                        )}
+                      </td>
+
+                      <td className="py-3 px-4 font-extrabold text-slate-900 font-heading">
+                        ₹{prod.price} <span className="text-[10px] text-slate-400 line-through">₹{prod.mrp}</span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span
+                          className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold ${
+                            prod.stock <= 5
+                              ? 'bg-amber-100 text-amber-800'
+                              : 'bg-blue-100 text-blue-900'
+                          }`}
+                        >
+                          {prod.stock} left
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-right space-x-2">
+                        <button
+                          onClick={() => handleOpenEditModal(prod)}
+                          className="p-1.5 text-slate-600 hover:text-blue-900 bg-slate-100 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                          title="Edit product"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(prod._id, prod.name)}
+                          className="p-1.5 text-slate-600 hover:text-red-700 bg-slate-100 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                          title="Delete product"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -430,7 +483,7 @@ export default function AdminProductsPage() {
           <div className="bg-white rounded-3xl max-w-2xl w-full p-6 space-y-4 shadow-2xl relative my-8">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
               <h3 className="font-extrabold text-slate-900 text-base font-heading">
-                {editingId ? 'Edit Product & Weight Variants' : 'Add New Product with Weight Variants'}
+                {editingId ? 'Edit Product, Photos & Weight Variants' : 'Add New Product with Multiple Photos & Weight Variants'}
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -468,6 +521,81 @@ export default function AdminProductsPage() {
                     ))}
                   </select>
                 </div>
+              </div>
+
+              {/* Multiple Photos Upload Gallery Manager */}
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <label className="font-extrabold text-slate-900 text-xs flex items-center gap-1.5 font-heading">
+                    <Images size={18} className="text-pink-600" />
+                    <span>Product Photo Gallery (એક કરતા વધુ ફોટો અપલોડ કરો)</span>
+                  </label>
+
+                  <label className="bg-pink-600 hover:bg-pink-500 text-white font-extrabold text-[11px] px-3.5 py-2 rounded-xl cursor-pointer flex items-center gap-1.5 shrink-0 shadow transition-colors font-heading self-start sm:self-auto">
+                    <Upload size={14} />
+                    <span>{uploadingImage ? 'Uploading...' : '+ Upload Multiple Photos'}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleMultipleImagesUpload}
+                      className="hidden cursor-pointer"
+                    />
+                  </label>
+                </div>
+
+                {/* Manual URL Add Bar */}
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    placeholder="Or paste image URL here and click Add..."
+                    value={manualUrlInput}
+                    onChange={(e) => setManualUrlInput(e.target.value)}
+                    className="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs focus:ring-2 focus:ring-pink-500 focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddManualUrl}
+                    className="bg-blue-900 hover:bg-blue-800 text-white font-extrabold px-3 py-1.5 rounded-xl text-xs cursor-pointer transition-colors shrink-0"
+                  >
+                    + Add URL
+                  </button>
+                </div>
+
+                {/* Uploaded Thumbnails Grid */}
+                {formData.images.length > 0 ? (
+                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-2.5 pt-1">
+                    {formData.images.map((url, idx) => (
+                      <div
+                        key={idx}
+                        className="relative group bg-white p-1 rounded-xl border border-slate-200 shadow-sm aspect-square flex items-center justify-center"
+                      >
+                        <img
+                          src={url}
+                          alt={`Product photo ${idx + 1}`}
+                          className="w-full h-full object-contain rounded-lg"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage(idx)}
+                          className="absolute -top-1.5 -right-1.5 bg-red-600 text-white p-1 rounded-full shadow hover:bg-red-700 transition-colors cursor-pointer"
+                          title="Remove photo"
+                        >
+                          <X size={12} />
+                        </button>
+                        {idx === 0 && (
+                          <span className="absolute bottom-1 left-1 bg-pink-600 text-white text-[9px] font-black px-1 rounded">
+                            Main
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-4 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 text-xs">
+                    No photos uploaded yet. Select multiple photos to build product gallery.
+                  </div>
+                )}
               </div>
 
               {/* Weight Variants Manager Section */}
@@ -556,42 +684,6 @@ export default function AdminProductsPage() {
                     </div>
                   ))}
                 </div>
-              </div>
-
-              {/* Upload Image Control */}
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">
-                  Product Image (Auto-Compressed Upload)
-                </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    placeholder="Image URL or select image file..."
-                    value={formData.imageUrl}
-                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                    className="flex-1 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-pink-500 focus:outline-none"
-                  />
-                  <label className="bg-pink-600 hover:bg-pink-500 text-white font-extrabold px-3 py-2 rounded-xl cursor-pointer flex items-center gap-1 shrink-0 font-heading">
-                    <Upload size={14} />
-                    <span>{uploadingImage ? 'Compressing...' : 'Upload Image'}</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageFileChange}
-                      className="hidden cursor-pointer"
-                    />
-                  </label>
-                </div>
-                {formData.imageUrl && (
-                  <div className="mt-2 flex items-center gap-2">
-                    <img
-                      src={formData.imageUrl}
-                      alt="Preview"
-                      className="w-12 h-12 object-contain rounded border border-slate-200 bg-slate-50"
-                    />
-                    <span className="text-[11px] text-emerald-600 font-bold">Image Compressed & Uploaded</span>
-                  </div>
-                )}
               </div>
 
               <div>
