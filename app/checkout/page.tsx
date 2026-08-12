@@ -16,11 +16,24 @@ import {
   Minus,
   Trash2,
   Lock,
+  Scale,
+  CheckCircle2,
+  AlertCircle,
+  Truck,
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { useToast } from '@/context/ToastContext';
 import { RAZORPAY_KEY_ID } from '@/lib/constants';
+
+interface PincodeStatus {
+  loading: boolean;
+  verified: boolean;
+  isGujarat: boolean;
+  stateName: string;
+  district: string;
+  error: string;
+}
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -28,8 +41,8 @@ export default function CheckoutPage() {
   const {
     items,
     subtotal,
-    deliveryCharge,
-    grandTotal,
+    totalWeightGrams,
+    billableKg,
     updateQuantity,
     removeFromCart,
     clearCart,
@@ -43,6 +56,15 @@ export default function CheckoutPage() {
     pincode: '',
     landmark: '',
     notes: '',
+  });
+
+  const [pincodeStatus, setPincodeStatus] = useState<PincodeStatus>({
+    loading: false,
+    verified: false,
+    isGujarat: true, // Default estimate to Gujarat rate (₹40/kg)
+    stateName: '',
+    district: '',
+    error: '',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -60,6 +82,76 @@ export default function CheckoutPage() {
       }
     };
   }, []);
+
+  // Postal Pincode API Check Function
+  const checkPincodeState = async (pincode: string) => {
+    if (!/^\d{6}$/.test(pincode)) {
+      setPincodeStatus({
+        loading: false,
+        verified: false,
+        isGujarat: true,
+        stateName: '',
+        district: '',
+        error: '',
+      });
+      return;
+    }
+
+    setPincodeStatus((prev) => ({ ...prev, loading: true, error: '' }));
+
+    try {
+      const response = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
+      const data = await response.json();
+
+      if (data && data[0] && data[0].Status === 'Success') {
+        const postOfficeList = data[0].PostOffice || [];
+        const state = postOfficeList[0]?.State || '';
+        const district = postOfficeList[0]?.District || '';
+        const isGujarat = state.toLowerCase().trim() === 'gujarat';
+
+        setPincodeStatus({
+          loading: false,
+          verified: true,
+          isGujarat,
+          stateName: state,
+          district,
+          error: '',
+        });
+
+        showSuccess(
+          isGujarat
+            ? `Pincode verified: Gujarat (Delivery: ₹40 / kg)`
+            : `Pincode verified: ${state} (Out of Gujarat - Delivery: ₹70 / kg)`
+        );
+      } else {
+        setPincodeStatus({
+          loading: false,
+          verified: false,
+          isGujarat: true,
+          stateName: '',
+          district: '',
+          error: 'Invalid 6-digit Pincode. Please check your area pincode.',
+        });
+      }
+    } catch (error: any) {
+      console.error('Error fetching pincode data:', error);
+      setPincodeStatus({
+        loading: false,
+        verified: false,
+        isGujarat: true,
+        stateName: '',
+        district: '',
+        error: 'Failed to verify pincode automatically. Base shipping rate applied.',
+      });
+    }
+  };
+
+  // Trigger Pincode API check on typing 6 digits
+  useEffect(() => {
+    if (formData.pincode.trim().length === 6) {
+      checkPincodeState(formData.pincode.trim());
+    }
+  }, [formData.pincode]);
 
   if (items.length === 0) {
     return (
@@ -79,6 +171,11 @@ export default function CheckoutPage() {
       </div>
     );
   }
+
+  // Calculate dynamic weight & state-based delivery charge
+  const ratePerKg = pincodeStatus.verified ? (pincodeStatus.isGujarat ? 40 : 70) : 40; // ₹40/kg for Gujarat, ₹70/kg for Out of Gujarat
+  const deliveryCharge = billableKg * ratePerKg;
+  const payableTotal = subtotal + deliveryCharge;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -121,7 +218,7 @@ export default function CheckoutPage() {
       const orderRes = await fetch('/api/razorpay/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: grandTotal }),
+        body: JSON.stringify({ amount: payableTotal }),
       });
 
       const orderData = await orderRes.json();
@@ -162,6 +259,8 @@ export default function CheckoutPage() {
                   address: formData.address.trim(),
                   pincode: formData.pincode.trim(),
                   landmark: formData.landmark.trim(),
+                  state: pincodeStatus.stateName || (pincodeStatus.isGujarat ? 'Gujarat' : 'Out of Gujarat'),
+                  district: pincodeStatus.district || '',
                 },
                 items: items.map((item) => ({
                   productId: item.productId,
@@ -172,6 +271,12 @@ export default function CheckoutPage() {
                   quantity: item.quantity,
                   image: item.image,
                 })),
+                weightSummary: {
+                  totalWeightGrams,
+                  billableKg,
+                  ratePerKg,
+                  shippingFee: deliveryCharge,
+                },
                 notes: formData.notes.trim(),
               }),
             });
@@ -319,18 +424,89 @@ export default function CheckoutPage() {
             ))}
           </div>
 
-          <div className="space-y-2 text-xs pt-2 font-semibold border-t border-slate-100">
+          {/* Weight & State Shipping Fee Calculation Breakdown */}
+          <div className="space-y-2.5 text-xs pt-3 font-semibold border-t border-slate-100">
             <div className="flex justify-between text-slate-600">
               <span>{t('subtotal')}</span>
               <span className="font-bold text-slate-900 font-heading">₹{subtotal}</span>
             </div>
+
+            {/* Total Weight Indicator */}
             <div className="flex justify-between text-slate-600">
-              <span>{t('deliveryCharge')}</span>
-              <span className="font-bold text-pink-600 font-heading">₹{deliveryCharge}</span>
+              <span className="flex items-center gap-1">
+                <Scale size={14} className="text-pink-600" />
+                <span>
+                  {language === 'gu' ? 'કુલ વજન (Total Weight):' : 'Total Order Weight:'}
+                </span>
+              </span>
+              <span className="font-mono text-slate-800 font-bold">
+                {totalWeightGrams < 1000 ? `${totalWeightGrams} g` : `${(totalWeightGrams / 1000).toFixed(1)} kg`}{' '}
+                <span className="text-[10px] text-pink-600 font-sans font-bold bg-pink-50 px-1.5 py-0.5 rounded border border-pink-100">
+                  (Charge: {billableKg} kg)
+                </span>
+              </span>
             </div>
+
+            {/* Delivery Charge Row with State Rate Badge */}
+            <div className="flex justify-between items-center text-slate-600">
+              <div className="flex items-center gap-1">
+                <Truck size={14} className="text-blue-900" />
+                <span>Shipping Fee:</span>
+                <span className="text-[11px] text-slate-500 font-normal">
+                  ({billableKg} kg × ₹{ratePerKg})
+                </span>
+              </div>
+              <span className="font-bold text-pink-600 font-heading text-sm">₹{deliveryCharge}</span>
+            </div>
+
+            {/* Pincode & State Location Banner */}
+            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200 text-[11px] space-y-1">
+              {pincodeStatus.loading ? (
+                <div className="flex items-center gap-2 text-slate-600 font-bold">
+                  <RefreshCw size={14} className="animate-spin text-pink-600" />
+                  <span>Checking Postal Pincode & State...</span>
+                </div>
+              ) : pincodeStatus.verified ? (
+                <div className="flex items-center justify-between text-emerald-800 font-extrabold font-heading">
+                  <span className="flex items-center gap-1.5">
+                    <CheckCircle2 size={16} className="text-emerald-600" />
+                    <span>
+                      {pincodeStatus.isGujarat
+                        ? `📍 Gujarat (${pincodeStatus.district || 'State'})`
+                        : `📍 ${pincodeStatus.stateName} (Out of Gujarat)`}
+                    </span>
+                  </span>
+                  <span className="bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded text-[10px] font-mono border border-emerald-300">
+                    {pincodeStatus.isGujarat ? 'Rate: ₹40 / kg' : 'Rate: ₹70 / kg'}
+                  </span>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between text-slate-600 font-bold">
+                  <span className="flex items-center gap-1.5">
+                    <MapPin size={14} className="text-pink-600" />
+                    <span>
+                      {language === 'gu'
+                        ? 'ચોક્કસ શિપિંગ ચાર્જ માટે ૬-અંકનો પિનકોડ દાખલ કરો'
+                        : 'Enter 6-digit Area Pincode below to calculate exact shipping rate'}
+                    </span>
+                  </span>
+                  <span className="text-[10px] text-pink-600 font-bold bg-pink-50 px-2 py-0.5 rounded border border-pink-100">
+                    Guj: ₹40/kg | Other: ₹70/kg
+                  </span>
+                </div>
+              )}
+
+              {pincodeStatus.error && (
+                <div className="flex items-center gap-1.5 text-red-600 font-bold pt-0.5">
+                  <AlertCircle size={14} />
+                  <span>{pincodeStatus.error}</span>
+                </div>
+              )}
+            </div>
+
             <div className="flex justify-between text-base sm:text-lg font-black text-slate-900 pt-3 border-t border-slate-200 font-heading">
               <span>{t('payableTotal')}</span>
-              <span className="text-blue-900 font-heading">₹{grandTotal}</span>
+              <span className="text-blue-900 font-heading">₹{payableTotal}</span>
             </div>
           </div>
         </div>
@@ -395,7 +571,7 @@ export default function CheckoutPage() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Compulsory Pincode Field */}
+                {/* Compulsory Pincode Field with Live API Verification */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
                     <span>{language === 'gu' ? '૬-અંકનો પિનકોડ *' : 'Area Pincode (6-digit) *'}</span>
@@ -489,8 +665,8 @@ export default function CheckoutPage() {
                   <CreditCard size={20} />
                   <span>
                     {language === 'gu'
-                      ? `Razorpay વડે ₹${grandTotal} ચૂકવો`
-                      : `Pay ₹${grandTotal} via Razorpay`}
+                      ? `Razorpay વડે ₹${payableTotal} ચૂકવો`
+                      : `Pay ₹${payableTotal} via Razorpay`}
                   </span>
                 </>
               )}

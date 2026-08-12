@@ -27,12 +27,33 @@ interface CartContextType {
   deliveryCharge: number;
   grandTotal: number;
   freeDeliveryThreshold: number;
+  totalWeightGrams: number;
+  billableKg: number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const CART_STORAGE_KEY = 'moxfood_cart_v1';
-const STANDARD_DELIVERY_CHARGE = 30;
+
+// Helper to parse unit string into weight in grams
+export function parseUnitWeightGrams(unitStr: string): number {
+  if (!unitStr) return 1000;
+  const str = unitStr.toLowerCase().trim();
+
+  // Match e.g. "250 g", "500g", "250 gram"
+  const gramMatch = str.match(/(\d+(?:\.\d+)?)\s*(?:g|gm|gram|grams)\b/);
+  if (gramMatch) {
+    return parseFloat(gramMatch[1]);
+  }
+
+  // Match e.g. "1 kg", "5.5kg", "5 litre"
+  const kgMatch = str.match(/(\d+(?:\.\d+)?)\s*(?:kg|kilo|litre|l)\b/);
+  if (kgMatch) {
+    return parseFloat(kgMatch[1]) * 1000;
+  }
+
+  return 1000; // default 1 kg
+}
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([]);
@@ -119,7 +140,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const totalItemsCount = items.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const deliveryCharge = items.length === 0 ? 0 : STANDARD_DELIVERY_CHARGE;
+
+  // Total weight calculation
+  const totalWeightGrams = items.reduce((sum, item) => {
+    const singleGrams = parseUnitWeightGrams(item.unit);
+    return sum + singleGrams * item.quantity;
+  }, 0);
+
+  const billableKg = totalWeightGrams > 0 ? Math.max(1, Math.ceil(totalWeightGrams / 1000)) : 0;
+  // Default base shipping fee (Gujarat rate ₹40/kg)
+  const deliveryCharge = items.length === 0 ? 0 : billableKg * 40;
   const grandTotal = subtotal + deliveryCharge;
 
   return (
@@ -138,6 +168,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         deliveryCharge,
         grandTotal,
         freeDeliveryThreshold: 0,
+        totalWeightGrams,
+        billableKg,
       }}
     >
       {children}
