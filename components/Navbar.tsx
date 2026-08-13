@@ -10,10 +10,8 @@ import {
   X,
   Sparkles,
   PhoneCall,
-  Globe,
   ShieldCheck,
   ChevronRight,
-  Flame,
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -40,7 +38,7 @@ const InstagramIcon = ({ size = 14, className = '' }: { size?: number; className
 export default function Navbar() {
   const router = useRouter();
   const { totalItemsCount, subtotal, setIsCartOpen } = useCart();
-  const { language, setLanguage, t } = useLanguage();
+  const { t } = useLanguage();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -124,22 +122,12 @@ export default function Navbar() {
               href="https://www.instagram.com/gautamoilandsugar?igsh=MTN2YXV3cDB1bmgxaw=="
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-[11px] sm:text-xs font-extrabold px-3 py-2 rounded-xl flex items-center gap-1.5 transition-all shadow-md cursor-pointer font-heading shrink-0"
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-[11px] sm:text-xs font-extrabold px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 transition-all shadow-md cursor-pointer font-heading shrink-0"
               title="Follow us on Instagram @gautamoilandsugar"
             >
-              <InstagramIcon size={14} />
+              <InstagramIcon size={15} />
               <span className="hidden sm:inline">@gautamoilandsugar</span>
             </a>
-
-            {/* Language Switcher Button (EN / GU) */}
-            <button
-              onClick={() => setLanguage(language === 'en' ? 'gu' : 'en')}
-              className="bg-blue-900/80 hover:bg-blue-800 text-white text-[11px] sm:text-xs font-extrabold px-3 py-2 rounded-xl border border-blue-700 flex items-center gap-1.5 transition-colors cursor-pointer font-heading shrink-0"
-              title="Toggle Gujarati / English Language"
-            >
-              <Globe size={14} className="text-pink-400" />
-              <span>{language === 'en' ? 'ENGLISH' : 'ગુજરાતી'}</span>
-            </button>
 
             {/* Interactive Cart Button Drawer Trigger */}
             <button
@@ -193,7 +181,7 @@ export default function Navbar() {
           </form>
         </div>
 
-        {/* Mobile Navigation Dropdown Drawer (Without Admin Panel option) */}
+        {/* Mobile Navigation Dropdown Drawer */}
         {isMobileMenuOpen && (
           <div className="sm:hidden bg-slate-900 border-t border-slate-800 px-4 py-4 space-y-3 animate-fade-in text-xs font-semibold">
             <Link
