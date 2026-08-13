@@ -92,12 +92,12 @@ export default function Footer() {
             <li className="flex items-center gap-2.5">
               <InstagramIcon size={16} className="text-pink-400 shrink-0" />
               <a
-                href="https://www.instagram.com/gautamtrading_"
+                href="https://www.instagram.com/gautamoilandsugar?igsh=MTN2YXV3cDB1bmgxaw=="
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-pink-400 transition-colors text-pink-300 font-extrabold"
               >
-                @gautamtrading_ (Instagram)
+                @gautamoilandsugar (Instagram)
               </a>
             </li>
             <li className="flex items-center gap-2.5">

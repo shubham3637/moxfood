@@ -42,7 +42,7 @@ export function generateOrganizationSchema() {
     url: APP_URL,
     logo: `${APP_URL}/logo.png`,
     sameAs: [
-      'https://www.instagram.com/gautamtrading_',
+      'https://www.instagram.com/gautamoilandsugar?igsh=MTN2YXV3cDB1bmgxaw==',
     ],
     contactPoint: {
       '@type': 'ContactPoint',

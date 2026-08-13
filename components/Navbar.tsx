@@ -13,7 +13,6 @@ import {
   Globe,
   ShieldCheck,
   ChevronRight,
-  User,
   Flame,
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
@@ -74,12 +73,12 @@ export default function Navbar() {
               <PhoneCall size={13} /> +91 7096396856
             </a>
             <a
-              href="https://www.instagram.com/gautamtrading_"
+              href="https://www.instagram.com/gautamoilandsugar?igsh=MTN2YXV3cDB1bmgxaw=="
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 hover:text-pink-200 transition-colors bg-black/20 px-2.5 py-0.5 rounded-full border border-white/20 font-heading"
             >
-              <InstagramIcon size={13} className="text-pink-300" /> @gautamtrading_
+              <InstagramIcon size={13} className="text-pink-300" /> @gautamoilandsugar
             </a>
             <span className="flex items-center gap-1.5"><ShieldCheck size={13} /> {t('qualityBadge')}</span>
           </div>
@@ -122,14 +121,14 @@ export default function Navbar() {
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Instagram Quick Link Button (Mobile/Desktop) */}
             <a
-              href="https://www.instagram.com/gautamtrading_"
+              href="https://www.instagram.com/gautamoilandsugar?igsh=MTN2YXV3cDB1bmgxaw=="
               target="_blank"
               rel="noopener noreferrer"
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-[11px] sm:text-xs font-extrabold px-3 py-2 rounded-xl flex items-center gap-1.5 transition-all shadow-md cursor-pointer font-heading shrink-0"
-              title="Follow us on Instagram @gautamtrading_"
+              title="Follow us on Instagram @gautamoilandsugar"
             >
               <InstagramIcon size={14} />
-              <span className="hidden sm:inline">@gautamtrading_</span>
+              <span className="hidden sm:inline">@gautamoilandsugar</span>
             </a>
 
             {/* Language Switcher Button (EN / GU) */}
@@ -194,7 +193,7 @@ export default function Navbar() {
           </form>
         </div>
 
-        {/* Mobile Navigation Dropdown Drawer */}
+        {/* Mobile Navigation Dropdown Drawer (Without Admin Panel option) */}
         {isMobileMenuOpen && (
           <div className="sm:hidden bg-slate-900 border-t border-slate-800 px-4 py-4 space-y-3 animate-fade-in text-xs font-semibold">
             <Link
@@ -207,7 +206,7 @@ export default function Navbar() {
             </Link>
 
             <a
-              href="https://www.instagram.com/gautamtrading_"
+              href="https://www.instagram.com/gautamoilandsugar?igsh=MTN2YXV3cDB1bmgxaw=="
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setIsMobileMenuOpen(false)}
@@ -215,7 +214,7 @@ export default function Navbar() {
             >
               <span className="flex items-center gap-2">
                 <InstagramIcon size={16} />
-                Instagram (@gautamtrading_)
+                Instagram (@gautamoilandsugar)
               </span>
               <ChevronRight size={16} />
             </a>
@@ -231,18 +230,6 @@ export default function Navbar() {
               </span>
               <ChevronRight size={16} />
             </a>
-
-            <Link
-              href="/admin"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-800 text-slate-300"
-            >
-              <span className="flex items-center gap-2">
-                <User size={16} />
-                Admin Panel
-              </span>
-              <ChevronRight size={16} className="text-slate-500" />
-            </Link>
           </div>
         )}
       </header>
