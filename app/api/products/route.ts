@@ -15,7 +15,23 @@ export async function GET(request: Request) {
     const queryFilter: any = {};
 
     if (category && category !== 'all') {
-      queryFilter.category = category;
+      if (category === 'dry-fruits') {
+        queryFilter.$or = [
+          { category: 'dry-fruits' },
+          { category: 'dryfruits' },
+          { category: /dry.*fruit/i },
+          { name: /almond|badam|kaju|cashew|walnut|kishmish|raisin|pista|date/i },
+        ];
+      } else if (category === 'seeds-superfoods' || category === 'seeds') {
+        queryFilter.$or = [
+          { category: 'seeds-superfoods' },
+          { category: 'seeds' },
+          { category: /seed/i },
+          { name: /seed|chia|pumpkin|sunflower|flax|alsi|sabja|watermelon|kalonji/i },
+        ];
+      } else {
+        queryFilter.category = category;
+      }
     }
 
     if (featured === 'true') {

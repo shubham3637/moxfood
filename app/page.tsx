@@ -11,7 +11,6 @@ import { useLanguage } from '@/context/LanguageContext';
 
 function StorefrontContent() {
   const { t, language, setLanguage } = useLanguage();
-  const [currentCategory, setCurrentCategory] = useState('all');
   const [currentTab, setCurrentTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -20,15 +19,13 @@ function StorefrontContent() {
 
   useEffect(() => {
     fetchInitialData();
-  }, [currentCategory, searchQuery, currentTab]);
+  }, [searchQuery, currentTab]);
 
   const fetchInitialData = async () => {
     setLoading(true);
     try {
-      let url = `/api/products?category=${currentCategory}`;
+      let url = `/api/products?category=${currentTab}`;
       if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
-      if (currentTab === 'featured') url += `&featured=true`;
-      if (currentTab === 'trending') url += `&trending=true`;
 
       const prodRes = await fetch(url);
       const prodData = await prodRes.json();
@@ -47,7 +44,6 @@ function StorefrontContent() {
   };
 
   const clearFilters = () => {
-    setCurrentCategory('all');
     setCurrentTab('all');
     setSearchQuery('');
   };
@@ -99,7 +95,6 @@ function StorefrontContent() {
             >
               <span>🇬🇧 ENGLISH</span>
             </button>
-
             <button
               onClick={() => setLanguage('gu')}
               className={`px-4 sm:px-5 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
@@ -113,21 +108,19 @@ function StorefrontContent() {
           </div>
         </div>
 
-        {/* 3. Catalog Products Section */}
+        {/* 3. Main Products Grid Section */}
         <section id="products-grid" className="space-y-6 pt-2">
+          {/* Header & 3 Main Category Filter Pills Tabs: All Items, Dry Fruits, Seeds */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              {searchQuery ? (
-                <p className="text-xs text-slate-600 font-medium">
-                  Search results for &quot;<strong className="text-pink-600">{searchQuery}</strong>&quot; ({products.length} items found)
-                </p>
-              ) : (
-                <h2 className="text-sm sm:text-base font-black text-slate-800 font-heading">{t('catalogSub')}</h2>
-              )}
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-heading">
+                {t('catalogTitle')}
+              </h2>
+              <p className="text-xs text-slate-500 font-medium">{t('catalogSub')}</p>
             </div>
 
-            {/* Filter Tabs: All items, Combo, Newly launched */}
-            <div className="flex items-center bg-slate-200/80 p-1.5 rounded-2xl gap-1.5 text-xs font-extrabold shrink-0 self-start sm:self-auto shadow-inner overflow-x-auto max-w-full">
+            {/* 3 Main Category Filter Tabs: All Items | Dry Fruits | Seeds */}
+            <div className="flex items-center bg-slate-200/80 p-1.5 rounded-2xl gap-1.5 text-xs font-extrabold shrink-0 self-start sm:self-auto shadow-inner overflow-x-auto max-w-full font-heading">
               <button
                 onClick={() => handleTabSelect('all')}
                 className={`px-4 py-2.5 rounded-xl transition-all cursor-pointer whitespace-nowrap ${
@@ -136,23 +129,23 @@ function StorefrontContent() {
               >
                 {t('filterAll')}
               </button>
+
               <button
-                onClick={() => handleTabSelect('featured')}
-                className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
-                  currentTab === 'featured' ? 'bg-pink-600 text-white shadow-md' : 'text-slate-600 hover:text-slate-900'
+                onClick={() => handleTabSelect('dry-fruits')}
+                className={`px-4 py-2.5 rounded-xl transition-all cursor-pointer whitespace-nowrap ${
+                  currentTab === 'dry-fruits' ? 'bg-pink-600 text-white shadow-md' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <Sparkles size={14} />
-                <span>{t('filterCombo')}</span>
+                <span>{t('filterDryFruits')}</span>
               </button>
+
               <button
-                onClick={() => handleTabSelect('trending')}
-                className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
-                  currentTab === 'trending' ? 'bg-blue-800 text-white shadow-md' : 'text-slate-600 hover:text-slate-900'
+                onClick={() => handleTabSelect('seeds-superfoods')}
+                className={`px-4 py-2.5 rounded-xl transition-all cursor-pointer whitespace-nowrap ${
+                  currentTab === 'seeds-superfoods' ? 'bg-blue-900 text-white shadow-md' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <Flame size={14} />
-                <span>{t('filterNew')}</span>
+                <span>{t('filterSeeds')}</span>
               </button>
             </div>
           </div>
@@ -200,45 +193,32 @@ function StorefrontContent() {
               Moxfood - Premium Healthy Seeds, Superfoods & Nutrient-Rich Grocery
             </h2>
           </div>
-
-          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
-            Welcome to <strong>Moxfood</strong>, your ultimate destination to buy 100% pure, raw, and roasted <strong>healthy seeds online</strong> at wholesale prices. We offer a comprehensive selection of nutrient-dense superfoods including <strong>Pumpkin Seeds, Chia Seeds, Sunflower Seeds, Flax Seeds, Watermelon Seeds, Muskmelon Seeds</strong>, and specially curated <strong>7-in-1 Super Seeds Mixes</strong>. Whether you are looking for diet seeds for weight management, energy-boosting daily snacks, or premium dry fruits and nuts, Moxfood brings fresh quality straight from local store to your doorstep.
+          <p className="text-xs text-slate-600 leading-relaxed font-medium">
+            Welcome to <strong>Moxfood</strong>, India&apos;s leading online superstore for raw and roasted healthy seeds, organic superfoods, and premium daily grocery ration. We specialize in offering 100% pure, unadulterated <strong>Raw Pumpkin Seeds (કદૂ ના બી)</strong>, <strong>Organic Chia Seeds (ચિયા સીડ્સ)</strong>, <strong>Sunflower Seeds (સૂર્યમુખી ના બી)</strong>, <strong>Flax Seeds (અળસી)</strong>, <strong>Sabja Seeds</strong>, and <strong>7-in-1 Super Seed Mixes</strong> at unbeatable wholesale direct rates.
           </p>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 text-xs font-bold text-slate-700">
-            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
-              <span className="text-pink-600 font-heading block">🎃 Pumpkin Seeds</span>
-              <span className="text-[11px] text-slate-500 font-medium">Raw & Roasted AAA Grade</span>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-xs font-bold text-slate-700">
+            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200">
+              🌱 100% Pure Raw & Roasted Seeds
             </div>
-            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
-              <span className="text-pink-600 font-heading block">🌱 Organic Chia Seeds</span>
-              <span className="text-[11px] text-slate-500 font-medium">Rich in Omega-3 & Fibre</span>
+            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200">
+              ⚡ Fast Doorstep Express Shipping
             </div>
-            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
-              <span className="text-pink-600 font-heading block">🌻 Sunflower Seeds</span>
-              <span className="text-[11px] text-slate-500 font-medium">Pure Vitamin E Superfood</span>
-            </div>
-            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
-              <span className="text-pink-600 font-heading block">🥜 Seed Mixes & Nuts</span>
-              <span className="text-[11px] text-slate-500 font-medium">Roasted Salted & Raw Packs</span>
+            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200">
+              💎 Up to 25% Off Wholesale Savings
             </div>
           </div>
         </section>
 
-        {/* 6. Full-Width Customer Testimonials & Stats Counter Section */}
+        {/* 6. Customer Testimonials & Reviews */}
         <Testimonials />
       </div>
     </div>
   );
 }
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <Suspense fallback={
-      <div className="text-center py-24">
-        <RefreshCw size={36} className="animate-spin text-pink-600 mx-auto" />
-      </div>
-    }>
+    <Suspense fallback={<div className="text-center py-20">Loading store...</div>}>
       <StorefrontContent />
     </Suspense>
   );
