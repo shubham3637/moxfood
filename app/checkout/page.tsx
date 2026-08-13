@@ -431,7 +431,7 @@ export default function CheckoutPage() {
               <span className="font-bold text-slate-900 font-heading">₹{subtotal}</span>
             </div>
 
-            {/* Total Weight Indicator */}
+            {/* Total Weight Indicator (Clean Weight without Charge Badge) */}
             <div className="flex justify-between text-slate-600">
               <span className="flex items-center gap-1">
                 <Scale size={14} className="text-pink-600" />
@@ -440,10 +440,7 @@ export default function CheckoutPage() {
                 </span>
               </span>
               <span className="font-mono text-slate-800 font-bold">
-                {totalWeightGrams < 1000 ? `${totalWeightGrams} g` : `${(totalWeightGrams / 1000).toFixed(1)} kg`}{' '}
-                <span className="text-[10px] text-pink-600 font-sans font-bold bg-pink-50 px-1.5 py-0.5 rounded border border-pink-100">
-                  (Chargable: {billableKg} kg)
-                </span>
+                {totalWeightGrams < 1000 ? `${totalWeightGrams} g` : `${(totalWeightGrams / 1000).toFixed(1)} kg`}
               </span>
             </div>
 
