@@ -19,8 +19,12 @@ export default function Footer() {
         {/* Brand & Store Info */}
         <div className="space-y-3">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-pink-600 text-white flex items-center justify-center font-bold text-xl shadow-lg">
-              <Store size={22} />
+            <div className="bg-white p-1 rounded-2xl shadow border border-blue-800">
+              <img
+                src="/logo.png"
+                alt="Moxfood Logo"
+                className="h-10 w-auto object-contain rounded-xl"
+              />
             </div>
             <div>
               <div className="font-extrabold text-white text-lg leading-none font-heading">
@@ -56,53 +60,45 @@ export default function Footer() {
           <h3 className="text-white font-extrabold text-sm mb-3.5 border-b border-blue-900 pb-1.5 font-heading">
             Contact & Store Location
           </h3>
-          <ul className="space-y-3 text-xs text-slate-300">
+          <ul className="space-y-3 text-xs text-slate-300 font-semibold">
             <li className="flex items-start gap-2.5">
               <MapPin size={16} className="text-pink-400 shrink-0 mt-0.5" />
-              <span>Main Market, Moxfood Shop No. 12, Station Road, Gujarat</span>
+              <span>Anand & Ahmedabad Express Delivery Region, Gujarat, India</span>
             </li>
             <li className="flex items-center gap-2.5">
               <Phone size={16} className="text-pink-400 shrink-0" />
-              <a href="tel:+919876543210" className="hover:text-white font-bold cursor-pointer">+91 98765 43210 / WhatsApp</a>
+              <span>+91 98765 43210 / WhatsApp Support</span>
             </li>
             <li className="flex items-center gap-2.5">
               <Clock size={16} className="text-pink-400 shrink-0" />
-              <span>8:00 AM - 9:00 PM (Mon - Sun)</span>
+              <span>Express Doorstep Delivery Daily</span>
             </li>
           </ul>
         </div>
 
-        {/* Delivery Badges */}
-        <div>
+        {/* Delivery & Payment Badges */}
+        <div className="space-y-3">
           <h3 className="text-white font-extrabold text-sm mb-3.5 border-b border-blue-900 pb-1.5 font-heading">
-            Store Services
+            Payment & Trust
           </h3>
-          <div className="space-y-2.5 text-xs">
-            <div className="p-3 bg-blue-900/60 rounded-2xl border border-blue-800 flex items-center gap-3">
-              <Truck size={20} className="text-pink-400 shrink-0" />
-              <div>
-                <div className="font-extrabold text-white">Fast Express Delivery</div>
-                <div className="text-[11px] text-blue-200">Direct store doorstep delivery</div>
-              </div>
+          <div className="bg-blue-900/40 p-4 rounded-2xl border border-blue-800 space-y-2">
+            <div className="flex items-center gap-2 text-xs font-bold text-white">
+              <CreditCard size={16} className="text-pink-400" />
+              <span>Razorpay Online Payments</span>
             </div>
-            <div className="p-3 bg-blue-900/60 rounded-2xl border border-blue-800 flex items-center gap-3">
-              <CreditCard size={20} className="text-pink-400 shrink-0" />
-              <div>
-                <div className="font-extrabold text-white">Instant UPI Pay</div>
-                <div className="text-[11px] text-blue-200">Prepaid Online UPI (GPay/PhonePe/Paytm)</div>
-              </div>
-            </div>
+            <p className="text-[11px] text-slate-300 font-medium">
+              Accepting UPI, GPay, PhonePe, Paytm, Credit/Debit Cards & Netbanking.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-emerald-400 font-bold bg-emerald-950/40 p-3 rounded-xl border border-emerald-900/50">
+            <Truck size={16} className="shrink-0" /> Fast Express Shipping Across Gujarat & India
           </div>
         </div>
       </div>
 
-      <div className="w-full px-4 md:px-10 lg:px-16 pt-5 border-t border-blue-900 flex flex-col sm:flex-row items-center justify-between text-xs text-blue-300/80 gap-3">
-        <div>© 2026 Moxfood. All Rights Reserved.</div>
-        <div className="flex gap-4">
-          <Link href="/products" className="text-pink-400 hover:text-pink-300 font-bold cursor-pointer">
-            Browse All Products
-          </Link>
-        </div>
+      {/* Copyright Bar */}
+      <div className="border-t border-blue-900/80 pt-6 text-center text-xs text-slate-400 font-medium">
+        © {new Date().getFullYear()} Moxfood Healthy Seeds & Grocery Super Store. All Rights Reserved.
       </div>
     </footer>
   );

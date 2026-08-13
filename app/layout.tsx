@@ -29,6 +29,10 @@ export const metadata: Metadata = {
   creator: 'Moxfood',
   publisher: 'Moxfood',
   applicationName: 'Moxfood Store',
+  icons: {
+    icon: '/logo.png',
+    apple: '/logo.png',
+  },
   robots: {
     index: true,
     follow: true,
@@ -52,7 +56,7 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     images: [
       {
-        url: getCanonicalUrl('/og-image.jpg'),
+        url: getCanonicalUrl('/logo.png'),
         width: 1200,
         height: 630,
         alt: 'Moxfood - Premium Healthy Seeds & Superfood Store',
@@ -63,7 +67,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: SITE_TITLE_DEFAULT,
     description: SITE_DESCRIPTION_DEFAULT,
-    images: [getCanonicalUrl('/og-image.jpg')],
+    images: [getCanonicalUrl('/logo.png')],
   },
 };
 

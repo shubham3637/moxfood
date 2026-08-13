@@ -241,7 +241,7 @@ export default function CheckoutPage() {
         currency: razorpayOrder.currency || 'INR',
         name: 'Moxfood',
         description: 'Healthy Seeds & Grocery Order Payment',
-        image: 'https://images.unsplash.com/photo-1509358271058-acd02cc93858?auto=format&fit=crop&w=150&q=80',
+        image: `${window.location.origin}/logo.png`,
         order_id: razorpayOrder.id,
         handler: async function (response: any) {
           try {

@@ -2,24 +2,34 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
-import { ShoppingBag, Search, MapPin, Store, Menu, X, PhoneCall, ShieldCheck, Zap, Grid } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import {
+  Search,
+  ShoppingCart,
+  Menu,
+  X,
+  Store,
+  MapPin,
+  Sparkles,
+  PhoneCall,
+  Globe,
+  Tag,
+  Flame,
+  ShieldCheck,
+  ChevronRight,
+  User,
+} from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useLanguage } from '@/context/LanguageContext';
-import LanguageSwitcher from '@/components/LanguageSwitcher';
+import CartDrawer from './CartDrawer';
 
 export default function Navbar() {
   const router = useRouter();
-  const pathname = usePathname();
-  const { totalItemsCount } = useCart();
-  const { t } = useLanguage();
+  const { totalItemsCount, subtotal, setIsCartOpen } = useCart();
+  const { language, setLanguage, t } = useLanguage();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // Hide Navbar completely on all Admin routes (/admin/*)
-  if (pathname?.startsWith('/admin')) {
-    return null;
-  }
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,150 +41,178 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full max-w-full bg-blue-950/95 backdrop-blur-md text-white shadow-xl border-b border-blue-800/80 transition-all overflow-x-hidden">
-      {/* Top Announcement Banner */}
-      <div className="bg-gradient-to-r from-pink-600 via-rose-600 to-pink-600 text-white text-[11px] sm:text-xs py-1.5 px-3 sm:px-6 md:px-10 font-bold flex justify-between items-center w-full shadow-inner">
-        <div className="flex items-center gap-1.5 truncate">
-          <Zap size={13} className="text-yellow-300 fill-yellow-300 animate-bounce shrink-0" />
-          <span className="truncate">
-            <strong>Moxfood</strong> • {t('topNotice')}
-          </span>
-        </div>
-        <div className="hidden md:flex items-center gap-5 text-xs font-semibold shrink-0">
-          <span className="flex items-center gap-1.5"><PhoneCall size={13} /> +91 98765 43210</span>
-          <span className="flex items-center gap-1.5"><ShieldCheck size={13} /> {t('qualityBadge')}</span>
-        </div>
-      </div>
-
-      {/* Main Responsive Header Bar */}
-      <div className="w-full max-w-full px-3 sm:px-6 md:px-10 lg:px-12 py-2.5 sm:py-3.5 flex items-center justify-between gap-2">
-        {/* Brand Logo */}
-        <Link href="/" className="flex items-center gap-2 sm:gap-3 group shrink-0 cursor-pointer">
-          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-pink-600 to-rose-500 text-white flex items-center justify-center font-bold text-xl sm:text-2xl shadow-lg shadow-pink-600/40 group-hover:scale-105 transition-transform shrink-0">
-            <Store size={22} className="sm:w-6 sm:h-6" />
+    <>
+      <header className="sticky top-0 z-40 w-full bg-slate-900 text-white shadow-xl">
+        {/* Top Notification Announcement Bar */}
+        <div className="bg-gradient-to-r from-pink-600 via-rose-600 to-pink-600 text-white px-4 py-1.5 text-[11px] sm:text-xs font-bold flex items-center justify-between font-heading shadow-inner">
+          <div className="flex items-center gap-2 overflow-hidden whitespace-nowrap">
+            <Sparkles size={14} className="animate-spin text-pink-200 shrink-0" />
+            <span className="truncate">
+              <strong>Moxfood</strong> • {t('topNotice')}
+            </span>
           </div>
-          <div>
-            <div className="text-base sm:text-2xl font-black tracking-tight leading-none text-white flex items-center gap-1 font-heading">
-              MOX<span className="text-pink-400">FOOD</span>
+          <div className="hidden md:flex items-center gap-5 text-xs font-semibold shrink-0">
+            <span className="flex items-center gap-1.5"><PhoneCall size={13} /> +91 98765 43210</span>
+            <span className="flex items-center gap-1.5"><ShieldCheck size={13} /> {t('qualityBadge')}</span>
+          </div>
+        </div>
+
+        {/* Main Responsive Header Bar */}
+        <div className="w-full max-w-full px-3 sm:px-6 md:px-10 lg:px-12 py-2.5 sm:py-3.5 flex items-center justify-between gap-2">
+          {/* Brand Logo from public/logo.png */}
+          <Link href="/" className="flex items-center gap-2 sm:gap-3 group shrink-0 cursor-pointer">
+            <div className="bg-white/95 p-1 rounded-2xl shadow-lg border border-pink-500/20 group-hover:scale-105 transition-transform shrink-0 flex items-center justify-center">
+              <img
+                src="/logo.png"
+                alt="Moxfood Logo"
+                className="h-10 sm:h-12 w-auto max-w-[140px] sm:max-w-[170px] object-contain rounded-xl"
+              />
             </div>
-            <div className="text-[10px] sm:text-[11px] text-pink-200 font-bold tracking-wide mt-0.5">
-              {t('storeSubtitle')}
+          </Link>
+
+          {/* Location Badge (Desktop) */}
+          <div className="hidden lg:flex items-center gap-2.5 text-xs bg-blue-900/60 backdrop-blur-md px-4 py-2 rounded-full border border-blue-700/60 shadow-inner">
+            <MapPin size={16} className="text-pink-400 shrink-0 animate-pulse" />
+            <div className="text-left">
+              <div className="font-extrabold text-blue-100">{t('locationTitle')}</div>
+              <div className="text-pink-300 text-[10px] font-semibold">{t('locationSub')}</div>
             </div>
           </div>
-        </Link>
 
-        {/* Location Badge (Desktop) */}
-        <div className="hidden lg:flex items-center gap-2.5 text-xs bg-blue-900/60 backdrop-blur-md px-4 py-2 rounded-full border border-blue-700/60 shadow-inner">
-          <MapPin size={16} className="text-pink-400 shrink-0 animate-pulse" />
-          <div className="text-left">
-            <div className="font-extrabold text-blue-100">{t('locationTitle')}</div>
-            <div className="text-pink-300 text-[10px] font-semibold">{t('locationSub')}</div>
+          {/* Expanded Full Search Bar (Desktop) */}
+          <form onSubmit={handleSearch} className="flex-1 max-w-xl relative hidden sm:block">
+            <div className="relative group">
+              <input
+                type="text"
+                placeholder={t('searchPlaceholder')}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-slate-800/90 text-white placeholder-slate-400 text-xs font-semibold rounded-full pl-4 pr-11 py-2.5 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-slate-800 shadow-inner transition-all"
+              />
+              <button
+                type="submit"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-pink-600 hover:bg-pink-500 text-white p-1.5 rounded-full transition-colors cursor-pointer"
+                aria-label="Search button"
+              >
+                <Search size={15} />
+              </button>
+            </div>
+          </form>
+
+          {/* Actions & Cart Control */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Language Switcher Button (EN / GU) */}
+            <button
+              onClick={() => setLanguage(language === 'en' ? 'gu' : 'en')}
+              className="bg-blue-900/80 hover:bg-blue-800 text-white text-[11px] sm:text-xs font-extrabold px-3 py-2 rounded-xl border border-blue-700 flex items-center gap-1.5 transition-colors cursor-pointer font-heading"
+              title="Toggle Gujarati / English Language"
+            >
+              <Globe size={14} className="text-pink-400" />
+              <span>{language === 'en' ? 'ENGLISH' : 'ગુજરાતી'}</span>
+            </button>
+
+            {/* All Products Link Button */}
+            <Link
+              href="/products"
+              className="hidden lg:flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-3.5 py-2.5 rounded-xl border border-slate-700 transition-colors cursor-pointer font-heading"
+            >
+              <Tag size={14} className="text-pink-400" />
+              <span>{t('navAllProducts')}</span>
+            </Link>
+
+            {/* Interactive Cart Button Drawer Trigger */}
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="relative bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-extrabold px-3.5 sm:px-4 py-2.5 rounded-xl shadow-lg shadow-pink-600/30 flex items-center gap-2 transition-all active:scale-95 cursor-pointer font-heading"
+              aria-label="Open Shopping Cart"
+            >
+              <div className="relative">
+                <ShoppingCart size={18} />
+                {totalItemsCount > 0 && (
+                  <span className="absolute -top-2.5 -right-2.5 bg-white text-pink-600 font-black text-[10px] w-4 h-4 rounded-full flex items-center justify-center border border-pink-600 shadow">
+                    {totalItemsCount}
+                  </span>
+                )}
+              </div>
+
+              <div className="hidden sm:flex flex-col text-left leading-none">
+                <span className="text-[10px] opacity-80 uppercase tracking-wider">{t('cartTitle')}</span>
+                <span className="text-xs font-black">₹{subtotal}</span>
+              </div>
+            </button>
+
+            {/* Mobile Hamburger Menu Toggle */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="sm:hidden p-2 text-slate-300 hover:text-white bg-slate-800 rounded-xl cursor-pointer"
+              aria-label="Toggle Navigation Menu"
+            >
+              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
           </div>
         </div>
 
-        {/* Expanded Full Search Bar (Desktop) */}
-        <form onSubmit={handleSearch} className="flex-1 max-w-xl relative hidden sm:block">
-          <div className="relative group">
+        {/* Mobile Search Bar Row */}
+        <div className="px-3 pb-3 sm:hidden">
+          <form onSubmit={handleSearch} className="relative w-full">
             <input
               type="text"
               placeholder={t('searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-blue-900/70 text-white placeholder-blue-300/70 text-xs sm:text-sm rounded-full pl-5 pr-12 py-3 border border-blue-700/80 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-blue-900 transition-all shadow-inner font-medium"
+              className="w-full bg-slate-800 text-white text-xs font-semibold rounded-xl pl-3.5 pr-10 py-2 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-pink-500"
             />
             <button
               type="submit"
-              aria-label="Search items"
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-pink-600 hover:bg-pink-500 text-white flex items-center justify-center transition-all group-hover:scale-105 shadow-md cursor-pointer"
+              className="absolute right-1 top-1/2 -translate-y-1/2 bg-pink-600 text-white p-1 rounded-lg"
+              aria-label="Mobile Search"
             >
-              <Search size={18} />
+              <Search size={14} />
             </button>
-          </div>
-        </form>
-
-        {/* Navigation & Cart Actions */}
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          {/* Language Switcher Pill (Desktop & Tablet) */}
-          <div className="hidden sm:block">
-            <LanguageSwitcher />
-          </div>
-
-          {/* Shop All Products Link (Desktop) */}
-          <Link
-            href="/products"
-            className="hidden md:flex items-center gap-1.5 text-xs font-extrabold px-4 py-2.5 rounded-full bg-blue-900/80 hover:bg-blue-800 text-white transition-all border border-blue-700/80 cursor-pointer shadow-sm hover:border-pink-500/50"
-          >
-            <Grid size={16} className="text-pink-400" />
-            <span>{t('allProductsBtn')}</span>
-          </Link>
-
-          {/* Direct Checkout Trigger */}
-          <Link
-            href="/checkout"
-            className="relative flex items-center gap-1.5 sm:gap-2 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white px-3 sm:px-5 py-2 sm:py-2.5 rounded-full font-extrabold text-xs sm:text-sm transition-all shadow-md shadow-pink-600/30 active:scale-95 cursor-pointer shrink-0 font-heading"
-          >
-            <ShoppingBag size={18} className="sm:w-5 sm:h-5" />
-            <span className="hidden sm:inline">{t('cartBtn')}</span>
-            {totalItemsCount > 0 && (
-              <span className="bg-blue-950 text-white text-[10px] sm:text-xs font-black w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center border border-pink-300 shadow-inner animate-pulse">
-                {totalItemsCount}
-              </span>
-            )}
-          </Link>
-
-          {/* Mobile Hamburger Toggle */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="sm:hidden p-1.5 text-blue-200 hover:text-white cursor-pointer shrink-0"
-            aria-label="Toggle menu"
-          >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          </form>
         </div>
-      </div>
 
-      {/* Mobile Search & Menu Bar */}
-      <div className="sm:hidden px-3 pb-2.5 pt-0.5 border-t border-blue-900">
-        <form onSubmit={handleSearch} className="relative">
-          <input
-            type="text"
-            placeholder={t('searchPlaceholder')}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-blue-900/90 text-white placeholder-blue-300/70 text-xs rounded-full pl-3.5 pr-9 py-2 border border-blue-700 focus:outline-none focus:ring-2 focus:ring-pink-500"
-          />
-          <button
-            type="submit"
-            aria-label="Search items mobile"
-            className="absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-pink-600 text-white flex items-center justify-center cursor-pointer"
-          >
-            <Search size={13} />
-          </button>
-        </form>
-
+        {/* Mobile Navigation Dropdown Drawer */}
         {isMobileMenuOpen && (
-          <div className="mt-2.5 py-2 border-t border-blue-900 flex flex-col gap-2 text-xs font-semibold">
-            <div className="py-1 px-1 flex items-center justify-between">
-              <span className="text-blue-300 text-[11px] font-bold">Select Language:</span>
-              <LanguageSwitcher />
-            </div>
+          <div className="sm:hidden bg-slate-900 border-t border-slate-800 px-4 py-4 space-y-3 animate-fade-in text-xs font-semibold">
             <Link
               href="/"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="py-2 px-3 rounded-xl hover:bg-blue-900 text-blue-100 cursor-pointer flex items-center gap-2"
+              className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-800 text-slate-200"
             >
-              🏠 Home Page
+              <span>{t('navHome')}</span>
+              <ChevronRight size={16} className="text-slate-500" />
             </Link>
+
             <Link
               href="/products"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="py-2 px-3 rounded-xl hover:bg-blue-900 text-pink-300 font-bold cursor-pointer flex items-center gap-2"
+              className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-800 text-pink-400 font-bold"
             >
-              📦 {t('allProductsBtn')}
+              <span className="flex items-center gap-2">
+                <Flame size={16} />
+                {t('navAllProducts')}
+              </span>
+              <ChevronRight size={16} />
+            </Link>
+
+            <Link
+              href="/admin"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-800 text-slate-300"
+            >
+              <span className="flex items-center gap-2">
+                <User size={16} />
+                Admin Panel
+              </span>
+              <ChevronRight size={16} className="text-slate-500" />
             </Link>
           </div>
         )}
-      </div>
-    </header>
+      </header>
+
+      {/* Cart Side Drawer Modal */}
+      <CartDrawer />
+    </>
   );
 }
