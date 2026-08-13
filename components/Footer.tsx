@@ -5,6 +5,24 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Store, Phone, MapPin, Clock, ShieldCheck, Truck, CreditCard } from 'lucide-react';
 
+const InstagramIcon = ({ size = 16, className = '' }: { size?: number; className?: string }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+  </svg>
+);
+
 export default function Footer() {
   const pathname = usePathname();
 
@@ -48,9 +66,9 @@ export default function Footer() {
           </h3>
           <ul className="space-y-2.5 text-xs font-semibold text-slate-300">
             <li><Link href="/products?category=seeds-superfoods" className="hover:text-pink-400 transition-colors cursor-pointer">Healthy Seeds & Superfoods</Link></li>
+            <li><Link href="/products?category=dry-fruits" className="hover:text-pink-400 transition-colors cursor-pointer">Dry Fruits & Nuts</Link></li>
             <li><Link href="/products?category=atta-rice" className="hover:text-pink-400 transition-colors cursor-pointer">Atta, Rice & Grains</Link></li>
             <li><Link href="/products?category=oil-masala" className="hover:text-pink-400 transition-colors cursor-pointer">Edible Oil & Spices</Link></li>
-            <li><Link href="/products?category=dairy-bakery" className="hover:text-pink-400 transition-colors cursor-pointer">Dairy & Breakfast</Link></li>
             <li><Link href="/products?category=snacks" className="hover:text-pink-400 transition-colors cursor-pointer">Snacks & Namkeen</Link></li>
           </ul>
         </div>
@@ -63,11 +81,24 @@ export default function Footer() {
           <ul className="space-y-3 text-xs text-slate-300 font-semibold">
             <li className="flex items-start gap-2.5">
               <MapPin size={16} className="text-pink-400 shrink-0 mt-0.5" />
-              <span>Anand & Ahmedabad Express Delivery Region, Gujarat, India</span>
+              <span>Surat, Gujarat, India</span>
             </li>
             <li className="flex items-center gap-2.5">
               <Phone size={16} className="text-pink-400 shrink-0" />
-              <span>+91 98765 43210 / WhatsApp Support</span>
+              <a href="tel:+917096396856" className="hover:text-pink-400 transition-colors">
+                +91 7096396856 / WhatsApp Support
+              </a>
+            </li>
+            <li className="flex items-center gap-2.5">
+              <InstagramIcon size={16} className="text-pink-400 shrink-0" />
+              <a
+                href="https://www.instagram.com/gautamtrading_"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-pink-400 transition-colors text-pink-300 font-extrabold"
+              >
+                @gautamtrading_ (Instagram)
+              </a>
             </li>
             <li className="flex items-center gap-2.5">
               <Clock size={16} className="text-pink-400 shrink-0" />
@@ -91,7 +122,7 @@ export default function Footer() {
             </p>
           </div>
           <div className="flex items-center gap-2 text-xs text-emerald-400 font-bold bg-emerald-950/40 p-3 rounded-xl border border-emerald-900/50">
-            <Truck size={16} className="shrink-0" /> Fast Express Shipping Across Gujarat & India
+            <Truck size={16} className="shrink-0" /> Fast Express Shipping in Surat & Across India
           </div>
         </div>
       </div>

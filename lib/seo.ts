@@ -3,7 +3,7 @@ import { APP_URL } from '@/lib/constants';
 export const SITE_NAME = 'Moxfood';
 export const SITE_TITLE_DEFAULT = 'Moxfood - Buy Premium Healthy Seeds, Pumpkin Seeds, Chia Seeds & Dry Fruits Online';
 export const SITE_DESCRIPTION_DEFAULT =
-  'Shop 100% pure & raw healthy seeds online at Moxfood. Buy raw & roasted Pumpkin Seeds, Chia Seeds, Sunflower Seeds, Flax Seeds, Watermelon Seeds, Seed Mixes & premium dry fruits with fast doorstep delivery.';
+  'Shop 100% pure & raw healthy seeds online at Moxfood. Buy raw & roasted Pumpkin Seeds, Chia Seeds, Sunflower Seeds, Flax Seeds, Watermelon Seeds, Seed Mixes & premium dry fruits with fast doorstep delivery in Surat.';
 
 export const DEFAULT_KEYWORDS = [
   'Moxfood',
@@ -42,12 +42,11 @@ export function generateOrganizationSchema() {
     url: APP_URL,
     logo: `${APP_URL}/logo.png`,
     sameAs: [
-      'https://www.facebook.com/moxfood',
-      'https://www.instagram.com/moxfood',
+      'https://www.instagram.com/gautamtrading_',
     ],
     contactPoint: {
       '@type': 'ContactPoint',
-      telephone: '+91-9876543210',
+      telephone: '+91-7096396856',
       contactType: 'customer service',
       areaServed: 'IN',
       availableLanguage: ['English', 'Gujarati'],
@@ -77,15 +76,15 @@ export function generateStoreSchema() {
     '@context': 'https://schema.org',
     '@type': 'GroceryStore',
     name: 'Moxfood - Healthy Seeds & Superfood Store',
-    image: `${APP_URL}/og-image.jpg`,
+    image: `${APP_URL}/logo.png`,
     url: APP_URL,
-    telephone: '+91-9876543210',
+    telephone: '+91-7096396856',
     address: {
       '@type': 'PostalAddress',
-      streetAddress: 'Main Market, Moxfood Shop No. 12, Station Road',
-      addressLocality: 'Anand',
+      streetAddress: 'Gautam Trading, Surat',
+      addressLocality: 'Surat',
       addressRegion: 'Gujarat',
-      postalCode: '388001',
+      postalCode: '395006',
       addressCountry: 'IN',
     },
     priceRange: '₹',
@@ -121,7 +120,7 @@ export function generateProductSchema(product: {
   const imageUrl =
     Array.isArray(product.images) && product.images.length > 0
       ? product.images[0]
-      : `${APP_URL}/placeholder-product.jpg`;
+      : `${APP_URL}/logo.png`;
 
   return {
     '@context': 'https://schema.org',

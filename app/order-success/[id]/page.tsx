@@ -58,7 +58,7 @@ export default function OrderSuccessPage(props: { params: Promise<{ id: string }
     );
   }
 
-  const storePhone = '919876543210';
+  const storePhone = '917096396856';
   const whatsappText = `🛒 *MOXFOOD - ORDER RECEIPT* 🛒
 *Order ID:* #${order.orderId}
 *Customer Name:* ${order.customerDetails.name}

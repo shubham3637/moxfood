@@ -8,20 +8,35 @@ import {
   ShoppingCart,
   Menu,
   X,
-  Store,
-  MapPin,
   Sparkles,
   PhoneCall,
   Globe,
-  Tag,
-  Flame,
   ShieldCheck,
   ChevronRight,
   User,
+  Flame,
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useLanguage } from '@/context/LanguageContext';
 import CartDrawer from './CartDrawer';
+
+const InstagramIcon = ({ size = 14, className = '' }: { size?: number; className?: string }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+  </svg>
+);
 
 export default function Navbar() {
   const router = useRouter();
@@ -52,13 +67,26 @@ export default function Navbar() {
             </span>
           </div>
           <div className="hidden md:flex items-center gap-5 text-xs font-semibold shrink-0">
-            <span className="flex items-center gap-1.5"><PhoneCall size={13} /> +91 98765 43210</span>
+            <a
+              href="tel:+917096396856"
+              className="flex items-center gap-1.5 hover:text-pink-200 transition-colors"
+            >
+              <PhoneCall size={13} /> +91 7096396856
+            </a>
+            <a
+              href="https://www.instagram.com/gautamtrading_"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 hover:text-pink-200 transition-colors bg-black/20 px-2.5 py-0.5 rounded-full border border-white/20 font-heading"
+            >
+              <InstagramIcon size={13} className="text-pink-300" /> @gautamtrading_
+            </a>
             <span className="flex items-center gap-1.5"><ShieldCheck size={13} /> {t('qualityBadge')}</span>
           </div>
         </div>
 
         {/* Main Responsive Header Bar */}
-        <div className="w-full max-w-full px-3 sm:px-6 md:px-10 lg:px-12 py-2.5 sm:py-3.5 flex items-center justify-between gap-2">
+        <div className="w-full max-w-full px-3 sm:px-6 md:px-10 lg:px-12 py-2.5 sm:py-3.5 flex items-center justify-between gap-3">
           {/* Brand Logo from public/logo.png */}
           <Link href="/" className="flex items-center gap-2 sm:gap-3 group shrink-0 cursor-pointer">
             <div className="bg-white/95 p-1 rounded-2xl shadow-lg border border-pink-500/20 group-hover:scale-105 transition-transform shrink-0 flex items-center justify-center">
@@ -69,15 +97,6 @@ export default function Navbar() {
               />
             </div>
           </Link>
-
-          {/* Location Badge (Desktop) */}
-          <div className="hidden lg:flex items-center gap-2.5 text-xs bg-blue-900/60 backdrop-blur-md px-4 py-2 rounded-full border border-blue-700/60 shadow-inner">
-            <MapPin size={16} className="text-pink-400 shrink-0 animate-pulse" />
-            <div className="text-left">
-              <div className="font-extrabold text-blue-100">{t('locationTitle')}</div>
-              <div className="text-pink-300 text-[10px] font-semibold">{t('locationSub')}</div>
-            </div>
-          </div>
 
           {/* Expanded Full Search Bar (Desktop) */}
           <form onSubmit={handleSearch} className="flex-1 max-w-xl relative hidden sm:block">
@@ -101,29 +120,32 @@ export default function Navbar() {
 
           {/* Actions & Cart Control */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Instagram Quick Link Button (Mobile/Desktop) */}
+            <a
+              href="https://www.instagram.com/gautamtrading_"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-[11px] sm:text-xs font-extrabold px-3 py-2 rounded-xl flex items-center gap-1.5 transition-all shadow-md cursor-pointer font-heading shrink-0"
+              title="Follow us on Instagram @gautamtrading_"
+            >
+              <InstagramIcon size={14} />
+              <span className="hidden sm:inline">@gautamtrading_</span>
+            </a>
+
             {/* Language Switcher Button (EN / GU) */}
             <button
               onClick={() => setLanguage(language === 'en' ? 'gu' : 'en')}
-              className="bg-blue-900/80 hover:bg-blue-800 text-white text-[11px] sm:text-xs font-extrabold px-3 py-2 rounded-xl border border-blue-700 flex items-center gap-1.5 transition-colors cursor-pointer font-heading"
+              className="bg-blue-900/80 hover:bg-blue-800 text-white text-[11px] sm:text-xs font-extrabold px-3 py-2 rounded-xl border border-blue-700 flex items-center gap-1.5 transition-colors cursor-pointer font-heading shrink-0"
               title="Toggle Gujarati / English Language"
             >
               <Globe size={14} className="text-pink-400" />
               <span>{language === 'en' ? 'ENGLISH' : 'ગુજરાતી'}</span>
             </button>
 
-            {/* All Products Link Button */}
-            <Link
-              href="/products"
-              className="hidden lg:flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-3.5 py-2.5 rounded-xl border border-slate-700 transition-colors cursor-pointer font-heading"
-            >
-              <Tag size={14} className="text-pink-400" />
-              <span>{t('navAllProducts')}</span>
-            </Link>
-
             {/* Interactive Cart Button Drawer Trigger */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="relative bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-extrabold px-3.5 sm:px-4 py-2.5 rounded-xl shadow-lg shadow-pink-600/30 flex items-center gap-2 transition-all active:scale-95 cursor-pointer font-heading"
+              className="relative bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-extrabold px-3.5 sm:px-4 py-2.5 rounded-xl shadow-lg shadow-pink-600/30 flex items-center gap-2 transition-all active:scale-95 cursor-pointer font-heading shrink-0"
               aria-label="Open Shopping Cart"
             >
               <div className="relative">
@@ -144,7 +166,7 @@ export default function Navbar() {
             {/* Mobile Hamburger Menu Toggle */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="sm:hidden p-2 text-slate-300 hover:text-white bg-slate-800 rounded-xl cursor-pointer"
+              className="sm:hidden p-2 text-slate-300 hover:text-white bg-slate-800 rounded-xl cursor-pointer shrink-0"
               aria-label="Toggle Navigation Menu"
             >
               {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -184,17 +206,31 @@ export default function Navbar() {
               <ChevronRight size={16} className="text-slate-500" />
             </Link>
 
-            <Link
-              href="/products"
+            <a
+              href="https://www.instagram.com/gautamtrading_"
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={() => setIsMobileMenuOpen(false)}
               className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-800 text-pink-400 font-bold"
             >
               <span className="flex items-center gap-2">
-                <Flame size={16} />
-                {t('navAllProducts')}
+                <InstagramIcon size={16} />
+                Instagram (@gautamtrading_)
               </span>
               <ChevronRight size={16} />
-            </Link>
+            </a>
+
+            <a
+              href="tel:+917096396856"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-800 text-emerald-400 font-bold"
+            >
+              <span className="flex items-center gap-2">
+                <PhoneCall size={16} />
+                Call +91 7096396856
+              </span>
+              <ChevronRight size={16} />
+            </a>
 
             <Link
               href="/admin"

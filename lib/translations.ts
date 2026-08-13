@@ -3,10 +3,10 @@ export type Language = 'en' | 'gu';
 export const translations = {
   en: {
     // Header & Navbar
-    topNotice: 'Fast Express Delivery across Anand & Ahmedabad Region!',
+    topNotice: 'Fast Express Delivery in Surat!',
     storeSubtitle: 'Healthy Seeds & Grocery Super Store',
     locationTitle: 'Local Store Express Delivery',
-    locationSub: 'Anand & Ahmedabad Region',
+    locationSub: 'Surat',
     searchPlaceholder: 'Search Pumpkin Seeds, Chia Seeds, Sunflower Seeds, Atta, Oil...',
     allProductsBtn: 'All Products',
     cartBtn: 'Cart',
@@ -24,7 +24,7 @@ export const translations = {
 
     // Features Bar
     featDeliveryTitle: 'Fast Express Delivery',
-    featDeliverySub: 'Direct local store delivery within 15-30 mins to doorstep',
+    featDeliverySub: 'Direct local store delivery within 15-30 mins in Surat',
     featQualityTitle: '100% Pure & Fresh',
     featQualitySub: 'Branded, lab-tested & quality certified grocery ration',
     featPriceTitle: 'Best Wholesale Rates',
@@ -122,7 +122,7 @@ export const translations = {
     // Testimonials & Stats
     testimonialsTag: 'CUSTOMER TRUST • Verified Local Reviews',
     testimonialsTitle: 'What Our Customers Say',
-    testimonialsSub: 'Trusted by thousands of local families across Anand & Ahmedabad',
+    testimonialsSub: 'Trusted by thousands of local families across Surat',
     statFamilies: 'Happy Local Families',
     statSpeed: 'Fast Express Delivery',
     statQuality: 'Pure Healthy Superfoods',
@@ -137,10 +137,10 @@ export const translations = {
   },
   gu: {
     // Header & Navbar
-    topNotice: 'આણંદ અને અમદાવાદ વિસ્તારમાં ઝડપી એક્સપ્રેસ હોમ ડિલિવરી!',
+    topNotice: 'સુરતમાં ઝડપી એક્સપ્રેસ હોમ ડિલિવરી!',
     storeSubtitle: 'હેલ્ધી સીડ્સ અને મોક્સફૂડ સ્ટોર',
     locationTitle: 'સ્થાનિક સ્ટોર ફાસ્ટ ડિલિવરી',
-    locationSub: 'આણંદ અને અમદાવાદ વિસ્તાર',
+    locationSub: 'સુરત',
     searchPlaceholder: 'પમ્પકિન સીડ્સ, ચિયા સીડ્સ, અળસી, તેલ, ચા, મસાલા શોધો...',
     allProductsBtn: 'તમામ સામાન',
     cartBtn: 'કાર્ટ',
@@ -158,7 +158,7 @@ export const translations = {
 
     // Features Bar
     featDeliveryTitle: 'ઝડપી હોમ ડિલિવરી',
-    featDeliverySub: 'અમારા સ્થાનિક સ્ટોર તરફથી 15-30 મિનિટમાં ડિલિવરી',
+    featDeliverySub: 'અમારા સ્થાનિક સ્ટોર તરફથી સુરતમાં ઝડપી ડિલિવરી',
     featQualityTitle: '100% તાજું અને શુદ્ધ',
     featQualitySub: 'બ્રાન્ડેડ અને ચકાસેલો તાજો સામાન',
     featPriceTitle: 'બેસ્ટ ભાવ અને ઓફર',
@@ -256,7 +256,7 @@ export const translations = {
     // Testimonials & Stats
     testimonialsTag: 'ગ્રાહકોનો સંતોષ • ચકાસેલા રીવ્યુઝ',
     testimonialsTitle: 'અમારા ગ્રાહકો શું કહે છે?',
-    testimonialsSub: 'હજારો સ્થાનિક પરિવારો નો વિશ્વાસ - મોક્સફૂડ (Moxfood)',
+    testimonialsSub: 'હજારો સ્થાનિક પરિવારો નો વિશ્વાસ - સુરત',
     statFamilies: 'સંતોષ્ટ પરિવારો',
     statSpeed: 'ઝડપી હોમ ડિલિવરી',
     statQuality: '૧૦૦% શુદ્ધ સામાન',
