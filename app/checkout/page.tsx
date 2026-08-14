@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Script from 'next/script';
 import { useRouter } from 'next/navigation';
 import {
   ShoppingBag,
   ArrowLeft,
   MapPin,
-  CheckCircle2,
   Trash2,
   Plus,
   Minus,
@@ -32,6 +32,22 @@ interface PincodeStatus {
   error: string;
 }
 
+// Helper to dynamically load Razorpay script on demand
+const loadRazorpayScript = (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    if (typeof window !== 'undefined' && (window as any).Razorpay) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
+
 export default function CheckoutPage() {
   const router = useRouter();
   const {
@@ -43,6 +59,11 @@ export default function CheckoutPage() {
     totalWeightGrams,
   } = useCart();
   const { t, language } = useLanguage();
+
+  // Preload Razorpay Script on mount
+  useEffect(() => {
+    loadRazorpayScript();
+  }, []);
 
   // Collapsible toggle for Bill Breakdown (Taxes & Shipping fee hidden by default)
   const [isBillDetailOpen, setIsBillDetailOpen] = useState(false);
@@ -68,7 +89,7 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  // 1. Debounced India Post Pincode Lookup API
+  // Debounced India Post Pincode Lookup API
   useEffect(() => {
     const cleanPincode = formData.pincode.trim();
 
@@ -183,6 +204,19 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
 
     try {
+      // 0. Ensure Razorpay script is loaded dynamically
+      const isRzpLoaded = await loadRazorpayScript();
+      if (!isRzpLoaded || typeof window === 'undefined' || !(window as any).Razorpay) {
+        const failMsg =
+          language === 'gu'
+            ? 'પેમેન્ટ ગેટવે લોડ થઈ શક્યો નથી. મહેરબાની કરીને ફરી પ્રયાસ કરો.'
+            : 'Payment Gateway failed to load. Please check your internet connection.';
+        setErrorMsg(failMsg);
+        showError(failMsg);
+        setIsSubmitting(false);
+        return;
+      }
+
       // 1. Create Order via Razorpay Backend API
       const orderRes = await fetch('/api/razorpay/create-order', {
         method: 'POST',
@@ -324,374 +358,346 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-4 py-8 space-y-6 pb-28">
-      <Link
-        href="/"
-        className="inline-flex items-center gap-2 text-xs font-extrabold text-pink-600 hover:text-pink-700 transition-colors font-heading"
-      >
-        <ArrowLeft size={16} />
-        <span>{t('backToStore')}</span>
-      </Link>
+    <>
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
 
-      <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-heading">
-        {t('checkoutTitle')}
-      </h1>
+      <div className="w-full max-w-2xl mx-auto px-4 py-8 space-y-6 pb-28">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-xs font-extrabold text-pink-600 hover:text-pink-700 transition-colors font-heading"
+        >
+          <ArrowLeft size={16} />
+          <span>{t('backToStore')}</span>
+        </Link>
 
-      {errorMsg && (
-        <div className="p-4 bg-red-100 border border-red-300 text-red-800 text-xs font-extrabold rounded-2xl animate-shake">
-          ⚠️ {errorMsg}
-        </div>
-      )}
+        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-heading">
+          {t('checkoutTitle')}
+        </h1>
 
-      <div className="space-y-6">
-        {/* Step 1: Order Summary with Interactive Quantity Controls & Delete */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-          <h3 className="font-extrabold text-base text-slate-900 border-b border-slate-100 pb-3 flex items-center justify-between font-heading">
-            <div className="flex items-center gap-2">
-              <ShoppingBag size={20} className="text-blue-900" />
-              <span>1. {t('orderSummary')}</span>
-            </div>
-            <span className="text-xs text-pink-600 font-bold bg-pink-50 px-3 py-1 rounded-full border border-pink-100 font-heading">
-              {items.reduce((acc, item) => acc + item.quantity, 0)} {t('items')}
-            </span>
-          </h3>
+        {errorMsg && (
+          <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-xs font-bold rounded-2xl animate-shake flex items-center justify-between">
+            <span>⚠️ {errorMsg}</span>
+            <button onClick={() => setErrorMsg('')} className="text-red-500 hover:text-red-800 font-bold ml-2">✕</button>
+          </div>
+        )}
 
-          {/* Purchased Products List */}
-          <div className="space-y-3.5 max-h-96 overflow-y-auto pr-1">
-            {items.map((item) => (
-              <div
-                key={item.productId}
-                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs pb-3 border-b border-slate-100 font-medium"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-12 h-12 object-contain bg-slate-50 p-1 rounded-xl border border-slate-200 shrink-0"
-                  />
-                  <div className="min-w-0">
-                    <div className="font-bold text-slate-900 text-xs sm:text-sm font-heading truncate">
-                      {language === 'gu' && item.altNameGujarati ? item.altNameGujarati : item.name}
-                    </div>
-                    <div className="text-[11px] text-slate-500 font-semibold mt-0.5">
-                      {item.unit} • ₹{item.price} / unit
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
-                  {/* Quantity Counter Control (+ / -) */}
-                  <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
-                    <button
-                      type="button"
-                      onClick={() => updateQuantity(item.productId, item.quantity - 1)}
-                      className="w-7 h-7 rounded-lg bg-white hover:bg-pink-50 hover:text-pink-600 text-slate-700 font-bold flex items-center justify-center transition-colors shadow-sm cursor-pointer"
-                      aria-label="Decrease quantity"
-                    >
-                      <Minus size={14} />
-                    </button>
-                    <span className="w-8 text-center font-black text-slate-900 text-xs font-heading">
-                      {item.quantity}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                      className="w-7 h-7 rounded-lg bg-pink-600 hover:bg-pink-500 text-white font-bold flex items-center justify-center transition-colors shadow-sm cursor-pointer"
-                      aria-label="Increase quantity"
-                    >
-                      <Plus size={14} />
-                    </button>
-                  </div>
-
-                  {/* Subtotal & Delete Trash Button */}
-                  <div className="flex items-center gap-2">
-                    <div className="font-extrabold text-slate-900 text-sm font-heading w-16 text-right">
-                      ₹{item.price * item.quantity}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeFromCart(item.productId)}
-                      className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                      title="Remove item"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </div>
+        <div className="space-y-6">
+          {/* Step 1: Order Summary */}
+          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+            <h3 className="font-extrabold text-base text-slate-900 border-b border-slate-100 pb-3 flex items-center justify-between font-heading">
+              <div className="flex items-center gap-2">
+                <ShoppingBag size={20} className="text-blue-900" />
+                <span>1. {t('orderSummary')}</span>
               </div>
-            ))}
+              <span className="text-xs text-pink-600 font-bold bg-pink-50 px-3 py-1 rounded-full border border-pink-100 font-heading">
+                {items.reduce((acc, item) => acc + item.quantity, 0)} {t('items')}
+              </span>
+            </h3>
+
+            {/* Purchased Products List */}
+            <div className="space-y-3.5 max-h-96 overflow-y-auto pr-1">
+              {items.map((item) => (
+                <div
+                  key={item.productId}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs pb-3 border-b border-slate-100 font-medium"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-12 h-12 object-contain bg-slate-50 p-1 rounded-xl border border-slate-200 shrink-0"
+                    />
+                    <div className="min-w-0">
+                      <div className="font-bold text-slate-900 text-xs sm:text-sm font-heading truncate">
+                        {language === 'gu' && item.altNameGujarati ? item.altNameGujarati : item.name}
+                      </div>
+                      <div className="text-[11px] text-slate-500 font-semibold mt-0.5">
+                        {item.unit} • ₹{item.price} / unit
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                    {/* Quantity Counter Control (+ / -) */}
+                    <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+                      <button
+                        type="button"
+                        onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                        className="w-7 h-7 rounded-lg bg-white hover:bg-pink-50 hover:text-pink-600 text-slate-700 font-bold flex items-center justify-center transition-colors shadow-sm cursor-pointer"
+                        aria-label="Decrease quantity"
+                      >
+                        <Minus size={14} />
+                      </button>
+                      <span className="w-8 text-center font-black text-slate-900 text-xs font-heading">
+                        {item.quantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                        className="w-7 h-7 rounded-lg bg-pink-600 hover:bg-pink-500 text-white font-bold flex items-center justify-center transition-colors shadow-sm cursor-pointer"
+                        aria-label="Increase quantity"
+                      >
+                        <Plus size={14} />
+                      </button>
+                    </div>
+
+                    {/* Subtotal & Delete Trash Button */}
+                    <div className="flex items-center gap-2">
+                      <div className="font-extrabold text-slate-900 text-sm font-heading w-16 text-right">
+                        ₹{item.price * item.quantity}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeFromCart(item.productId)}
+                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                        title="Remove item"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
-        </div>
+          {/* Step 2: Customer Information & Delivery Address */}
+          <div className="bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+            <form onSubmit={handleRazorpayPayment} className="space-y-6">
+              <div className="space-y-4">
+                <h3 className="font-extrabold text-base text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3 font-heading">
+                  <MapPin size={20} className="text-pink-600" />
+                  <span>2. {language === 'gu' ? 'ગ્રાહક અને ડિલિવરી સરનામું' : 'Customer & Delivery Address'}</span>
+                </h3>
 
-        {/* Step 2: Customer Information & Delivery Address */}
-        <div className="bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
-          <form onSubmit={handleRazorpayPayment} className="space-y-6">
-            <div className="space-y-4">
-              <h3 className="font-extrabold text-base text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3 font-heading">
-                <MapPin size={20} className="text-pink-600" />
-                <span>2. {language === 'gu' ? 'ગ્રાહક અને ડિલિવરી સરનામું' : 'Customer & Delivery Address'}</span>
-              </h3>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    {t('fullName')}
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    required
-                    placeholder="e.g. Ramesh Patel"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 text-xs text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    {t('mobile')}
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    required
-                    maxLength={10}
-                    placeholder="10-digit WhatsApp Number"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 text-xs text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  {t('fullAddress')}
-                </label>
-                <textarea
-                  name="address"
-                  required
-                  rows={2}
-                  placeholder="House No, Building, Street Name, Area"
-                  value={formData.address}
-                  onChange={handleChange}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 text-xs text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Postal Pincode *
-                  </label>
-                  <div className="relative">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      {t('fullName')}
+                    </label>
                     <input
                       type="text"
-                      name="pincode"
+                      name="name"
                       required
-                      maxLength={6}
-                      placeholder="e.g. 395006"
-                      value={formData.pincode}
+                      placeholder="e.g. Ramesh Patel"
+                      value={formData.name}
                       onChange={handleChange}
                       className="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 text-xs text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white"
                     />
-                    {pincodeStatus.loading && (
-                      <RefreshCw size={16} className="animate-spin text-pink-600 absolute right-3 top-1/2 -translate-y-1/2" />
-                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      {t('mobile')}
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      required
+                      maxLength={10}
+                      placeholder="10-digit WhatsApp Number"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      className="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 text-xs text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white"
+                    />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    {t('landmark')}
+                    {t('fullAddress')}
+                  </label>
+                  <textarea
+                    name="address"
+                    required
+                    rows={2}
+                    placeholder="House No, Building, Street Name, Area"
+                    value={formData.address}
+                    onChange={handleChange}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 text-xs text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Postal Pincode *
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        name="pincode"
+                        required
+                        maxLength={6}
+                        placeholder="e.g. 395006"
+                        value={formData.pincode}
+                        onChange={handleChange}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 text-xs text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white"
+                      />
+                      {pincodeStatus.loading && (
+                        <RefreshCw size={16} className="animate-spin text-pink-600 absolute right-3 top-1/2 -translate-y-1/2" />
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      {t('landmark')}
+                    </label>
+                    <input
+                      type="text"
+                      name="landmark"
+                      placeholder="Near Temple / School / Hospital"
+                      value={formData.landmark}
+                      onChange={handleChange}
+                      className="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 text-xs text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    {t('orderNotes')}
                   </label>
                   <input
                     type="text"
-                    name="landmark"
-                    placeholder="Near Temple / School / Hospital"
-                    value={formData.landmark}
+                    name="notes"
+                    placeholder="Optional delivery instructions"
+                    value={formData.notes}
                     onChange={handleChange}
                     className="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 text-xs text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white"
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  {t('orderNotes')}
-                </label>
-                <input
-                  type="text"
-                  name="notes"
-                  placeholder="Optional delivery instructions"
-                  value={formData.notes}
-                  onChange={handleChange}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 text-xs text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white"
-                />
-              </div>
-            </div>
-
-            {/* Submit Payment Button inside form */}
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full bg-gradient-to-r from-pink-600 via-rose-600 to-pink-600 hover:from-pink-500 hover:to-rose-500 text-white font-extrabold py-4 px-6 rounded-2xl shadow-xl shadow-pink-600/30 flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-50 cursor-pointer text-sm font-heading"
-            >
-              {isSubmitting ? (
-                <>
-                  <RefreshCw size={18} className="animate-spin" />
-                  <span>{t('processingOrder')}</span>
-                </>
-              ) : (
-                <>
-                  <CreditCard size={20} />
-                  <span>Pay Now ₹{payableTotal}</span>
-                </>
-              )}
-            </button>
-          </form>
+              {/* Submit Payment Button inside form */}
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-gradient-to-r from-pink-600 via-rose-600 to-pink-600 hover:from-pink-500 hover:to-rose-500 text-white font-extrabold py-4 px-6 rounded-2xl shadow-xl shadow-pink-600/30 flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-50 cursor-pointer text-sm font-heading"
+              >
+                {isSubmitting ? (
+                  <>
+                    <RefreshCw size={18} className="animate-spin" />
+                    <span>{t('processingOrder')}</span>
+                  </>
+                ) : (
+                  <>
+                    <CreditCard size={20} />
+                    <span>Pay Now ₹{payableTotal}</span>
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
         </div>
-      </div>
 
-      {/* Step 3: Bill Summary */}
-      <div className="bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-3">
-        {/* Bill Summary Section with Collapsible Toggle Disclosure (Taxes & Shipping hidden by default) */}
-        <div className="space-y-3">
-          {/* Clickable Toggle Disclosure Header */}
-          <button
-            type="button"
-            onClick={() => setIsBillDetailOpen(!isBillDetailOpen)}
-            className="w-full flex items-center justify-between p-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl transition-all shadow-md cursor-pointer font-heading"
-          >
-            <div className="flex flex-col text-left">
-              <span className="text-xs font-extrabold flex items-center gap-1.5 text-pink-300">
-                <span>{language === 'gu' ? 'કુલ બિલ (Total Bill)' : 'Total Bill'}</span>
-                <span className="text-[10px] font-normal text-slate-300">
-                  (Incl. taxes &amp; shipping charges)
-                </span>
-              </span>
-              <span className="text-base font-black text-white">₹{payableTotal}</span>
-            </div>
-
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-black/30 border border-white/10 text-pink-400">
-              {isBillDetailOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-            </div>
-          </button>
-
-          {/* Collapsible Body (Hidden by default, click toggle to expand) */}
-          {isBillDetailOpen && (
-            <div className="space-y-2.5 text-xs p-4 bg-slate-50 rounded-2xl border border-slate-200 animate-fade-in font-semibold">
-              <div className="flex justify-between text-slate-600">
-                <span>{t('subtotal')}</span>
-                <span className="font-bold text-slate-900 font-heading">₹{subtotal}</span>
-              </div>
-
-              {/* Total Weight Indicator */}
-              <div className="flex justify-between text-slate-600">
-                <span className="flex items-center gap-1">
-                  <Scale size={14} className="text-pink-600" />
-                  <span>
-                    {language === 'gu' ? 'કુલ વજન (Total Weight):' : 'Total Order Weight:'}
+        {/* Step 3: Bill Summary */}
+        <div className="bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-3">
+          {/* Bill Summary Section with Collapsible Toggle Disclosure */}
+          <div className="space-y-3">
+            {/* Clickable Toggle Disclosure Header */}
+            <button
+              type="button"
+              onClick={() => setIsBillDetailOpen(!isBillDetailOpen)}
+              className="w-full flex items-center justify-between p-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl transition-all shadow-md cursor-pointer font-heading"
+            >
+              <div className="flex flex-col text-left">
+                <span className="text-xs font-extrabold flex items-center gap-1.5 text-pink-300">
+                  <span>{language === 'gu' ? 'કુલ બિલ (Total Bill)' : 'Total Bill'}</span>
+                  <span className="text-[10px] font-normal text-slate-300">
+                    (Incl. taxes &amp; shipping charges)
                   </span>
                 </span>
-                <span className="font-mono text-slate-800 font-bold">
-                  {totalWeightGrams < 1000 ? `${totalWeightGrams} g` : `${(totalWeightGrams / 1000).toFixed(1)} kg`}
-                </span>
+                <span className="text-base font-black text-white">₹{payableTotal}</span>
               </div>
 
-              {/* Delivery Charge Row */}
-              <div className="flex justify-between items-center text-slate-600">
-                <div className="flex items-center gap-1">
-                  <Truck size={14} className="text-blue-900" />
-                  <span>Shipping Fee:</span>
-                  {pincodeStatus.verified && (
-                    <span className="text-[11px] text-slate-500 font-normal font-mono">
-                      ({billableKg} kg × ₹{ratePerKg})
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-black/30 border border-white/10 text-pink-400">
+                {isBillDetailOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+              </div>
+            </button>
+
+            {/* Collapsible Body */}
+            {isBillDetailOpen && (
+              <div className="space-y-2.5 text-xs p-4 bg-slate-50 rounded-2xl border border-slate-200 animate-fade-in font-semibold">
+                <div className="flex justify-between text-slate-600">
+                  <span>{t('subtotal')}</span>
+                  <span className="font-bold text-slate-900 font-heading">₹{subtotal}</span>
+                </div>
+
+                {/* Total Weight Indicator */}
+                <div className="flex justify-between text-slate-600">
+                  <span className="flex items-center gap-1">
+                    <Scale size={14} className="text-pink-600" />
+                    <span>
+                      {language === 'gu' ? 'કુલ વજન (Total Weight):' : 'Total Order Weight:'}
+                    </span>
+                  </span>
+                  <span className="font-mono text-slate-800 font-bold">
+                    {totalWeightGrams < 1000 ? `${totalWeightGrams} g` : `${(totalWeightGrams / 1000).toFixed(1)} kg`}
+                  </span>
+                </div>
+
+                {/* Delivery Charge Row (Removed per-kg text multiplier per request) */}
+                <div className="flex justify-between items-center text-slate-600">
+                  <div className="flex items-center gap-1">
+                    <Truck size={14} className="text-blue-900" />
+                    <span>Shipping Fee:</span>
+                  </div>
+                  {pincodeStatus.verified ? (
+                    <span className="font-bold text-pink-600 font-heading text-sm">₹{deliveryCharge}</span>
+                  ) : (
+                    <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                      Enter Pincode Above
                     </span>
                   )}
                 </div>
-                {pincodeStatus.verified ? (
-                  <span className="font-bold text-pink-600 font-heading text-sm">₹{deliveryCharge}</span>
-                ) : (
-                  <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                    Enter Pincode Below
-                  </span>
+
+                {/* Pincode Error Banner */}
+                {pincodeStatus.error && (
+                  <div className="bg-red-50 p-3 rounded-xl border border-red-200 text-[11px] flex items-center gap-1.5 text-red-600 font-bold">
+                    <AlertCircle size={14} className="shrink-0" />
+                    <span>{pincodeStatus.error}</span>
+                  </div>
                 )}
+
+                <div className="flex justify-between text-base font-black text-slate-900 pt-2 border-t border-slate-200 font-heading">
+                  <span>{t('payableTotal')}</span>
+                  <span className="text-blue-900 font-heading">₹{payableTotal}</span>
+                </div>
               </div>
-
-              {/* Pincode & Location Status Banner */}
-              {pincodeStatus.loading && (
-                <div className="bg-white p-3 rounded-xl border border-slate-200 text-[11px]">
-                  <div className="flex items-center gap-2 text-slate-600 font-bold">
-                    <RefreshCw size={14} className="animate-spin text-pink-600" />
-                    <span>Checking Postal Pincode & State...</span>
-                  </div>
-                </div>
-              )}
-
-              {pincodeStatus.verified && (
-                <div className="bg-emerald-50/80 p-3 rounded-xl border border-emerald-200 text-[11px] animate-fade-in">
-                  <div className="flex items-center justify-between text-emerald-900 font-extrabold font-heading">
-                    <span className="flex items-center gap-1.5">
-                      <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
-                      <span>
-                        {pincodeStatus.isGujarat
-                          ? `📍 Gujarat (${pincodeStatus.district || 'State'})`
-                          : `📍 ${pincodeStatus.stateName} (Out of Gujarat)`}
-                      </span>
-                    </span>
-                    <span className="bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded text-[10px] font-mono border border-emerald-300">
-                      {pincodeStatus.isGujarat ? 'Rate: ₹40 / kg' : 'Rate: ₹70 / kg'}
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {pincodeStatus.error && (
-                <div className="bg-red-50 p-3 rounded-xl border border-red-200 text-[11px] flex items-center gap-1.5 text-red-600 font-bold">
-                  <AlertCircle size={14} className="shrink-0" />
-                  <span>{pincodeStatus.error}</span>
-                </div>
-              )}
-
-              <div className="flex justify-between text-base font-black text-slate-900 pt-2 border-t border-slate-200 font-heading">
-                <span>{t('payableTotal')}</span>
-                <span className="text-blue-900 font-heading">₹{payableTotal}</span>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Sticky Bottom Action Bar with "To Pay" Amount & "Pay Now" Button (Direct Instant Payment Bar) */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 p-3 sm:px-10 shadow-2xl flex items-center justify-between gap-4 font-heading">
-        <div className="flex flex-col text-left">
-          <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">
-            {language === 'gu' ? 'ચૂકવવાની રકમ (To Pay)' : 'To Pay'}
-          </span>
-          <span className="text-lg sm:text-xl font-black text-slate-900">
-            ₹{payableTotal}
-          </span>
+            )}
+          </div>
         </div>
 
-        <button
-          type="button"
-          onClick={handleRazorpayPayment}
-          disabled={isSubmitting}
-          className="bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-extrabold text-sm sm:text-base px-6 sm:px-10 py-3 sm:py-3.5 rounded-2xl shadow-lg shadow-pink-600/30 flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50 cursor-pointer font-heading"
-        >
-          {isSubmitting ? (
-            <RefreshCw size={20} className="animate-spin" />
-          ) : (
-            <>
-              <span>{language === 'gu' ? 'પેમેન્ટ કરો (Pay Now)' : 'Pay Now'}</span>
-              <CreditCard size={18} />
-            </>
-          )}
-        </button>
+        {/* Sticky Bottom Action Bar with "To Pay" Amount & "Pay Now" Button */}
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 p-3 sm:px-10 shadow-2xl flex items-center justify-between gap-4 font-heading">
+          <div className="flex flex-col text-left">
+            <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">
+              {language === 'gu' ? 'ચૂકવવાની રકમ (To Pay)' : 'To Pay'}
+            </span>
+            <span className="text-lg sm:text-xl font-black text-slate-900">
+              ₹{payableTotal}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleRazorpayPayment}
+            disabled={isSubmitting}
+            className="bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-extrabold text-sm sm:text-base px-6 sm:px-10 py-3 sm:py-3.5 rounded-2xl shadow-lg shadow-pink-600/30 flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50 cursor-pointer font-heading"
+          >
+            {isSubmitting ? (
+              <RefreshCw size={20} className="animate-spin" />
+            ) : (
+              <>
+                <span>{language === 'gu' ? 'પેમેન્ટ કરો (Pay Now)' : 'Pay Now'}</span>
+                <CreditCard size={18} />
+              </>
+            )}
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
