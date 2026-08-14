@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Plus, Trash2, Upload, RefreshCw, X, Image as ImageIcon, ExternalLink } from 'lucide-react';
+import { Plus, Trash2, Edit2, Upload, RefreshCw, X, Image as ImageIcon, ExternalLink } from 'lucide-react';
 import { compressImageFile } from '@/lib/imageUtils';
 import { useToast } from '@/context/ToastContext';
 
@@ -10,6 +10,7 @@ export default function AdminBannersPage() {
   const [banners, setBanners] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -38,13 +39,36 @@ export default function AdminBannersPage() {
     }
   };
 
+  const handleOpenAddModal = () => {
+    setEditingId(null);
+    setFormData({
+      title: '',
+      subtitle: '',
+      image: '',
+      link: '/products?category=seeds-superfoods',
+      buttonText: 'Shop Healthy Seeds',
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (b: any) => {
+    setEditingId(b._id);
+    setFormData({
+      title: b.title || '',
+      subtitle: b.subtitle || '',
+      image: b.image || '',
+      link: b.link || '/products?category=seeds-superfoods',
+      buttonText: b.buttonText || 'Shop Healthy Seeds',
+    });
+    setIsModalOpen(true);
+  };
+
   const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setUploading(true);
     try {
-      // Compress image on client side before upload to prevent 413 error
       const compressedBase64 = await compressImageFile(file, 1400, 800, 0.8);
 
       const res = await fetch('/api/upload', {
@@ -84,20 +108,29 @@ export default function AdminBannersPage() {
     }
 
     try {
-      const res = await fetch('/api/banners', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+      let res;
+      if (editingId) {
+        res = await fetch(`/api/banners/${editingId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
+      } else {
+        res = await fetch('/api/banners', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
+      }
 
       const data = await res.json();
       if (data.success) {
-        showSuccess('New hero banner published successfully!');
+        showSuccess(editingId ? 'Hero banner updated successfully!' : 'New hero banner published successfully!');
         setIsModalOpen(false);
         setFormData({ title: '', subtitle: '', image: '', link: '/products?category=seeds-superfoods', buttonText: 'Shop Healthy Seeds' });
         fetchBanners();
       } else {
-        showError(data.error || 'Failed to publish banner.');
+        showError(data.error || 'Failed to save banner.');
       }
     } catch (err: any) {
       showError('Error saving banner: ' + err.message);
@@ -130,12 +163,12 @@ export default function AdminBannersPage() {
             Hero Slider Banner Management
           </h1>
           <p className="text-xs text-slate-500 font-medium">
-            Upload and manage custom promotional carousel banners for the Moxfood home page slider
+            Upload, edit and manage custom promotional carousel banners for the Moxfood home page slider
           </p>
         </div>
 
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={handleOpenAddModal}
           className="bg-pink-600 hover:bg-pink-500 text-white font-extrabold text-xs px-4 py-3 rounded-xl shadow flex items-center gap-1.5 transition-colors self-start sm:self-auto cursor-pointer font-heading"
         >
           <Plus size={18} />
@@ -180,13 +213,24 @@ export default function AdminBannersPage() {
                   <span className="bg-blue-50 text-blue-900 px-2.5 py-0.5 rounded-full font-bold text-[11px] font-heading">
                     Button: {b.buttonText || 'Shop Now'}
                   </span>
-                  <button
-                    onClick={() => handleDelete(b._id, b.title)}
-                    className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                    title="Delete Banner"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+
+                  {/* Action Buttons: Edit & Delete */}
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => handleOpenEditModal(b)}
+                      className="p-1.5 text-slate-500 hover:text-blue-900 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                      title="Edit Banner"
+                    >
+                      <Edit2 size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(b._id, b.title)}
+                      className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                      title="Delete Banner"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -194,13 +238,13 @@ export default function AdminBannersPage() {
         </div>
       )}
 
-      {/* Upload Modal */}
+      {/* Add / Edit Banner Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
               <h3 className="font-extrabold text-slate-900 text-base font-heading">
-                Upload New Hero Banner Image
+                {editingId ? 'Edit Hero Banner Image & Link' : 'Upload New Hero Banner Image'}
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -294,7 +338,7 @@ export default function AdminBannersPage() {
                 type="submit"
                 className="w-full bg-pink-600 hover:bg-pink-500 text-white font-extrabold py-3.5 rounded-xl shadow-lg transition-all text-xs cursor-pointer font-heading"
               >
-                Save & Publish Hero Banner
+                {editingId ? 'Update Hero Banner' : 'Save & Publish Hero Banner'}
               </button>
             </form>
           </div>
