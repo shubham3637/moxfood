@@ -11,17 +11,24 @@ export async function PUT(
     const { id } = await props.params;
     const body = await request.json();
 
-    const { name, altNameGujarati, slug, image, iconName } = body;
+    const { name, altNameGujarati, slug, image, iconName, sortOrder, serialNumber } = body;
+
+    const updateFields: any = {
+      name,
+      altNameGujarati: altNameGujarati || '',
+      slug: slug ? slug.toLowerCase().replace(/\s+/g, '-') : undefined,
+      image: image || '',
+      iconName: iconName || 'ShoppingBag',
+    };
+
+    if (sortOrder !== undefined || serialNumber !== undefined) {
+      const parsed = Number(sortOrder ?? serialNumber ?? 999);
+      updateFields.sortOrder = isNaN(parsed) ? 999 : parsed;
+    }
 
     const updatedCategory = await Category.findByIdAndUpdate(
       id,
-      {
-        name,
-        altNameGujarati: altNameGujarati || '',
-        slug: slug ? slug.toLowerCase().replace(/\s+/g, '-') : undefined,
-        image: image || '',
-        iconName: iconName || 'ShoppingBag',
-      },
+      updateFields,
       { new: true, runValidators: true }
     );
 

@@ -16,6 +16,7 @@ import {
   Cookie,
   Coffee,
   Sparkles,
+  Hash,
 } from 'lucide-react';
 import { compressImageFile } from '@/lib/imageUtils';
 import { useToast } from '@/context/ToastContext';
@@ -34,6 +35,7 @@ export default function AdminCategoriesPage() {
     slug: '',
     image: '',
     iconName: 'Leaf',
+    sortOrder: '',
   });
 
   useEffect(() => {
@@ -62,6 +64,7 @@ export default function AdminCategoriesPage() {
       slug: '',
       image: '',
       iconName: 'Leaf',
+      sortOrder: '',
     });
     setIsModalOpen(true);
   };
@@ -74,6 +77,7 @@ export default function AdminCategoriesPage() {
       slug: cat.slug || '',
       image: cat.image || '',
       iconName: cat.iconName || 'Leaf',
+      sortOrder: cat.sortOrder !== undefined && cat.sortOrder !== 999 ? String(cat.sortOrder) : '',
     });
     setIsModalOpen(true);
   };
@@ -126,19 +130,24 @@ export default function AdminCategoriesPage() {
       return;
     }
 
+    const payload = {
+      ...formData,
+      sortOrder: formData.sortOrder !== '' ? Number(formData.sortOrder) : 999,
+    };
+
     try {
       let res;
       if (editingId) {
         res = await fetch(`/api/categories/${editingId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(payload),
         });
       } else {
         res = await fetch('/api/categories', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(payload),
         });
       }
 
@@ -201,7 +210,7 @@ export default function AdminCategoriesPage() {
           <h1 className="text-2xl font-black text-slate-900 tracking-tight font-heading">
             Category Management
           </h1>
-          <p className="text-xs text-slate-500 font-medium">Manage all Moxfood store sections and product categories</p>
+          <p className="text-xs text-slate-500 font-medium">Manage all Moxfood store sections, serial number sorting & category display order</p>
         </div>
 
         <button
@@ -222,8 +231,15 @@ export default function AdminCategoriesPage() {
           {categories.map((cat) => (
             <div
               key={cat._id || cat.slug}
-              className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow group"
+              className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow group relative overflow-hidden"
             >
+              {/* Serial No. Badge */}
+              {cat.sortOrder !== undefined && cat.sortOrder !== 999 && (
+                <span className="absolute top-2.5 right-3 bg-pink-50 text-pink-600 text-[10px] font-black font-mono px-2 py-0.5 rounded-full border border-pink-100">
+                  #{cat.sortOrder}
+                </span>
+              )}
+
               <div className="flex items-center gap-3 min-w-0">
                 {cat.image ? (
                   <img
@@ -247,7 +263,7 @@ export default function AdminCategoriesPage() {
               </div>
 
               {/* Edit & Delete Action Buttons */}
-              <div className="flex items-center gap-1.5 shrink-0 pl-2">
+              <div className="flex items-center gap-1.5 shrink-0 pl-2 pt-3">
                 <button
                   onClick={() => handleOpenEditModal(cat)}
                   className="p-2 text-slate-500 hover:text-blue-900 bg-slate-100 hover:bg-blue-50 rounded-xl transition-colors cursor-pointer"
@@ -274,7 +290,7 @@ export default function AdminCategoriesPage() {
           <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl relative">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
               <h3 className="font-extrabold text-slate-900 text-base font-heading">
-                {editingId ? 'Edit Category' : 'Add New Category'}
+                {editingId ? 'Edit Category & Serial No.' : 'Add New Category & Serial No.'}
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -285,16 +301,33 @@ export default function AdminCategoriesPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4 text-xs font-semibold">
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">Category Name (English) *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Healthy Seeds & Superfoods"
-                  value={formData.name}
-                  onChange={handleNameChange}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-pink-500 focus:outline-none"
-                />
+              <div className="grid grid-cols-12 gap-3">
+                <div className="col-span-8">
+                  <label className="block font-bold text-slate-700 mb-1">Category Name (English) *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Healthy Seeds & Superfoods"
+                    value={formData.name}
+                    onChange={handleNameChange}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-pink-500 focus:outline-none"
+                  />
+                </div>
+
+                <div className="col-span-4">
+                  <label className="block font-bold text-slate-700 mb-1 flex items-center gap-1">
+                    <Hash size={13} className="text-pink-600" />
+                    <span>Serial No. (ક્રમ)</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    placeholder="e.g. 1, 2, 3"
+                    value={formData.sortOrder}
+                    onChange={(e) => setFormData({ ...formData, sortOrder: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono font-extrabold focus:ring-2 focus:ring-pink-500 focus:outline-none"
+                  />
+                </div>
               </div>
 
               <div>
