@@ -422,113 +422,6 @@ export default function CheckoutPage() {
             ))}
           </div>
 
-          {/* Bill Summary Section with Collapsible Toggle Disclosure (Taxes & Shipping hidden by default) */}
-          <div className="pt-3 border-t border-slate-100 space-y-3">
-            {/* Clickable Toggle Disclosure Header */}
-            <button
-              type="button"
-              onClick={() => setIsBillDetailOpen(!isBillDetailOpen)}
-              className="w-full flex items-center justify-between p-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl transition-all shadow-md cursor-pointer font-heading"
-            >
-              <div className="flex flex-col text-left">
-                <span className="text-xs font-extrabold flex items-center gap-1.5 text-pink-300">
-                  <span>{language === 'gu' ? 'કુલ બિલ (Total Bill)' : 'Total Bill'}</span>
-                  <span className="text-[10px] font-normal text-slate-300">
-                    (Incl. taxes &amp; shipping charges)
-                  </span>
-                </span>
-                <span className="text-base font-black text-white">₹{payableTotal}</span>
-              </div>
-
-              <div className="flex items-center gap-1.5 text-xs font-bold text-pink-400 bg-black/30 px-3 py-1.5 rounded-xl border border-white/10">
-                <span>{isBillDetailOpen ? (language === 'gu' ? 'છુપાવો' : 'Hide details') : (language === 'gu' ? 'વિગત જુઓ' : 'View details')}</span>
-                {isBillDetailOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-              </div>
-            </button>
-
-            {/* Collapsible Body (Hidden by default, click toggle to expand) */}
-            {isBillDetailOpen && (
-              <div className="space-y-2.5 text-xs p-4 bg-slate-50 rounded-2xl border border-slate-200 animate-fade-in font-semibold">
-                <div className="flex justify-between text-slate-600">
-                  <span>{t('subtotal')}</span>
-                  <span className="font-bold text-slate-900 font-heading">₹{subtotal}</span>
-                </div>
-
-                {/* Total Weight Indicator */}
-                <div className="flex justify-between text-slate-600">
-                  <span className="flex items-center gap-1">
-                    <Scale size={14} className="text-pink-600" />
-                    <span>
-                      {language === 'gu' ? 'કુલ વજન (Total Weight):' : 'Total Order Weight:'}
-                    </span>
-                  </span>
-                  <span className="font-mono text-slate-800 font-bold">
-                    {totalWeightGrams < 1000 ? `${totalWeightGrams} g` : `${(totalWeightGrams / 1000).toFixed(1)} kg`}
-                  </span>
-                </div>
-
-                {/* Delivery Charge Row */}
-                <div className="flex justify-between items-center text-slate-600">
-                  <div className="flex items-center gap-1">
-                    <Truck size={14} className="text-blue-900" />
-                    <span>Shipping Fee:</span>
-                    {pincodeStatus.verified && (
-                      <span className="text-[11px] text-slate-500 font-normal font-mono">
-                        ({billableKg} kg × ₹{ratePerKg})
-                      </span>
-                    )}
-                  </div>
-                  {pincodeStatus.verified ? (
-                    <span className="font-bold text-pink-600 font-heading text-sm">₹{deliveryCharge}</span>
-                  ) : (
-                    <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                      Enter Pincode Below
-                    </span>
-                  )}
-                </div>
-
-                {/* Pincode & Location Status Banner */}
-                {pincodeStatus.loading && (
-                  <div className="bg-white p-3 rounded-xl border border-slate-200 text-[11px]">
-                    <div className="flex items-center gap-2 text-slate-600 font-bold">
-                      <RefreshCw size={14} className="animate-spin text-pink-600" />
-                      <span>Checking Postal Pincode & State...</span>
-                    </div>
-                  </div>
-                )}
-
-                {pincodeStatus.verified && (
-                  <div className="bg-emerald-50/80 p-3 rounded-xl border border-emerald-200 text-[11px] animate-fade-in">
-                    <div className="flex items-center justify-between text-emerald-900 font-extrabold font-heading">
-                      <span className="flex items-center gap-1.5">
-                        <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
-                        <span>
-                          {pincodeStatus.isGujarat
-                            ? `📍 Gujarat (${pincodeStatus.district || 'State'})`
-                            : `📍 ${pincodeStatus.stateName} (Out of Gujarat)`}
-                        </span>
-                      </span>
-                      <span className="bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded text-[10px] font-mono border border-emerald-300">
-                        {pincodeStatus.isGujarat ? 'Rate: ₹40 / kg' : 'Rate: ₹70 / kg'}
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {pincodeStatus.error && (
-                  <div className="bg-red-50 p-3 rounded-xl border border-red-200 text-[11px] flex items-center gap-1.5 text-red-600 font-bold">
-                    <AlertCircle size={14} className="shrink-0" />
-                    <span>{pincodeStatus.error}</span>
-                  </div>
-                )}
-
-                <div className="flex justify-between text-base font-black text-slate-900 pt-2 border-t border-slate-200 font-heading">
-                  <span>{t('payableTotal')}</span>
-                  <span className="text-blue-900 font-heading">₹{payableTotal}</span>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
 
         {/* Step 2: Customer Information & Delivery Address */}
@@ -659,6 +552,116 @@ export default function CheckoutPage() {
               )}
             </button>
           </form>
+        </div>
+      </div>
+
+      {/* Step 3: Bill Summary */}
+      <div className="bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-3">
+        {/* Bill Summary Section with Collapsible Toggle Disclosure (Taxes & Shipping hidden by default) */}
+        <div className="space-y-3">
+          {/* Clickable Toggle Disclosure Header */}
+          <button
+            type="button"
+            onClick={() => setIsBillDetailOpen(!isBillDetailOpen)}
+            className="w-full flex items-center justify-between p-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl transition-all shadow-md cursor-pointer font-heading"
+          >
+            <div className="flex flex-col text-left">
+              <span className="text-xs font-extrabold flex items-center gap-1.5 text-pink-300">
+                <span>{language === 'gu' ? 'કુલ બિલ (Total Bill)' : 'Total Bill'}</span>
+                <span className="text-[10px] font-normal text-slate-300">
+                  (Incl. taxes &amp; shipping charges)
+                </span>
+              </span>
+              <span className="text-base font-black text-white">₹{payableTotal}</span>
+            </div>
+
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-black/30 border border-white/10 text-pink-400">
+              {isBillDetailOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+            </div>
+          </button>
+
+          {/* Collapsible Body (Hidden by default, click toggle to expand) */}
+          {isBillDetailOpen && (
+            <div className="space-y-2.5 text-xs p-4 bg-slate-50 rounded-2xl border border-slate-200 animate-fade-in font-semibold">
+              <div className="flex justify-between text-slate-600">
+                <span>{t('subtotal')}</span>
+                <span className="font-bold text-slate-900 font-heading">₹{subtotal}</span>
+              </div>
+
+              {/* Total Weight Indicator */}
+              <div className="flex justify-between text-slate-600">
+                <span className="flex items-center gap-1">
+                  <Scale size={14} className="text-pink-600" />
+                  <span>
+                    {language === 'gu' ? 'કુલ વજન (Total Weight):' : 'Total Order Weight:'}
+                  </span>
+                </span>
+                <span className="font-mono text-slate-800 font-bold">
+                  {totalWeightGrams < 1000 ? `${totalWeightGrams} g` : `${(totalWeightGrams / 1000).toFixed(1)} kg`}
+                </span>
+              </div>
+
+              {/* Delivery Charge Row */}
+              <div className="flex justify-between items-center text-slate-600">
+                <div className="flex items-center gap-1">
+                  <Truck size={14} className="text-blue-900" />
+                  <span>Shipping Fee:</span>
+                  {pincodeStatus.verified && (
+                    <span className="text-[11px] text-slate-500 font-normal font-mono">
+                      ({billableKg} kg × ₹{ratePerKg})
+                    </span>
+                  )}
+                </div>
+                {pincodeStatus.verified ? (
+                  <span className="font-bold text-pink-600 font-heading text-sm">₹{deliveryCharge}</span>
+                ) : (
+                  <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                    Enter Pincode Below
+                  </span>
+                )}
+              </div>
+
+              {/* Pincode & Location Status Banner */}
+              {pincodeStatus.loading && (
+                <div className="bg-white p-3 rounded-xl border border-slate-200 text-[11px]">
+                  <div className="flex items-center gap-2 text-slate-600 font-bold">
+                    <RefreshCw size={14} className="animate-spin text-pink-600" />
+                    <span>Checking Postal Pincode & State...</span>
+                  </div>
+                </div>
+              )}
+
+              {pincodeStatus.verified && (
+                <div className="bg-emerald-50/80 p-3 rounded-xl border border-emerald-200 text-[11px] animate-fade-in">
+                  <div className="flex items-center justify-between text-emerald-900 font-extrabold font-heading">
+                    <span className="flex items-center gap-1.5">
+                      <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
+                      <span>
+                        {pincodeStatus.isGujarat
+                          ? `📍 Gujarat (${pincodeStatus.district || 'State'})`
+                          : `📍 ${pincodeStatus.stateName} (Out of Gujarat)`}
+                      </span>
+                    </span>
+                    <span className="bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded text-[10px] font-mono border border-emerald-300">
+                      {pincodeStatus.isGujarat ? 'Rate: ₹40 / kg' : 'Rate: ₹70 / kg'}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {pincodeStatus.error && (
+                <div className="bg-red-50 p-3 rounded-xl border border-red-200 text-[11px] flex items-center gap-1.5 text-red-600 font-bold">
+                  <AlertCircle size={14} className="shrink-0" />
+                  <span>{pincodeStatus.error}</span>
+                </div>
+              )}
+
+              <div className="flex justify-between text-base font-black text-slate-900 pt-2 border-t border-slate-200 font-heading">
+                <span>{t('payableTotal')}</span>
+                <span className="text-blue-900 font-heading">₹{payableTotal}</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
