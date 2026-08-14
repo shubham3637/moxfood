@@ -21,6 +21,7 @@ export interface IProduct extends Document {
   description?: string;
   isFeatured: boolean;
   isTrending?: boolean;
+  sortOrder?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -50,6 +51,7 @@ const ProductSchema: Schema<IProduct> = new Schema(
     description: { type: String, default: '' },
     isFeatured: { type: Boolean, default: false },
     isTrending: { type: Boolean, default: false },
+    sortOrder: { type: Number, default: 999 },
   },
   { timestamps: true }
 );

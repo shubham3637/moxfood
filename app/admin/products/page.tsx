@@ -12,6 +12,7 @@ import {
   Scale,
   Image as ImageIcon,
   Images,
+  Hash,
 } from 'lucide-react';
 import { compressImageFile } from '@/lib/imageUtils';
 import { useToast } from '@/context/ToastContext';
@@ -40,6 +41,7 @@ export default function AdminProductsPage() {
     name: '',
     altNameGujarati: '',
     category: 'seeds-superfoods',
+    sortOrder: '',
     price: '',
     mrp: '',
     stock: '',
@@ -84,6 +86,7 @@ export default function AdminProductsPage() {
       name: '',
       altNameGujarati: '',
       category: categories.length > 0 ? categories[0].slug : 'seeds-superfoods',
+      sortOrder: '',
       price: '',
       mrp: '',
       stock: '',
@@ -131,6 +134,7 @@ export default function AdminProductsPage() {
       name: product.name || '',
       altNameGujarati: product.altNameGujarati || '',
       category: product.category || (categories.length > 0 ? categories[0].slug : 'seeds-superfoods'),
+      sortOrder: product.sortOrder !== undefined && product.sortOrder !== 999 ? String(product.sortOrder) : '',
       price: String(product.price ?? ''),
       mrp: String(product.mrp ?? ''),
       stock: String(product.stock ?? ''),
@@ -265,6 +269,7 @@ export default function AdminProductsPage() {
       description: formData.description.trim(),
       isFeatured: formData.isFeatured,
       isTrending: formData.isTrending,
+      sortOrder: formData.sortOrder !== '' ? Number(formData.sortOrder) : 999,
     };
 
     try {
@@ -327,7 +332,7 @@ export default function AdminProductsPage() {
           <h1 className="text-2xl font-black text-slate-900 tracking-tight font-heading">
             Products Management
           </h1>
-          <p className="text-xs text-slate-500 font-medium">Manage Moxfood healthy seeds, multiple weight variants & photos gallery</p>
+          <p className="text-xs text-slate-500 font-medium">Manage Moxfood healthy seeds, serial number sorting, multiple weight variants & photos gallery</p>
         </div>
 
         <button
@@ -377,6 +382,7 @@ export default function AdminProductsPage() {
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="border-b border-slate-200 text-slate-500 font-bold bg-slate-50 font-heading">
+                  <th className="py-3.5 px-3 text-center w-16">Serial No.</th>
                   <th className="py-3.5 px-4">Photos</th>
                   <th className="py-3.5 px-4">Product Name</th>
                   <th className="py-3.5 px-4">Category</th>
@@ -393,6 +399,9 @@ export default function AdminProductsPage() {
 
                   return (
                     <tr key={prod._id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-3 px-3 text-center font-mono font-black text-pink-600 text-sm">
+                        {prod.sortOrder !== undefined && prod.sortOrder !== 999 ? `#${prod.sortOrder}` : '-'}
+                      </td>
                       <td className="py-3 px-4">
                         <div className="relative inline-block">
                           <img
@@ -483,7 +492,7 @@ export default function AdminProductsPage() {
           <div className="bg-white rounded-3xl max-w-2xl w-full p-6 space-y-4 shadow-2xl relative my-8">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
               <h3 className="font-extrabold text-slate-900 text-base font-heading">
-                {editingId ? 'Edit Product, Photos & Weight Variants' : 'Add New Product with Multiple Photos & Weight Variants'}
+                {editingId ? 'Edit Product, Serial No. & Weight Variants' : 'Add New Product with Serial No. & Weight Variants'}
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -494,8 +503,8 @@ export default function AdminProductsPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5 text-xs font-semibold">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                <div className="sm:col-span-5">
                   <label className="block font-bold text-slate-700 mb-1">Product Name *</label>
                   <input
                     type="text"
@@ -507,7 +516,7 @@ export default function AdminProductsPage() {
                   />
                 </div>
 
-                <div>
+                <div className="sm:col-span-4">
                   <label className="block font-bold text-slate-700 mb-1">Category *</label>
                   <select
                     value={formData.category}
@@ -520,6 +529,21 @@ export default function AdminProductsPage() {
                       </option>
                     ))}
                   </select>
+                </div>
+
+                <div className="sm:col-span-3">
+                  <label className="block font-bold text-slate-700 mb-1 flex items-center gap-1">
+                    <Hash size={13} className="text-pink-600" />
+                    <span>Serial No. (ક્રમ)</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    placeholder="e.g. 1, 2, 3"
+                    value={formData.sortOrder}
+                    onChange={(e) => setFormData({ ...formData, sortOrder: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono font-extrabold focus:ring-2 focus:ring-pink-500 focus:outline-none"
+                  />
                 </div>
               </div>
 

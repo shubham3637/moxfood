@@ -52,7 +52,7 @@ export async function GET(request: Request) {
       ];
     }
 
-    const products = await Product.find(queryFilter).sort({ createdAt: -1 });
+    const products = await Product.find(queryFilter).sort({ sortOrder: 1, createdAt: -1 });
 
     return NextResponse.json({
       success: true,
@@ -83,6 +83,8 @@ export async function POST(request: Request) {
       description,
       isFeatured,
       isTrending,
+      sortOrder,
+      serialNumber,
     } = body;
 
     if (!name || !category) {
@@ -100,6 +102,8 @@ export async function POST(request: Request) {
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-+|-+$/g, '');
 
+    const parsedSortOrder = Number(sortOrder ?? serialNumber ?? 999);
+
     const product = await Product.create({
       name,
       slug: generatedSlug,
@@ -114,6 +118,7 @@ export async function POST(request: Request) {
       description: description || '',
       isFeatured: Boolean(isFeatured),
       isTrending: Boolean(isTrending),
+      sortOrder: isNaN(parsedSortOrder) ? 999 : parsedSortOrder,
     });
 
     return NextResponse.json({ success: true, product }, { status: 201 });
