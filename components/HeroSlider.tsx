@@ -17,26 +17,9 @@ interface HeroSliderProps {
   onExploreClick?: () => void;
 }
 
-const defaultFallbackBanners: BannerItem[] = [
-  {
-    title: 'Moxfood Premium Healthy Seeds & Superfoods',
-    image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1600&q=80',
-    link: '/products?category=seeds-superfoods',
-  },
-  {
-    title: 'Fresh & Pure Cooking Oils',
-    image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=1600&q=80',
-    link: '/products?category=oil-masala',
-  },
-  {
-    title: 'Premium Tea & Daily Breakfast',
-    image: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=1600&q=80',
-    link: '/products?category=beverages',
-  },
-];
-
 export default function HeroSlider({ onExploreClick }: HeroSliderProps) {
-  const [banners, setBanners] = useState<BannerItem[]>(defaultFallbackBanners);
+  const [banners, setBanners] = useState<BannerItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const touchStartX = useRef<number | null>(null);
@@ -49,11 +32,13 @@ export default function HeroSlider({ onExploreClick }: HeroSliderProps) {
     try {
       const res = await fetch('/api/banners');
       const data = await res.json();
-      if (data.success && Array.isArray(data.banners) && data.banners.length > 0) {
+      if (data.success && Array.isArray(data.banners)) {
         setBanners(data.banners);
       }
     } catch (err) {
       console.error('Failed to fetch hero slider banners:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -91,6 +76,8 @@ export default function HeroSlider({ onExploreClick }: HeroSliderProps) {
     touchStartX.current = null;
   };
 
+  if (loading || banners.length === 0) return null;
+
   return (
     <div
       className="relative w-full overflow-hidden rounded-3xl bg-slate-900 shadow-xl border border-slate-800 group my-2 sm:my-4"
@@ -117,7 +104,7 @@ export default function HeroSlider({ onExploreClick }: HeroSliderProps) {
                 onClick={onExploreClick}
                 className="block w-full h-full cursor-pointer"
               >
-                {/* Pure Uploaded Banner Image Without Blue Overlays or Text */}
+                {/* Pure Uploaded Banner Image Without Overlays or Text */}
                 <img
                   src={banner.image}
                   alt={banner.title || `Banner ${index + 1}`}
