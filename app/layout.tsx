@@ -3,9 +3,7 @@ import './globals.css';
 import { CartProvider } from '@/context/CartContext';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { ToastProvider } from '@/context/ToastContext';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import FloatingCartBar from '@/components/FloatingCartBar';
+import LayoutWrapper from '@/components/LayoutWrapper';
 import {
   SITE_NAME,
   SITE_TITLE_DEFAULT,
@@ -100,10 +98,7 @@ export default function RootLayout({
         <LanguageProvider>
           <ToastProvider>
             <CartProvider>
-              <Navbar />
-              <FloatingCartBar />
-              <main className="flex-1">{children}</main>
-              <Footer />
+              <LayoutWrapper>{children}</LayoutWrapper>
             </CartProvider>
           </ToastProvider>
         </LanguageProvider>

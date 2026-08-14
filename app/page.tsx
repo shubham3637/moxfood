@@ -6,7 +6,7 @@ import HeroSlider from '@/components/HeroSlider';
 import FeaturesBar from '@/components/FeaturesBar';
 import ProductCard from '@/components/ProductCard';
 import Testimonials from '@/components/Testimonials';
-import { Search, RefreshCw, Globe, Leaf, ArrowRight, Layers } from 'lucide-react';
+import { Search, RefreshCw, Globe, Leaf, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
 const getCategoryEmoji = (slug: string) => {
@@ -71,7 +71,7 @@ function StorefrontContent() {
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Group products category-wise when on 'all' tab without search filter
+  // Group products category-wise when on 'all' tab without active search
   const isCategorizedView = currentTab === 'all' && !searchQuery;
 
   const categoryGroups = useMemo(() => {
@@ -79,23 +79,36 @@ function StorefrontContent() {
 
     const map = new Map<string, { category: any; products: any[] }>();
 
-    // Initialize with categories from database
+    // 1. Initialize map with active categories from database
     categories.forEach((cat) => {
-      map.set(cat.slug, { category: cat, products: [] });
+      map.set((cat.slug || '').toLowerCase().trim(), { category: cat, products: [] });
     });
 
     const unmapped: any[] = [];
 
+    const normalize = (str: string) => (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
     products.forEach((prod) => {
-      const catKey = prod.category;
-      let target = map.get(catKey);
+      const prodCatRaw = prod.category || '';
+      const prodCatNorm = normalize(prodCatRaw);
+
+      let target = map.get(prodCatRaw.toLowerCase().trim());
 
       if (!target) {
-        const foundCat = categories.find(
-          (c) => c.slug === catKey || c.name.toLowerCase() === catKey.toLowerCase()
-        );
-        if (foundCat) {
-          target = map.get(foundCat.slug);
+        for (const val of map.values()) {
+          const catSlugNorm = normalize(val.category.slug);
+          const catNameNorm = normalize(val.category.name);
+          if (
+            catSlugNorm === prodCatNorm ||
+            catNameNorm === prodCatNorm ||
+            (catSlugNorm && prodCatNorm.includes(catSlugNorm)) ||
+            (catSlugNorm && catSlugNorm.includes(prodCatNorm)) ||
+            (catNameNorm && prodCatNorm.includes(catNameNorm)) ||
+            (catNameNorm && catNameNorm.includes(prodCatNorm))
+          ) {
+            target = val;
+            break;
+          }
         }
       }
 
@@ -111,7 +124,7 @@ function StorefrontContent() {
     if (unmapped.length > 0) {
       result.push({
         category: {
-          name: 'Other Essentials',
+          name: language === 'gu' ? 'અન્ય જરૂરી સામાન' : 'Other Grocery Items',
           altNameGujarati: 'અન્ય જરૂરી સામાન',
           slug: 'other',
         },
@@ -120,7 +133,7 @@ function StorefrontContent() {
     }
 
     return result;
-  }, [categories, products, isCategorizedView]);
+  }, [categories, products, isCategorizedView, language]);
 
   return (
     <div className="w-full flex flex-col items-center">
@@ -179,7 +192,7 @@ function StorefrontContent() {
 
         {/* 3. Main Products Grid Section with Category-wise Sections */}
         <section id="products-grid" className="space-y-6 pt-2">
-          {/* Header & Category Filter Tabs */}
+          {/* Header & Dynamic Category Filter Pills */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-heading">
