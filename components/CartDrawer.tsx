@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight, Truck } from 'lucide-react';
+import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight, Truck, ChevronDown, ChevronUp, CreditCard } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -20,6 +20,7 @@ export default function CartDrawer() {
   } = useCart();
 
   const { t, language } = useLanguage();
+  const [isBillDetailOpen, setIsBillDetailOpen] = useState(false);
 
   if (!isCartOpen) return null;
 
@@ -52,7 +53,7 @@ export default function CartDrawer() {
             </button>
           </div>
 
-          {/* Free Delivery Bar */}
+          {/* Free Delivery Progress Bar */}
           <div className="bg-pink-50 px-4 py-2.5 border-b border-pink-100">
             {subtotal >= freeDeliveryThreshold ? (
               <div className="flex items-center gap-2 text-xs font-bold text-pink-900">
@@ -78,7 +79,7 @@ export default function CartDrawer() {
             )}
           </div>
 
-          {/* Items List */}
+          {/* Cart Items List */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {items.length === 0 ? (
               <div className="text-center py-16 text-slate-400 space-y-3">
@@ -94,7 +95,7 @@ export default function CartDrawer() {
               items.map((item) => (
                 <div
                   key={item.productId}
-                  className="flex gap-3 p-3 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors"
+                  className="flex gap-3 p-3 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors font-medium"
                 >
                   <img
                     src={item.image}
@@ -149,34 +150,64 @@ export default function CartDrawer() {
             )}
           </div>
 
-          {/* Footer & Checkout Action */}
+          {/* Bottom Footer & Sticky Instant "Pay Now" Action Bar */}
           {items.length > 0 && (
-            <div className="p-4 border-t border-slate-200 bg-white space-y-3">
-              <div className="space-y-1.5 text-xs font-semibold">
-                <div className="flex justify-between text-slate-600">
-                  <span>{t('subtotal')}</span>
-                  <span className="font-bold text-slate-800">₹{subtotal}</span>
-                </div>
-                <div className="flex justify-between text-slate-600">
-                  <span>{t('deliveryCharge')}</span>
-                  <span className="font-bold text-pink-600">
-                    {deliveryCharge === 0 ? t('free') : `₹${deliveryCharge}`}
-                  </span>
-                </div>
-                <div className="flex justify-between text-base font-black text-slate-900 pt-2 border-t border-slate-100 font-heading">
-                  <span>{t('grandTotal')}</span>
-                  <span className="text-blue-900">₹{grandTotal}</span>
-                </div>
+            <div className="p-4 border-t border-slate-200 bg-white space-y-3 shadow-2xl">
+              {/* Collapsible Bill Toggle Disclosure */}
+              <div className="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50">
+                <button
+                  type="button"
+                  onClick={() => setIsBillDetailOpen(!isBillDetailOpen)}
+                  className="w-full flex items-center justify-between p-3 text-xs font-bold text-slate-800 hover:bg-slate-100 transition-colors font-heading cursor-pointer"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>{language === 'gu' ? 'કુલ બિલ (Total Bill)' : 'Total Bill'}</span>
+                    <span className="text-[10px] text-slate-500 font-normal">
+                      (Incl. taxes &amp; charges)
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1 text-pink-600">
+                    <span className="font-extrabold text-sm">₹{grandTotal}</span>
+                    {isBillDetailOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  </div>
+                </button>
+
+                {isBillDetailOpen && (
+                  <div className="p-3 border-t border-slate-200 bg-white space-y-1.5 text-xs font-semibold text-slate-600 animate-fade-in">
+                    <div className="flex justify-between">
+                      <span>{t('subtotal')}</span>
+                      <span className="font-bold text-slate-800">₹{subtotal}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>{t('deliveryCharge')}</span>
+                      <span className="font-bold text-pink-600">
+                        {deliveryCharge === 0 ? t('free') : `₹${deliveryCharge}`}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <Link
-                href="/checkout"
-                onClick={() => setIsCartOpen(false)}
-                className="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-extrabold py-3.5 rounded-2xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer text-xs"
-              >
-                <span>{t('proceedCheckout')}</span>
-                <ArrowRight size={18} />
-              </Link>
+              {/* Direct Instant "Pay Now" Sticky Footer Bar */}
+              <div className="flex items-center justify-between gap-3 pt-1">
+                <div className="flex flex-col text-left font-heading">
+                  <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">
+                    {language === 'gu' ? 'ચૂકવવાની રકમ' : 'To Pay'}
+                  </span>
+                  <span className="text-xl font-black text-slate-900">
+                    ₹{grandTotal}
+                  </span>
+                </div>
+
+                <Link
+                  href="/checkout"
+                  onClick={() => setIsCartOpen(false)}
+                  className="flex-1 max-w-[200px] bg-gradient-to-r from-pink-600 via-rose-600 to-pink-600 hover:from-pink-500 hover:to-rose-500 text-white font-extrabold py-3 px-5 rounded-2xl shadow-lg shadow-pink-600/30 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer text-xs sm:text-sm font-heading"
+                >
+                  <CreditCard size={18} />
+                  <span>{language === 'gu' ? 'પેમેન્ટ કરો' : 'Pay Now'}</span>
+                </Link>
+              </div>
             </div>
           )}
         </div>
