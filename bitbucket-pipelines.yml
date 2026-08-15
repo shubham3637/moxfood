@@ -1,0 +1,47 @@
+# Bitbucket Pipelines Configuration for Next.js App Deployment to DigitalOcean
+image: node:20
+
+pipelines:
+  branches:
+    main:
+      - step:
+          name: Build & Verify Next.js Application
+          caches:
+            - node
+          script:
+            - npm ci
+            - npm run build
+
+      - step:
+          name: Deploy to DigitalOcean Droplet via SSH
+          deployment: production
+          script:
+            - echo "Deploying latest main branch code to DigitalOcean Droplet..."
+            - pipe: atlassian/ssh-run:0.8.1
+              variables:
+                SSH_USER: $SERVER_USER
+                SERVER: $SERVER_IP
+                COMMAND: |
+                  set -e
+                  echo "Navigating to project directory on server..."
+                  cd /var/www/guatamtrading || cd ~/guatamtrading || cd /home/ubuntu/guatamtrading
+                  echo "Pulling latest main branch changes from Bitbucket..."
+                  git pull origin main
+                  echo "Installing NPM dependencies..."
+                  npm ci
+                  echo "Building Next.js production bundle..."
+                  npm run build
+                  echo "Restarting application with PM2..."
+                  pm2 restart guatamtrading || pm2 start npm --name "guatamtrading" -- start
+                  echo "DigitalOcean deployment completed successfully!"
+
+  custom:
+    deploy-to-digitalocean-app-platform:
+      - step:
+          name: Deploy to DigitalOcean App Platform
+          script:
+            - echo "Deploying via doctl to DigitalOcean App Platform..."
+            - cd /tmp && curl -sL https://github.com/digitalocean/doctl/releases/download/v1.100.0/doctl-1.100.0-linux-amd64.tar.gz | tar -xzv
+            - mv /tmp/doctl /usr/local/bin/
+            - doctl auth init -t $DIGITALOCEAN_ACCESS_TOKEN
+            - doctl apps create-deployment $DO_APP_ID
