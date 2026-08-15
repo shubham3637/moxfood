@@ -1,47 +1,48 @@
-# Bitbucket Pipelines Configuration for Next.js App Deployment to DigitalOcean
 image: node:20
 
 pipelines:
   branches:
     main:
       - step:
-          name: Build & Verify Next.js Application
+          name: "Build Next.js Application in Bitbucket Cloud"
+          size: 2x # Allocates 8GB RAM in Bitbucket Cloud
           caches:
             - node
           script:
+            - export NODE_OPTIONS="--max-old-space-size=3072"
             - npm ci
             - npm run build
+            # Compress build artifacts to send to server
+            - tar -czf deploy.tar.gz .next public package.json package-lock.json next.config.ts
+          artifacts:
+            - deploy.tar.gz
 
       - step:
-          name: Deploy to DigitalOcean Droplet via SSH
+          name: "Deploy Build Artifacts to Server (Zero-Build-Load on Server)"
           deployment: production
           script:
-            - echo "Deploying latest main branch code to DigitalOcean Droplet..."
-            - pipe: atlassian/ssh-run:0.8.1
-              variables:
-                SSH_USER: $SERVER_USER
-                SERVER: $SERVER_IP
-                COMMAND: |
-                  set -e
-                  echo "Navigating to project directory on server..."
-                  cd /var/www/guatamtrading || cd ~/guatamtrading || cd /home/ubuntu/guatamtrading
-                  echo "Pulling latest main branch changes from Bitbucket..."
-                  git pull origin main
-                  echo "Installing NPM dependencies..."
-                  npm ci
-                  echo "Building Next.js production bundle..."
-                  npm run build
-                  echo "Restarting application with PM2..."
-                  pm2 restart guatamtrading || pm2 start npm --name "guatamtrading" -- start
-                  echo "DigitalOcean deployment completed successfully!"
+            - apt-get update && apt-get install -y rsync sshpass
+            - scp -P ${SERVER_PORT:-22} deploy.tar.gz ${SERVER_USER}@${SERVER_IP}:${SERVER_PATH}/deploy.tar.gz
+            - ssh -p ${SERVER_PORT:-22} ${SERVER_USER}@${SERVER_IP} "cd ${SERVER_PATH} && tar -xzf deploy.tar.gz && rm -f deploy.tar.gz && npm install --omit=dev && (pm2 reload guatamtrading || pm2 restart guatamtrading)"
 
-  custom:
-    deploy-to-digitalocean-app-platform:
+    master:
       - step:
-          name: Deploy to DigitalOcean App Platform
+          name: "Build Next.js Application in Bitbucket Cloud"
+          size: 2x # Allocates 8GB RAM in Bitbucket Cloud
+          caches:
+            - node
           script:
-            - echo "Deploying via doctl to DigitalOcean App Platform..."
-            - cd /tmp && curl -sL https://github.com/digitalocean/doctl/releases/download/v1.100.0/doctl-1.100.0-linux-amd64.tar.gz | tar -xzv
-            - mv /tmp/doctl /usr/local/bin/
-            - doctl auth init -t $DIGITALOCEAN_ACCESS_TOKEN
-            - doctl apps create-deployment $DO_APP_ID
+            - export NODE_OPTIONS="--max-old-space-size=3072"
+            - npm ci
+            - npm run build
+            - tar -czf deploy.tar.gz .next public package.json package-lock.json next.config.ts
+          artifacts:
+            - deploy.tar.gz
+
+      - step:
+          name: "Deploy Build Artifacts to Server (Zero-Build-Load on Server)"
+          deployment: production
+          script:
+            - apt-get update && apt-get install -y rsync sshpass
+            - scp -P ${SERVER_PORT:-22} deploy.tar.gz ${SERVER_USER}@${SERVER_IP}:${SERVER_PATH}/deploy.tar.gz
+            - ssh -p ${SERVER_PORT:-22} ${SERVER_USER}@${SERVER_IP} "cd ${SERVER_PATH} && tar -xzf deploy.tar.gz && rm -f deploy.tar.gz && npm install --omit=dev && (pm2 reload guatamtrading || pm2 restart guatamtrading)"
