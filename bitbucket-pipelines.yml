@@ -18,13 +18,21 @@ pipelines:
             - deploy.tar.gz
 
       - step:
-          name: "Deploy Build Artifacts to Server via Password (Zero-Build-Load on Server)"
+          name: "Deploy Build Artifacts to Server (Zero-Build-Load on Server)"
           deployment: production
           script:
             - apt-get update && apt-get install -y rsync sshpass openssh-client
-            - export SSHPASS="$SERVER_PASSWORD"
-            - sshpass -e scp -o StrictHostKeyChecking=no -P ${SERVER_PORT:-22} deploy.tar.gz ${SERVER_USER}@${SERVER_IP}:${SERVER_PATH}/deploy.tar.gz
-            - sshpass -e ssh -o StrictHostKeyChecking=no -p ${SERVER_PORT:-22} ${SERVER_USER}@${SERVER_IP} "cd ${SERVER_PATH} && tar -xzf deploy.tar.gz && rm -f deploy.tar.gz && npm install --omit=dev && (pm2 reload guatamtrading || pm2 restart guatamtrading)"
+            - echo "Deploying build artifacts to DigitalOcean server..."
+            - |
+              if [ -n "$SERVER_PASSWORD" ]; then
+                echo "Connecting using SERVER_PASSWORD authentication..."
+                sshpass -p "$SERVER_PASSWORD" scp -o StrictHostKeyChecking=no -P ${SERVER_PORT:-22} deploy.tar.gz ${SERVER_USER}@${SERVER_IP}:${SERVER_PATH}/deploy.tar.gz
+                sshpass -p "$SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no -p ${SERVER_PORT:-22} ${SERVER_USER}@${SERVER_IP} "cd ${SERVER_PATH} && tar -xzf deploy.tar.gz && rm -f deploy.tar.gz && npm install --omit=dev && (pm2 reload guatamtrading || pm2 restart guatamtrading)"
+              else
+                echo "Connecting using SSH Key authentication..."
+                scp -o StrictHostKeyChecking=no -P ${SERVER_PORT:-22} deploy.tar.gz ${SERVER_USER}@${SERVER_IP}:${SERVER_PATH}/deploy.tar.gz
+                ssh -o StrictHostKeyChecking=no -p ${SERVER_PORT:-22} ${SERVER_USER}@${SERVER_IP} "cd ${SERVER_PATH} && tar -xzf deploy.tar.gz && rm -f deploy.tar.gz && npm install --omit=dev && (pm2 reload guatamtrading || pm2 restart guatamtrading)"
+              fi
 
     master:
       - step:
@@ -41,10 +49,18 @@ pipelines:
             - deploy.tar.gz
 
       - step:
-          name: "Deploy Build Artifacts to Server via Password (Zero-Build-Load on Server)"
+          name: "Deploy Build Artifacts to Server (Zero-Build-Load on Server)"
           deployment: production
           script:
             - apt-get update && apt-get install -y rsync sshpass openssh-client
-            - export SSHPASS="$SERVER_PASSWORD"
-            - sshpass -e scp -o StrictHostKeyChecking=no -P ${SERVER_PORT:-22} deploy.tar.gz ${SERVER_USER}@${SERVER_IP}:${SERVER_PATH}/deploy.tar.gz
-            - sshpass -e ssh -o StrictHostKeyChecking=no -p ${SERVER_PORT:-22} ${SERVER_USER}@${SERVER_IP} "cd ${SERVER_PATH} && tar -xzf deploy.tar.gz && rm -f deploy.tar.gz && npm install --omit=dev && (pm2 reload guatamtrading || pm2 restart guatamtrading)"
+            - echo "Deploying build artifacts to DigitalOcean server..."
+            - |
+              if [ -n "$SERVER_PASSWORD" ]; then
+                echo "Connecting using SERVER_PASSWORD authentication..."
+                sshpass -p "$SERVER_PASSWORD" scp -o StrictHostKeyChecking=no -P ${SERVER_PORT:-22} deploy.tar.gz ${SERVER_USER}@${SERVER_IP}:${SERVER_PATH}/deploy.tar.gz
+                sshpass -p "$SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no -p ${SERVER_PORT:-22} ${SERVER_USER}@${SERVER_IP} "cd ${SERVER_PATH} && tar -xzf deploy.tar.gz && rm -f deploy.tar.gz && npm install --omit=dev && (pm2 reload guatamtrading || pm2 restart guatamtrading)"
+              else
+                echo "Connecting using SSH Key authentication..."
+                scp -o StrictHostKeyChecking=no -P ${SERVER_PORT:-22} deploy.tar.gz ${SERVER_USER}@${SERVER_IP}:${SERVER_PATH}/deploy.tar.gz
+                ssh -o StrictHostKeyChecking=no -p ${SERVER_PORT:-22} ${SERVER_USER}@${SERVER_IP} "cd ${SERVER_PATH} && tar -xzf deploy.tar.gz && rm -f deploy.tar.gz && npm install --omit=dev && (pm2 reload guatamtrading || pm2 restart guatamtrading)"
+              fi
