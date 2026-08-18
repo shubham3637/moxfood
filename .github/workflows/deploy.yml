@@ -30,7 +30,7 @@ jobs:
 
       - name: Compress Ready Build Artifacts
         run: |
-          tar -czf deploy.tar.gz .next public package.json package-lock.json next.config.ts
+          tar -czf deploy.tar.gz .next public package.json package-lock.json next.config.ts app components models lib context
 
       - name: Upload Ready Artifact to DigitalOcean via SCP Password
         uses: appleboy/scp-action@v0.1.7
@@ -67,4 +67,4 @@ jobs:
             rm -f /tmp/deploy.tar.gz
             npm install --omit=dev --no-audit --no-fund
             export PATH=$PATH:/usr/local/bin:$HOME/.nvm/versions/node/$(ls $HOME/.nvm/versions/node 2>/dev/null | tail -n 1)/bin
-            pm2 reload guatamtrading || pm2 restart guatamtrading || pm2 start npm --name "guatamtrading" -- start
+            pm2 reload all || pm2 restart all || pm2 reload guatamtrading || pm2 restart guatamtrading || pm2 start npm --name "guatamtrading" -- start
