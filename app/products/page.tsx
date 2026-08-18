@@ -1,23 +1,32 @@
 'use client';
 
 import React, { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import ProductCard from '@/components/ProductCard';
 import { RefreshCw, Search } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
 function ProductsPageContent() {
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get('search') || '';
+  const categoryQuery = searchParams.get('category') || 'all';
+
   const { t } = useLanguage();
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchProductsData();
-  }, []);
+  }, [searchQuery, categoryQuery]);
 
   const fetchProductsData = async () => {
     setLoading(true);
     try {
-      const prodRes = await fetch('/api/products?category=all');
+      let url = `/api/products?category=${categoryQuery}`;
+      if (searchQuery) {
+        url += `&search=${encodeURIComponent(searchQuery)}`;
+      }
+      const prodRes = await fetch(url);
       const prodData = await prodRes.json();
       setProducts(prodData.products || []);
     } catch (error) {
@@ -29,6 +38,17 @@ function ProductsPageContent() {
 
   return (
     <div className="w-full px-4 md:px-10 lg:px-16 py-8 space-y-6">
+      {searchQuery && (
+        <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+          <p className="text-xs font-bold text-slate-700">
+            Showing search results for: <span className="text-pink-600 font-extrabold">&quot;{searchQuery}&quot;</span>
+          </p>
+          <a href="/products" className="text-xs font-extrabold text-pink-600 hover:underline">
+            Clear Search
+          </a>
+        </div>
+      )}
+
       {/* Product Grid Section */}
       {loading ? (
         <div className="text-center py-24 space-y-3">
@@ -41,7 +61,13 @@ function ProductsPageContent() {
             <Search size={28} />
           </div>
           <h3 className="font-black text-slate-800 text-lg font-heading">{t('noProductsFound')}</h3>
-          <p className="text-xs text-slate-500 font-medium">No items available in store catalog.</p>
+          <p className="text-xs text-slate-500 font-medium">No items matched your search &quot;{searchQuery}&quot;.</p>
+          <a
+            href="/products"
+            className="inline-block bg-pink-600 text-white text-xs font-extrabold px-5 py-2.5 rounded-xl shadow cursor-pointer font-heading"
+          >
+            Show All Products
+          </a>
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 gap-4 md:gap-6 animate-fade-in">

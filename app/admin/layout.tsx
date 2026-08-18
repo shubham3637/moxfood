@@ -7,15 +7,13 @@ import { Lock } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isChecking, setIsChecking] = useState<boolean>(true);
+  const [isMounted, setIsMounted] = useState<boolean>(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const authStatus = sessionStorage.getItem('moxfoodAdminAuth');
-      if (authStatus === 'true') {
-        setIsAuthenticated(true);
-      }
-      setIsChecking(false);
+    setIsMounted(true);
+    const authStatus = sessionStorage.getItem('moxfoodAdminAuth');
+    if (authStatus === 'true') {
+      setIsAuthenticated(true);
     }
   }, []);
 
@@ -26,10 +24,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   };
 
-  if (isChecking) {
+  if (!isMounted) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white text-xs font-bold">
-        Authenticating Moxfood Admin Session...
+        Loading Moxfood Admin Panel...
       </div>
     );
   }
