@@ -1,0 +1,70 @@
+name: Build on GitHub Actions (16GB RAM) & Deploy Ready Output to DigitalOcean
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies on GitHub Actions Cloud
+        run: npm ci
+
+      - name: Build Next.js Application on GitHub Cloud (16GB RAM / 4-Core CPU)
+        run: |
+          export NEXT_TELEMETRY_DISABLED=1
+          npm run build
+
+      - name: Compress Ready Build Artifacts
+        run: |
+          tar -czf deploy.tar.gz .next public package.json package-lock.json next.config.ts
+
+      - name: Upload Ready Artifact to DigitalOcean via SCP Password
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DO_HOST }}
+          username: ${{ secrets.DO_USER }}
+          password: ${{ secrets.DO_PASSWORD }}
+          port: ${{ secrets.DO_PORT || 22 }}
+          source: "deploy.tar.gz"
+          target: "/tmp/"
+
+      - name: Extract & Reload PM2 on DigitalOcean (Zero Build Load on Server)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DO_HOST }}
+          username: ${{ secrets.DO_USER }}
+          password: ${{ secrets.DO_PASSWORD }}
+          port: ${{ secrets.DO_PORT || 22 }}
+          script: |
+            TARGET_DIR="${{ secrets.DO_PATH }}"
+            if [ -z "$TARGET_DIR" ]; then
+              if [ -d "/root/guatamtrading" ]; then
+                TARGET_DIR="/root/guatamtrading"
+              elif [ -d "/var/www/guatamtrading" ]; then
+                TARGET_DIR="/var/www/guatamtrading"
+              else
+                TARGET_DIR="/root/guatamtrading"
+              fi
+            fi
+            echo "Deploying ready artifacts to $TARGET_DIR..."
+            mkdir -p $TARGET_DIR
+            cd $TARGET_DIR
+            tar -xzf /tmp/deploy.tar.gz -C $TARGET_DIR/
+            rm -f /tmp/deploy.tar.gz
+            npm install --omit=dev --no-audit --no-fund
+            export PATH=$PATH:/usr/local/bin:$HOME/.nvm/versions/node/$(ls $HOME/.nvm/versions/node 2>/dev/null | tail -n 1)/bin
+            pm2 reload guatamtrading || pm2 restart guatamtrading || pm2 start npm --name "guatamtrading" -- start
