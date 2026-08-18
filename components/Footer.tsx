@@ -62,9 +62,15 @@ export default function Footer() {
         {/* Quick Links */}
         <div>
           <h3 className="text-white font-extrabold text-sm mb-3.5 border-b border-blue-900 pb-1.5 font-heading">
-            Quick Categories
+            Customer Links & Categories
           </h3>
           <ul className="space-y-2.5 text-xs font-semibold text-slate-300">
+            <li>
+              <Link href="/track-order" className="text-pink-300 hover:text-pink-200 transition-colors font-extrabold flex items-center gap-1.5">
+                <Truck size={14} className="text-pink-400" />
+                <span>Track Your Order (ઓર્ડર ટ્રેક કરો)</span>
+              </Link>
+            </li>
             <li><Link href="/products?category=seeds-superfoods" className="hover:text-pink-400 transition-colors cursor-pointer">Healthy Seeds & Superfoods</Link></li>
             <li><Link href="/products?category=dry-fruits" className="hover:text-pink-400 transition-colors cursor-pointer">Dry Fruits & Nuts</Link></li>
             <li><Link href="/products?category=atta-rice" className="hover:text-pink-400 transition-colors cursor-pointer">Atta, Rice & Grains</Link></li>

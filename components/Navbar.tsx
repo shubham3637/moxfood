@@ -12,6 +12,7 @@ import {
   PhoneCall,
   ShieldCheck,
   ChevronRight,
+  Truck,
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -38,7 +39,7 @@ const InstagramIcon = ({ size = 14, className = '' }: { size?: number; className
 export default function Navbar() {
   const router = useRouter();
   const { totalItemsCount, subtotal, setIsCartOpen } = useCart();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -64,6 +65,13 @@ export default function Navbar() {
             </span>
           </div>
           <div className="hidden md:flex items-center gap-5 text-xs font-semibold shrink-0">
+            <Link
+              href="/track-order"
+              className="flex items-center gap-1.5 hover:text-pink-200 transition-colors bg-white/10 px-2.5 py-0.5 rounded-full border border-white/20"
+            >
+              <Truck size={13} className="text-pink-300" />
+              <span>{language === 'gu' ? 'ઓર્ડર ટ્રેક કરો' : 'Track Order'}</span>
+            </Link>
             <a
               href="tel:+917096396856"
               className="flex items-center gap-1.5 hover:text-pink-200 transition-colors"
@@ -117,6 +125,16 @@ export default function Navbar() {
 
           {/* Actions & Cart Control */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Track Order Direct Link Button */}
+            <Link
+              href="/track-order"
+              className="bg-slate-800 hover:bg-slate-700 text-pink-300 border border-slate-700 text-[11px] sm:text-xs font-extrabold px-3 py-2.5 rounded-xl flex items-center gap-1.5 transition-all shadow-md cursor-pointer font-heading shrink-0"
+              title="Track Order Status"
+            >
+              <Truck size={16} className="text-pink-400" />
+              <span className="hidden md:inline">{language === 'gu' ? 'ઓર્ડર ટ્રેક કરો' : 'Track Order'}</span>
+            </Link>
+
             {/* Instagram Quick Link Button (Mobile/Desktop) */}
             <a
               href="https://www.instagram.com/gautamoilandsugar?igsh=MTN2YXV3cDB1bmgxaw=="
@@ -193,12 +211,24 @@ export default function Navbar() {
               <ChevronRight size={16} className="text-slate-500" />
             </Link>
 
+            <Link
+              href="/track-order"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-800 text-pink-400 font-bold"
+            >
+              <span className="flex items-center gap-2">
+                <Truck size={16} />
+                {language === 'gu' ? 'ઓર્ડર ટ્રેક કરો (Track Order)' : 'Track Order Status'}
+              </span>
+              <ChevronRight size={16} />
+            </Link>
+
             <a
               href="https://www.instagram.com/gautamoilandsugar?igsh=MTN2YXV3cDB1bmgxaw=="
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-800 text-pink-400 font-bold"
+              className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-800 text-purple-400 font-bold"
             >
               <span className="flex items-center gap-2">
                 <InstagramIcon size={16} />
