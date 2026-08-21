@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Store, Phone, MapPin, Clock, ShieldCheck, Truck, CreditCard } from 'lucide-react';
+import { Store, Phone, MapPin, Clock, ShieldCheck, Truck, CreditCard, FileText } from 'lucide-react';
 
 const InstagramIcon = ({ size = 16, className = '' }: { size?: number; className?: string }) => (
   <svg
@@ -52,47 +52,60 @@ export default function Footer() {
             </div>
           </div>
           <p className="text-xs text-slate-300 leading-relaxed font-medium">
-            Order raw & roasted Pumpkin Seeds, Chia Seeds, Sunflower Seeds, Flax Seeds, spices, and daily healthy grocery at best prices online.
+            Order raw & roasted Pumpkin Seeds, Chia Seeds, Sunflower Seeds, Flax Seeds, spices, and daily healthy grocery at best prices online in Surat.
           </p>
           <div className="flex items-center gap-2 text-xs text-pink-300 font-bold bg-blue-900/70 p-3 rounded-xl border border-blue-800">
             <ShieldCheck size={16} className="text-pink-400 shrink-0" /> 100% Quality & Purity Guaranteed
           </div>
         </div>
 
-        {/* Quick Links */}
+        {/* Company & Support Links */}
         <div>
           <h3 className="text-white font-extrabold text-sm mb-3.5 border-b border-blue-900 pb-1.5 font-heading">
-            Customer Links & Categories
+            Company & Quick Links
           </h3>
-          <ul className="space-y-2.5 text-xs font-semibold text-slate-300">
+          <ul className="space-y-2 text-xs font-semibold text-slate-300">
             <li>
               <Link href="/track-order" className="text-pink-300 hover:text-pink-200 transition-colors font-extrabold flex items-center gap-1.5">
                 <Truck size={14} className="text-pink-400" />
                 <span>Track Your Order (ઓર્ડર ટ્રેક કરો)</span>
               </Link>
             </li>
+            <li><Link href="/about" className="hover:text-pink-400 transition-colors cursor-pointer">About Us (અમારા વિશે)</Link></li>
+            <li><Link href="/contact" className="hover:text-pink-400 transition-colors cursor-pointer">Contact Us & Support (સંપર્ક)</Link></li>
             <li><Link href="/products?category=seeds-superfoods" className="hover:text-pink-400 transition-colors cursor-pointer">Healthy Seeds & Superfoods</Link></li>
             <li><Link href="/products?category=dry-fruits" className="hover:text-pink-400 transition-colors cursor-pointer">Dry Fruits & Nuts</Link></li>
             <li><Link href="/products?category=atta-rice" className="hover:text-pink-400 transition-colors cursor-pointer">Atta, Rice & Grains</Link></li>
-            <li><Link href="/products?category=oil-masala" className="hover:text-pink-400 transition-colors cursor-pointer">Edible Oil & Spices</Link></li>
-            <li><Link href="/products?category=snacks" className="hover:text-pink-400 transition-colors cursor-pointer">Snacks & Namkeen</Link></li>
           </ul>
         </div>
 
-        {/* Store Address & Contact */}
+        {/* Legal Policies */}
         <div>
+          <h3 className="text-white font-extrabold text-sm mb-3.5 border-b border-blue-900 pb-1.5 font-heading">
+            Store Policies & Legal
+          </h3>
+          <ul className="space-y-2 text-xs font-semibold text-slate-300">
+            <li><Link href="/privacy-policy" className="hover:text-pink-400 transition-colors cursor-pointer">Privacy Policy (પ્રાઈવસી પોલિસી)</Link></li>
+            <li><Link href="/terms-conditions" className="hover:text-pink-400 transition-colors cursor-pointer">Terms & Conditions (નિયમો અને શરતો)</Link></li>
+            <li><Link href="/shipping-policy" className="hover:text-pink-400 transition-colors cursor-pointer">Shipping & Delivery Policy (ડિલિવરી નીતિ)</Link></li>
+            <li><Link href="/refund-policy" className="hover:text-pink-400 transition-colors cursor-pointer">Cancellation & Refund Policy (રિફંડ નીતિ)</Link></li>
+          </ul>
+        </div>
+
+        {/* Store Location & Hours */}
+        <div className="space-y-3">
           <h3 className="text-white font-extrabold text-sm mb-3.5 border-b border-blue-900 pb-1.5 font-heading">
             Contact & Store Location
           </h3>
-          <ul className="space-y-3 text-xs text-slate-300 font-semibold">
+          <ul className="space-y-2.5 text-xs text-slate-300 font-semibold">
             <li className="flex items-start gap-2.5">
               <MapPin size={16} className="text-pink-400 shrink-0 mt-0.5" />
-              <span>Surat, Gujarat, India</span>
+              <span>Gautam Trading, Surat, Gujarat</span>
             </li>
             <li className="flex items-center gap-2.5">
               <Phone size={16} className="text-pink-400 shrink-0" />
               <a href="tel:+917096396856" className="hover:text-pink-400 transition-colors">
-                +91 7096396856 / WhatsApp Support
+                +91 7096396856 (Call & WhatsApp)
               </a>
             </li>
             <li className="flex items-center gap-2.5">
@@ -108,34 +121,16 @@ export default function Footer() {
             </li>
             <li className="flex items-center gap-2.5">
               <Clock size={16} className="text-pink-400 shrink-0" />
-              <span>Express Doorstep Delivery Daily</span>
+              <span>Daily Express Delivery: 8 AM - 9 PM</span>
             </li>
           </ul>
-        </div>
-
-        {/* Delivery & Payment Badges */}
-        <div className="space-y-3">
-          <h3 className="text-white font-extrabold text-sm mb-3.5 border-b border-blue-900 pb-1.5 font-heading">
-            Payment & Trust
-          </h3>
-          <div className="bg-blue-900/40 p-4 rounded-2xl border border-blue-800 space-y-2">
-            <div className="flex items-center gap-2 text-xs font-bold text-white">
-              <CreditCard size={16} className="text-pink-400" />
-              <span>Razorpay Online Payments</span>
-            </div>
-            <p className="text-[11px] text-slate-300 font-medium">
-              Accepting UPI, GPay, PhonePe, Paytm, Credit/Debit Cards & Netbanking.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-emerald-400 font-bold bg-emerald-950/40 p-3 rounded-xl border border-emerald-900/50">
-            <Truck size={16} className="shrink-0" /> Fast Express Shipping in Surat & Across India
-          </div>
         </div>
       </div>
 
       {/* Copyright Bar */}
-      <div className="border-t border-blue-900/80 pt-6 text-center text-xs text-slate-400 font-medium">
-        © {new Date().getFullYear()} Moxfood Healthy Seeds & Grocery Super Store. All Rights Reserved.
+      <div className="border-t border-blue-900/80 pt-6 text-center text-xs text-slate-400 font-medium space-y-1">
+        <div>© {new Date().getFullYear()} Moxfood Healthy Seeds & Grocery Store. All Rights Reserved.</div>
+        <div className="text-[11px] text-slate-500">Fast Doorstep Delivery in Surat, Gujarat • 100% Quality Assurance</div>
       </div>
     </footer>
   );
