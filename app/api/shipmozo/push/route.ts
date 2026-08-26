@@ -33,9 +33,15 @@ export async function POST(request: Request) {
       });
     }
 
+    const errorMsg =
+      shipmozoRes.pushData?.error ||
+      shipmozoRes.error ||
+      shipmozoRes.message ||
+      'Failed to push order to Shipmozo';
+
     return NextResponse.json({
       success: false,
-      error: shipmozoRes.error || 'Failed to push order to Shipmozo',
+      error: errorMsg,
       data: shipmozoRes,
     }, { status: 400 });
   } catch (error: any) {

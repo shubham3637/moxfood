@@ -67,7 +67,7 @@ export async function pushOrderToShipmozo(order: any) {
       order_type: 'ESSENTIALS',
       consignee_name: order.customerDetails?.name || 'Customer',
       consignee_phone: cleanPhone,
-      consignee_alternate_phone: cleanPhone,
+      consignee_alternate_phone: '',
       consignee_email: 'support@moxfood.com',
       consignee_address_line_one: order.customerDetails?.address || 'Surat, Gujarat',
       consignee_address_line_two: order.customerDetails?.landmark || '',
