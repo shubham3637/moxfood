@@ -6,12 +6,16 @@ import {
   Phone,
   MessageSquare,
   RefreshCw,
+  Truck,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react';
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeStatusTab, setActiveStatusTab] = useState('all');
+  const [pushingOrderId, setPushingOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchOrders();
@@ -70,6 +74,28 @@ export default function AdminOrdersPage() {
     }
   };
 
+  const handlePushToShipmozo = async (orderId: string) => {
+    setPushingOrderId(orderId);
+    try {
+      const res = await fetch('/api/shipmozo/push', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Successfully pushed order to Shipmozo panel!');
+        fetchOrders();
+      } else {
+        alert('Shipmozo Push Failed: ' + (data.error || 'Unknown error'));
+      }
+    } catch (err: any) {
+      alert('Shipmozo error: ' + err.message);
+    } finally {
+      setPushingOrderId(null);
+    }
+  };
+
   const getWhatsAppUpdateUrl = (order: any) => {
     const text = `Hello ${order.customerDetails.name},\n\nYour Moxfood Order #${order.orderId} status has been updated to: *${order.status}*.\n\nTotal Amount: ₹${order.totalAmount}\nContact us for any questions. Thank you!`;
     return `https://wa.me/91${order.customerDetails.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(text)}`;
@@ -80,9 +106,11 @@ export default function AdminOrdersPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-black text-slate-900 tracking-tight font-heading">
-          Order Management
+          Order & Shipmozo Dispatch Management
         </h1>
-        <p className="text-xs text-slate-500 font-medium">Track customer orders and update delivery & payment statuses</p>
+        <p className="text-xs text-slate-500 font-medium">
+          Track customer orders, auto-push to Shipmozo, and update delivery & payment statuses
+        </p>
       </div>
 
       {/* Filter Tabs */}
@@ -122,7 +150,7 @@ export default function AdminOrdersPage() {
             >
               {/* Top Row */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
                   <span className="font-mono font-black text-pink-600 text-base bg-pink-50 px-3 py-1 rounded-xl border border-pink-200">
                     #{ord.orderId}
                   </span>
@@ -132,6 +160,25 @@ export default function AdminOrdersPage() {
                       timeStyle: 'short',
                     })}
                   </span>
+
+                  {ord.shipmozoPushed ? (
+                    <span className="bg-emerald-100 text-emerald-800 text-[11px] font-extrabold px-3 py-1 rounded-full border border-emerald-200 flex items-center gap-1 font-heading">
+                      <CheckCircle2 size={13} /> Pushed to Shipmozo
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => handlePushToShipmozo(ord.orderId)}
+                      disabled={pushingOrderId === ord.orderId}
+                      className="bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-extrabold px-3 py-1 rounded-full shadow transition-all flex items-center gap-1 cursor-pointer font-heading"
+                    >
+                      {pushingOrderId === ord.orderId ? (
+                        <RefreshCw size={12} className="animate-spin" />
+                      ) : (
+                        <Truck size={13} />
+                      )}
+                      <span>Push to Shipmozo</span>
+                    </button>
+                  )}
                 </div>
 
                 {/* Status Update Dropdowns */}
@@ -201,6 +248,11 @@ export default function AdminOrdersPage() {
                   {ord.customerDetails.landmark && (
                     <div className="text-slate-500 text-[11px]">
                       Landmark: {ord.customerDetails.landmark}
+                    </div>
+                  )}
+                  {ord.shipmozoAwbNumber && (
+                    <div className="text-blue-900 font-extrabold text-[11px] pt-1">
+                      Shipmozo AWB: <span className="font-mono">{ord.shipmozoAwbNumber}</span> ({ord.shipmozoCourierName || 'Express Courier'})
                     </div>
                   )}
                   <div className="text-slate-500 pt-0.5 text-[11px]">

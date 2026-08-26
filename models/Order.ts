@@ -33,6 +33,11 @@ export interface IOrder extends Document {
   razorpayPaymentId?: string;
   razorpaySignature?: string;
   notes?: string;
+  shipmozoPushed?: boolean;
+  shipmozoAwbNumber?: string;
+  shipmozoCourierName?: string;
+  shipmozoStatus?: string;
+  shipmozoReferenceId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -81,6 +86,11 @@ const OrderSchema: Schema<IOrder> = new Schema(
     razorpayPaymentId: { type: String, default: '' },
     razorpaySignature: { type: String, default: '' },
     notes: { type: String, default: '' },
+    shipmozoPushed: { type: Boolean, default: false },
+    shipmozoAwbNumber: { type: String, default: '' },
+    shipmozoCourierName: { type: String, default: '' },
+    shipmozoStatus: { type: String, default: '' },
+    shipmozoReferenceId: { type: String, default: '' },
   },
   { timestamps: true }
 );

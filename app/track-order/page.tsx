@@ -19,6 +19,8 @@ import {
   ShieldCheck,
   ChevronDown,
   ChevronUp,
+  ExternalLink,
+  Navigation,
 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -104,15 +106,15 @@ function TrackOrderContent() {
       <div className="text-center space-y-2">
         <div className="inline-flex items-center gap-2 bg-pink-100 text-pink-700 font-extrabold text-xs px-3.5 py-1.5 rounded-full border border-pink-200 font-heading">
           <Truck size={14} />
-          <span>{language === 'gu' ? 'લાઇવ ઓર્ડર ટ્રેકિંગ' : 'Live Order Tracking'}</span>
+          <span>{language === 'gu' ? 'લાઇવ શિપમોઝો ઓર્ડર ટ્રેકિંગ' : 'Live Shipmozo Order Tracking'}</span>
         </div>
         <h1 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight font-heading">
           {language === 'gu' ? 'તમારો ઓર્ડર ટ્રેક કરો (Track Order)' : 'Track Your Order Status'}
         </h1>
         <p className="text-xs sm:text-sm text-slate-500 font-medium max-w-lg mx-auto">
           {language === 'gu'
-            ? 'તમારો વોટ્સએપ મોબાઈલ નંબર અથવા ઓર્ડર નંબર દાખલ કરી લાઈવ ડિલિવરી સ્ટેટસ જુઓ'
-            : 'Enter your Mobile Number or Order ID to check your live order delivery status'}
+            ? 'તમારો વોટ્સએપ મોબાઈલ નંબર અથવા ઓર્ડર નંબર દાખલ કરી લાઈવ શિપિંગ સ્ટેટસ જુઓ'
+            : 'Enter your Mobile Number or Order ID to check your live courier delivery status'}
         </p>
       </div>
 
@@ -204,6 +206,12 @@ function TrackOrderContent() {
                       >
                         {order.paymentStatus === 'Paid' ? 'PREPAID PAID' : 'PAYMENT PENDING'}
                       </span>
+
+                      {order.shipmozoPushed && (
+                        <span className="bg-blue-100 text-blue-700 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-blue-200 font-heading">
+                          SHIPMOZO DISPATCHED
+                        </span>
+                      )}
                     </div>
                     <p className="text-[11px] text-slate-400 font-medium flex items-center gap-1.5 pt-0.5">
                       <Calendar size={12} />
@@ -231,6 +239,35 @@ function TrackOrderContent() {
                     </a>
                   </div>
                 </div>
+
+                {/* Shipmozo Live Courier Tracking Details Card */}
+                {order.shipmozoAwbNumber && (
+                  <div className="bg-gradient-to-r from-slate-900 to-blue-950 text-white p-4 rounded-2xl shadow-inner space-y-2 text-xs">
+                    <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                      <span className="font-extrabold font-heading text-pink-300 flex items-center gap-1.5">
+                        <Navigation size={14} className="text-pink-400" />
+                        Shipmozo Courier Details
+                      </span>
+                      <span className="bg-emerald-500/20 text-emerald-300 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-emerald-500/40">
+                        {order.shipmozoCourierName || 'Express Courier'}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                      <div>
+                        <span className="text-slate-400 block">AWB Tracking Number</span>
+                        <span className="font-mono font-bold text-white tracking-wider">
+                          {order.shipmozoAwbNumber}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block">Shipment Status</span>
+                        <span className="font-bold text-emerald-400">
+                          {order.shipmozoStatus || 'In Transit / Dispatched'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Status Timeline Visual Bar */}
                 {isCancelled ? (
@@ -283,7 +320,7 @@ function TrackOrderContent() {
                 {/* Toggle Order Details Button */}
                 <button
                   onClick={() => setExpandedOrderId(isExpanded ? null : order.orderId)}
-                  className="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs py-2.5 rounded-xl border border-slate-200 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  className="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs py-2.5 rounded-xl border border-slate-200 flex items-center justify-center gap-1.5 transition-colors cursor-pointer font-heading"
                 >
                   <span>{isExpanded ? 'Hide Item Details' : 'View Ordered Items & Receipt'}</span>
                   {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}

@@ -4,6 +4,7 @@ import dbConnect from '@/lib/db';
 import Order from '@/models/Order';
 import Product from '@/models/Product';
 import { RAZORPAY_KEY_SECRET } from '@/lib/constants';
+import { pushOrderToShipmozo } from '@/lib/shipmozo';
 
 export async function POST(request: Request) {
   try {
@@ -72,6 +73,21 @@ export async function POST(request: Request) {
           console.warn(`Failed to update stock for product ${item.productId}:`, err);
         }
       }
+    }
+
+    // Push order details automatically to Shipmozo panel
+    try {
+      const shipmozoRes = await pushOrderToShipmozo(newOrder);
+      if (shipmozoRes.success) {
+        await Order.findByIdAndUpdate(newOrder._id, {
+          shipmozoPushed: true,
+          shipmozoReferenceId: shipmozoRes.pushData?.reference_id || orderId,
+          shipmozoAwbNumber: shipmozoRes.assignData?.awb_number || '',
+          shipmozoCourierName: shipmozoRes.assignData?.courier_company || '',
+        });
+      }
+    } catch (sErr) {
+      console.warn('Background Shipmozo push failed:', sErr);
     }
 
     return NextResponse.json({
