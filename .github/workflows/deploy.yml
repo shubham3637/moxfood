@@ -63,8 +63,10 @@ jobs:
             echo "Deploying ready artifacts to $TARGET_DIR..."
             mkdir -p $TARGET_DIR
             cd $TARGET_DIR
+            rm -rf .next
             tar -xzf /tmp/deploy.tar.gz -C $TARGET_DIR/
             rm -f /tmp/deploy.tar.gz
             npm install --omit=dev --no-audit --no-fund
             export PATH=$PATH:/usr/local/bin:$HOME/.nvm/versions/node/$(ls $HOME/.nvm/versions/node 2>/dev/null | tail -n 1)/bin
-            pm2 reload all || pm2 restart all || pm2 reload guatamtrading || pm2 restart guatamtrading || pm2 start npm --name "guatamtrading" -- start
+            pm2 restart moxfoods --update-env || pm2 restart guatamtrading --update-env || pm2 restart all --update-env || pm2 start npm --name "moxfoods" -- start
+            pm2 save

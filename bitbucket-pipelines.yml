@@ -27,11 +27,11 @@ pipelines:
               if [ -n "$SERVER_PASSWORD" ]; then
                 echo "Connecting using SERVER_PASSWORD authentication..."
                 sshpass -p "$SERVER_PASSWORD" scp -o StrictHostKeyChecking=no -P ${SERVER_PORT:-22} deploy.tar.gz ${SERVER_USER}@${SERVER_IP}:${SERVER_PATH}/deploy.tar.gz
-                sshpass -p "$SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no -p ${SERVER_PORT:-22} ${SERVER_USER}@${SERVER_IP} "cd ${SERVER_PATH} && tar -xzf deploy.tar.gz && rm -f deploy.tar.gz && npm install --omit=dev && (export PATH=\$PATH:/usr/local/bin:\$HOME/.nvm/versions/node/\$(ls \$HOME/.nvm/versions/node 2>/dev/null | tail -n 1)/bin; pm2 reload all || pm2 restart all || pm2 reload guatamtrading || pm2 restart guatamtrading || pm2 start npm --name 'guatamtrading' -- start)"
+                sshpass -p "$SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no -p ${SERVER_PORT:-22} ${SERVER_USER}@${SERVER_IP} "cd ${SERVER_PATH} && rm -rf .next && tar -xzf deploy.tar.gz && rm -f deploy.tar.gz && npm install --omit=dev && (export PATH=\$PATH:/usr/local/bin:\$HOME/.nvm/versions/node/\$(ls \$HOME/.nvm/versions/node 2>/dev/null | tail -n 1)/bin; pm2 restart moxfoods --update-env || pm2 restart guatamtrading --update-env || pm2 restart all --update-env; pm2 save)"
               else
                 echo "Connecting using SSH Key authentication..."
                 scp -o StrictHostKeyChecking=no -P ${SERVER_PORT:-22} deploy.tar.gz ${SERVER_USER}@${SERVER_IP}:${SERVER_PATH}/deploy.tar.gz
-                ssh -o StrictHostKeyChecking=no -p ${SERVER_PORT:-22} ${SERVER_USER}@${SERVER_IP} "cd ${SERVER_PATH} && tar -xzf deploy.tar.gz && rm -f deploy.tar.gz && npm install --omit=dev && (export PATH=\$PATH:/usr/local/bin:\$HOME/.nvm/versions/node/\$(ls \$HOME/.nvm/versions/node 2>/dev/null | tail -n 1)/bin; pm2 reload all || pm2 restart all || pm2 reload guatamtrading || pm2 restart guatamtrading || pm2 start npm --name 'guatamtrading' -- start)"
+                ssh -o StrictHostKeyChecking=no -p ${SERVER_PORT:-22} ${SERVER_USER}@${SERVER_IP} "cd ${SERVER_PATH} && rm -rf .next && tar -xzf deploy.tar.gz && rm -f deploy.tar.gz && npm install --omit=dev && (export PATH=\$PATH:/usr/local/bin:\$HOME/.nvm/versions/node/\$(ls \$HOME/.nvm/versions/node 2>/dev/null | tail -n 1)/bin; pm2 restart moxfoods --update-env || pm2 restart guatamtrading --update-env || pm2 restart all --update-env; pm2 save)"
               fi
 
     master:
@@ -58,9 +58,9 @@ pipelines:
               if [ -n "$SERVER_PASSWORD" ]; then
                 echo "Connecting using SERVER_PASSWORD authentication..."
                 sshpass -p "$SERVER_PASSWORD" scp -o StrictHostKeyChecking=no -P ${SERVER_PORT:-22} deploy.tar.gz ${SERVER_USER}@${SERVER_IP}:${SERVER_PATH}/deploy.tar.gz
-                sshpass -p "$SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no -p ${SERVER_PORT:-22} ${SERVER_USER}@${SERVER_IP} "cd ${SERVER_PATH} && tar -xzf deploy.tar.gz && rm -f deploy.tar.gz && npm install --omit=dev && (export PATH=\$PATH:/usr/local/bin:\$HOME/.nvm/versions/node/\$(ls \$HOME/.nvm/versions/node 2>/dev/null | tail -n 1)/bin; pm2 reload all || pm2 restart all || pm2 reload guatamtrading || pm2 restart guatamtrading || pm2 start npm --name 'guatamtrading' -- start)"
+                sshpass -p "$SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no -p ${SERVER_PORT:-22} ${SERVER_USER}@${SERVER_IP} "cd ${SERVER_PATH} && rm -rf .next && tar -xzf deploy.tar.gz && rm -f deploy.tar.gz && npm install --omit=dev && (export PATH=\$PATH:/usr/local/bin:\$HOME/.nvm/versions/node/\$(ls \$HOME/.nvm/versions/node 2>/dev/null | tail -n 1)/bin; pm2 restart moxfoods --update-env || pm2 restart guatamtrading --update-env || pm2 restart all --update-env; pm2 save)"
               else
                 echo "Connecting using SSH Key authentication..."
                 scp -o StrictHostKeyChecking=no -P ${SERVER_PORT:-22} deploy.tar.gz ${SERVER_USER}@${SERVER_IP}:${SERVER_PATH}/deploy.tar.gz
-                ssh -o StrictHostKeyChecking=no -p ${SERVER_PORT:-22} ${SERVER_USER}@${SERVER_IP} "cd ${SERVER_PATH} && tar -xzf deploy.tar.gz && rm -f deploy.tar.gz && npm install --omit=dev && (export PATH=\$PATH:/usr/local/bin:\$HOME/.nvm/versions/node/\$(ls \$HOME/.nvm/versions/node 2>/dev/null | tail -n 1)/bin; pm2 reload all || pm2 restart all || pm2 reload guatamtrading || pm2 restart guatamtrading || pm2 start npm --name 'guatamtrading' -- start)"
+                ssh -o StrictHostKeyChecking=no -p ${SERVER_PORT:-22} ${SERVER_USER}@${SERVER_IP} "cd ${SERVER_PATH} && rm -rf .next && tar -xzf deploy.tar.gz && rm -f deploy.tar.gz && npm install --omit=dev && (export PATH=\$PATH:/usr/local/bin:\$HOME/.nvm/versions/node/\$(ls \$HOME/.nvm/versions/node 2>/dev/null | tail -n 1)/bin; pm2 restart moxfoods --update-env || pm2 restart guatamtrading --update-env || pm2 restart all --update-env; pm2 save)"
               fi
