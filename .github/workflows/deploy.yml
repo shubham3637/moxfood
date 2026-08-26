@@ -68,5 +68,6 @@ jobs:
             rm -f /tmp/deploy.tar.gz
             npm install --omit=dev --no-audit --no-fund
             export PATH=$PATH:/usr/local/bin:$HOME/.nvm/versions/node/$(ls $HOME/.nvm/versions/node 2>/dev/null | tail -n 1)/bin
-            pm2 restart moxfoods --update-env || pm2 restart guatamtrading --update-env || pm2 restart all --update-env || pm2 start npm --name "moxfoods" -- start
+            pm2 delete guatamtrading || true
+            pm2 start npm --name "guatamtrading" --cwd "$TARGET_DIR" -- start
             pm2 save
