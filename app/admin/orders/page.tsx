@@ -74,23 +74,23 @@ export default function AdminOrdersPage() {
     }
   };
 
-  const handlePushToShipmozo = async (orderId: string) => {
+  const handlePushToShadowfax = async (orderId: string) => {
     setPushingOrderId(orderId);
     try {
-      const res = await fetch('/api/shipmozo/push', {
+      const res = await fetch('/api/shadowfax/push', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ orderId }),
       });
       const data = await res.json();
       if (data.success) {
-        alert('Successfully pushed order to Shipmozo panel!');
+        alert('Successfully pushed order to Shadowfax panel!');
         fetchOrders();
       } else {
-        alert('Shipmozo Push Failed: ' + (data.error || 'Unknown error'));
+        alert('Shadowfax Push Failed: ' + (data.error || 'Unknown error'));
       }
     } catch (err: any) {
-      alert('Shipmozo error: ' + err.message);
+      alert('Shadowfax error: ' + err.message);
     } finally {
       setPushingOrderId(null);
     }
@@ -106,10 +106,10 @@ export default function AdminOrdersPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-black text-slate-900 tracking-tight font-heading">
-          Order & Shipmozo Dispatch Management
+          Order & Shadowfax Dispatch Management
         </h1>
         <p className="text-xs text-slate-500 font-medium">
-          Track customer orders, auto-push to Shipmozo, and update delivery & payment statuses
+          Track customer orders, auto-push to Shadowfax, and update delivery & payment statuses
         </p>
       </div>
 
@@ -161,13 +161,13 @@ export default function AdminOrdersPage() {
                     })}
                   </span>
 
-                  {ord.shipmozoPushed ? (
+                  {ord.shadowfaxPushed ? (
                     <span className="bg-emerald-100 text-emerald-800 text-[11px] font-extrabold px-3 py-1 rounded-full border border-emerald-200 flex items-center gap-1 font-heading">
-                      <CheckCircle2 size={13} /> Pushed to Shipmozo
+                      <CheckCircle2 size={13} /> Pushed to Shadowfax
                     </span>
                   ) : (
                     <button
-                      onClick={() => handlePushToShipmozo(ord.orderId)}
+                      onClick={() => handlePushToShadowfax(ord.orderId)}
                       disabled={pushingOrderId === ord.orderId}
                       className="bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-extrabold px-3 py-1 rounded-full shadow transition-all flex items-center gap-1 cursor-pointer font-heading"
                     >
@@ -176,7 +176,7 @@ export default function AdminOrdersPage() {
                       ) : (
                         <Truck size={13} />
                       )}
-                      <span>Push to Shipmozo</span>
+                      <span>Push to Shadowfax</span>
                     </button>
                   )}
                 </div>
@@ -250,9 +250,9 @@ export default function AdminOrdersPage() {
                       Landmark: {ord.customerDetails.landmark}
                     </div>
                   )}
-                  {ord.shipmozoAwbNumber && (
+                  {ord.shadowfaxAwbNumber && (
                     <div className="text-blue-900 font-extrabold text-[11px] pt-1">
-                      Shipmozo AWB: <span className="font-mono">{ord.shipmozoAwbNumber}</span> ({ord.shipmozoCourierName || 'Express Courier'})
+                      Shadowfax AWB: <span className="font-mono">{ord.shadowfaxAwbNumber}</span> ({ord.shadowfaxCourierName || 'Shadowfax Express'})
                     </div>
                   )}
                   <div className="text-slate-500 pt-0.5 text-[11px]">

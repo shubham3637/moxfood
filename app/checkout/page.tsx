@@ -18,6 +18,7 @@ import {
   ChevronDown,
   ChevronUp,
   CreditCard,
+  CheckCircle2,
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -86,10 +87,11 @@ export default function CheckoutPage() {
     error: '',
   });
 
+  const [shadowfaxDeliveryCharge, setShadowfaxDeliveryCharge] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Debounced India Post Pincode Lookup API
+  // Debounced India Post Pincode Lookup & Dynamic Shadowfax Delivery Charge API
   useEffect(() => {
     const cleanPincode = formData.pincode.trim();
 
@@ -102,20 +104,26 @@ export default function CheckoutPage() {
         district: '',
         error: cleanPincode.length > 0 && cleanPincode.length !== 6 ? 'Pincode must be 6 digits' : '',
       });
+      setShadowfaxDeliveryCharge(0);
       return;
     }
 
     const timer = setTimeout(async () => {
       setPincodeStatus((prev) => ({ ...prev, loading: true, error: '' }));
       try {
+        // 1. Fetch postal pincode lookup for city/state
         const response = await fetch(`https://api.postalpincode.in/pincode/${cleanPincode}`);
         const data = await response.json();
+
+        // 2. Fetch dynamic Shadowfax shipping rate
+        const rateRes = await fetch(`/api/shadowfax/rate?pincode=${cleanPincode}&weight=${totalWeightGrams}`);
+        const rateData = await rateRes.json();
+        const calculatedRate = Number(rateData?.rate) || 0;
 
         if (Array.isArray(data) && data[0]?.Status === 'Success' && data[0]?.PostOffice?.length > 0) {
           const firstPo = data[0].PostOffice[0];
           const state = firstPo.State || '';
           const district = firstPo.District || '';
-
           const isGuj = state.toLowerCase() === 'gujarat';
 
           setPincodeStatus({
@@ -126,6 +134,7 @@ export default function CheckoutPage() {
             district,
             error: '',
           });
+          setShadowfaxDeliveryCharge(calculatedRate);
         } else {
           setPincodeStatus({
             loading: false,
@@ -135,9 +144,10 @@ export default function CheckoutPage() {
             district: '',
             error: 'Invalid Pincode. Please check your 6-digit Pincode.',
           });
+          setShadowfaxDeliveryCharge(0);
         }
       } catch (err) {
-        console.error('Error fetching pincode:', err);
+        console.error('Error fetching pincode / Shadowfax rate:', err);
         setPincodeStatus({
           loading: false,
           verified: false,
@@ -146,18 +156,14 @@ export default function CheckoutPage() {
           district: '',
           error: 'Failed to verify Pincode. Check connection.',
         });
+        setShadowfaxDeliveryCharge(0);
       }
     }, 400);
 
     return () => clearTimeout(timer);
-  }, [formData.pincode]);
+  }, [formData.pincode, totalWeightGrams]);
 
-  // Dynamic Shipping Charge Calculation (Gujarat = ₹40/kg, Out of Gujarat = ₹70/kg)
-  const billableKg = Math.max(1, Math.ceil(totalWeightGrams / 1000));
-  const ratePerKg = pincodeStatus.isGujarat ? 40 : 70;
-
-  // ONLY calculate shipping fee when pincode is 6-digit & verified
-  const deliveryCharge = pincodeStatus.verified ? billableKg * ratePerKg : 0;
+  const deliveryCharge = pincodeStatus.verified ? shadowfaxDeliveryCharge : 0;
   const payableTotal = subtotal + deliveryCharge;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -194,7 +200,7 @@ export default function CheckoutPage() {
       const msg =
         language === 'gu'
           ? 'મહેરબાની કરીને સાચો 6-અંકનો પિનકોડ દાખલ કરી વેરિફાય કરો.'
-          : 'Please enter a valid 6-digit Pincode to calculate shipping fee.';
+          : 'Please enter a valid 6-digit Pincode to calculate Shadowfax shipping fee.';
       setErrorMsg(msg);
       showError(msg);
       return;
@@ -274,10 +280,9 @@ export default function CheckoutPage() {
                   quantity: item.quantity,
                   image: item.image,
                 })),
+                deliveryCharge: deliveryCharge,
                 weightSummary: {
                   totalWeightGrams,
-                  billableKg,
-                  ratePerKg,
                   shippingFee: deliveryCharge,
                 },
                 notes: formData.notes.trim(),
@@ -606,7 +611,7 @@ export default function CheckoutPage() {
                 <span className="text-xs font-extrabold flex items-center gap-1.5 text-pink-300">
                   <span>{language === 'gu' ? 'કુલ બિલ (Total Bill)' : 'Total Bill'}</span>
                   <span className="text-[10px] font-normal text-slate-300">
-                    (Incl. taxes &amp; shipping charges)
+                    (Incl. taxes &amp; Shadowfax shipping charge)
                   </span>
                 </span>
                 <span className="text-base font-black text-white">₹{payableTotal}</span>
@@ -638,13 +643,17 @@ export default function CheckoutPage() {
                   </span>
                 </div>
 
-                {/* Delivery Charge Row (Removed per-kg text multiplier per request) */}
+                {/* Dynamic Shadowfax Delivery Charge Row */}
                 <div className="flex justify-between items-center text-slate-600">
                   <div className="flex items-center gap-1">
                     <Truck size={14} className="text-blue-900" />
-                    <span>Shipping Fee:</span>
+                    <span>Shadowfax Delivery Charge:</span>
                   </div>
-                  {pincodeStatus.verified ? (
+                  {pincodeStatus.loading ? (
+                    <span className="text-[11px] font-bold text-pink-600 flex items-center gap-1">
+                      <RefreshCw size={12} className="animate-spin" /> Calculating...
+                    </span>
+                  ) : pincodeStatus.verified ? (
                     <span className="font-bold text-pink-600 font-heading text-sm">₹{deliveryCharge}</span>
                   ) : (
                     <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">

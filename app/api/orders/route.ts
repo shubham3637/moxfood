@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Order from '@/models/Order';
 import Product from '@/models/Product';
-import { pushOrderToShipmozo } from '@/lib/shipmozo';
+import { pushOrderToShadowfax } from '@/lib/shadowfax';
 
 export async function GET(request: Request) {
   try {
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     await dbConnect();
     const body = await request.json();
 
-    const { customerDetails, items, paymentMethod, notes } = body;
+    const { customerDetails, items, paymentMethod, deliveryCharge: bodyDeliveryCharge, notes } = body;
 
     if (
       !customerDetails ||
@@ -59,8 +59,8 @@ export async function POST(request: Request) {
       return acc + Number(item.price) * Number(item.quantity);
     }, 0);
 
-    // Fixed ₹30 delivery charge
-    const deliveryCharge = 30;
+    // Dynamic Delivery charge passed from checkout or defaulted
+    const deliveryCharge = Number(bodyDeliveryCharge) || 0;
     const totalAmount = subtotal + deliveryCharge;
 
     // Generate unique Order ID
@@ -93,19 +93,20 @@ export async function POST(request: Request) {
       }
     }
 
-    // Push order details automatically to Shipmozo panel
+    // Push order details automatically to Shadowfax panel
     try {
-      const shipmozoRes = await pushOrderToShipmozo(newOrder);
-      if (shipmozoRes.success) {
+      const shadowfaxRes = await pushOrderToShadowfax(newOrder);
+      if (shadowfaxRes.success) {
         await Order.findByIdAndUpdate(newOrder._id, {
-          shipmozoPushed: true,
-          shipmozoReferenceId: shipmozoRes.pushData?.reference_id || orderId,
-          shipmozoAwbNumber: shipmozoRes.assignData?.awb_number || '',
-          shipmozoCourierName: shipmozoRes.assignData?.courier_company || '',
+          shadowfaxPushed: true,
+          shadowfaxAwbNumber: shadowfaxRes.awbNumber || '',
+          shadowfaxCourierName: shadowfaxRes.courierName || 'Shadowfax Express',
+          shadowfaxStatus: shadowfaxRes.status || 'Pushed',
+          shadowfaxOrderId: shadowfaxRes.shadowfaxOrderId || orderId,
         });
       }
     } catch (sErr) {
-      console.warn('Background Shipmozo push notification failed:', sErr);
+      console.warn('Background Shadowfax push notification failed:', sErr);
     }
 
     return NextResponse.json({ success: true, order: newOrder }, { status: 201 });
