@@ -31,19 +31,36 @@ export async function checkShadowfaxRate(pincode: string, weightGrams: number = 
       return { serviceable: false, rate: 0, error: 'Invalid 6-digit Pincode' };
     }
 
-    // Try live Shadowfax serviceability / rate API
-    const res = await shadowfaxFetch(
-      `/api/v2/serviceability/?pincode=${cleanPincode}&weight=${weightGrams}`,
-      { method: 'GET' }
-    );
+    // Try live Shadowfax v3 rate calculation API
+    const weightKg = Number((weightGrams / 1000).toFixed(2)) || 0.5;
+    const ratePayload = {
+      pickup_pincode: '394101',
+      delivery_pincode: cleanPincode,
+      actual_weight: weightKg,
+      length: 15,
+      breadth: 10,
+      height: 8,
+      payment_mode: 'PREPAID',
+    };
+
+    const res = await shadowfaxFetch('/api/v3/orders/calculate_rate/', {
+      method: 'POST',
+      body: JSON.stringify(ratePayload),
+    });
 
     if (res.status === 200 && res.data) {
-      const isServiceable = res.data.serviceable !== false && res.data.status !== 'unserviceable';
       const calculatedRate =
-        Number(res.data.rate || res.data.delivery_charge || res.data.charge || res.data.amount) ||
-        0;
+        Number(
+          res.data.rate ||
+            res.data.charge ||
+            res.data.total_amount ||
+            res.data.delivery_charge ||
+            res.data.amount ||
+            res.data.data?.rate ||
+            res.data.data?.total_amount
+        ) || 0;
 
-      if (isServiceable && calculatedRate > 0) {
+      if (calculatedRate > 0) {
         return {
           serviceable: true,
           rate: calculatedRate,
@@ -107,7 +124,7 @@ export async function pushOrderToShadowfax(order: any) {
         name: 'Moxfood Warehouse',
         phone: '7096396856',
         address: 'Surat, Gujarat',
-        pincode: '395006',
+        pincode: '394101',
         city: 'Surat',
         state: 'Gujarat',
       },
