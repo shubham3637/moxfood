@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     });
 
     const options = {
-      amount: Math.round(Number(amount) * 100), // Amount in paise (e.g. ₹328 -> 32800)
+      amount: Math.round(Number(amount) * 100), // Amount in paise (e.g. ₹170 -> 17000)
       currency: 'INR',
       receipt: `rcpt_${Date.now()}`,
     };
@@ -31,8 +31,14 @@ export async function POST(request: Request) {
     });
   } catch (error: any) {
     console.error('Error creating Razorpay order:', error);
+    const errDesc =
+      error?.error?.description ||
+      error?.description ||
+      error?.message ||
+      'Razorpay authentication failed. Please verify Razorpay API Keys.';
+
     return NextResponse.json(
-      { success: false, error: error.message || 'Razorpay order creation failed' },
+      { success: false, error: `Razorpay Order Error: ${errDesc}` },
       { status: 500 }
     );
   }
