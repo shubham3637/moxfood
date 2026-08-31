@@ -106,7 +106,7 @@ function TrackOrderContent() {
       <div className="text-center space-y-2">
         <div className="inline-flex items-center gap-2 bg-pink-100 text-pink-700 font-extrabold text-xs px-3.5 py-1.5 rounded-full border border-pink-200 font-heading">
           <Truck size={14} />
-          <span>{language === 'gu' ? 'લાઇવ શેડોફેક્સ ઓર્ડર ટ્રેકિંગ' : 'Live Shadowfax Order Tracking'}</span>
+          <span>{language === 'gu' ? 'લાઇવ શિપમોઝો ઓર્ડર ટ્રેકિંગ' : 'Live Shipmozo Order Tracking'}</span>
         </div>
         <h1 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight font-heading">
           {language === 'gu' ? 'તમારો ઓર્ડર ટ્રેક કરો (Track Order)' : 'Track Your Order Status'}
@@ -114,7 +114,7 @@ function TrackOrderContent() {
         <p className="text-xs sm:text-sm text-slate-500 font-medium max-w-lg mx-auto">
           {language === 'gu'
             ? 'તમારો વોટ્સએપ મોબાઈલ નંબર અથવા ઓર્ડર નંબર દાખલ કરી લાઈવ શિપિંગ સ્ટેટસ જુઓ'
-            : 'Enter your Mobile Number or Order ID to check your live Shadowfax delivery status'}
+            : 'Enter your Mobile Number or Order ID to check your live courier delivery status'}
         </p>
       </div>
 
@@ -207,9 +207,9 @@ function TrackOrderContent() {
                         {order.paymentStatus === 'Paid' ? 'PREPAID PAID' : 'PAYMENT PENDING'}
                       </span>
 
-                      {order.shadowfaxPushed && (
+                      {order.shipmozoPushed && (
                         <span className="bg-blue-100 text-blue-700 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-blue-200 font-heading">
-                          SHADOWFAX DISPATCHED
+                          SHIPMOZO DISPATCHED
                         </span>
                       )}
                     </div>
@@ -240,29 +240,29 @@ function TrackOrderContent() {
                   </div>
                 </div>
 
-                {/* Shadowfax Live Courier Tracking Details Card */}
-                {order.shadowfaxAwbNumber && (
+                {/* Shipmozo Live Courier Tracking Details Card */}
+                {order.shipmozoAwbNumber && (
                   <div className="bg-gradient-to-r from-slate-900 to-blue-950 text-white p-4 rounded-2xl shadow-inner space-y-2 text-xs">
                     <div className="flex items-center justify-between border-b border-white/10 pb-2">
                       <span className="font-extrabold font-heading text-pink-300 flex items-center gap-1.5">
                         <Navigation size={14} className="text-pink-400" />
-                        Shadowfax Courier Details
+                        Shipmozo Courier Details
                       </span>
                       <span className="bg-emerald-500/20 text-emerald-300 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-emerald-500/40">
-                        {order.shadowfaxCourierName || 'Shadowfax Express'}
+                        {order.shipmozoCourierName || 'Express Courier'}
                       </span>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
                       <div>
                         <span className="text-slate-400 block">AWB Tracking Number</span>
                         <span className="font-mono font-bold text-white tracking-wider">
-                          {order.shadowfaxAwbNumber}
+                          {order.shipmozoAwbNumber}
                         </span>
                       </div>
                       <div>
                         <span className="text-slate-400 block">Shipment Status</span>
                         <span className="font-bold text-emerald-400">
-                          {order.shadowfaxStatus || 'In Transit / Dispatched'}
+                          {order.shipmozoStatus || 'In Transit / Dispatched'}
                         </span>
                       </div>
                     </div>
@@ -393,7 +393,7 @@ function TrackOrderContent() {
                           <span className="font-bold">₹{order.subtotal}</span>
                         </div>
                         <div className="flex justify-between text-slate-600">
-                          <span>Shipping Fee:</span>
+                          <span>Store Delivery:</span>
                           <span className="font-bold">₹{order.deliveryCharge}</span>
                         </div>
                         <div className="flex justify-between font-black text-slate-900 pt-1 border-t border-slate-200">

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Order from '@/models/Order';
 import Product from '@/models/Product';
-import { pushOrderToShadowfax } from '@/lib/shadowfax';
+import { pushOrderToShipmozo } from '@/lib/shipmozo';
 
 export async function GET(request: Request) {
   try {
@@ -59,7 +59,6 @@ export async function POST(request: Request) {
       return acc + Number(item.price) * Number(item.quantity);
     }, 0);
 
-    // Dynamic Delivery charge passed from checkout or defaulted
     const deliveryCharge = Number(bodyDeliveryCharge) || 0;
     const totalAmount = subtotal + deliveryCharge;
 
@@ -93,20 +92,19 @@ export async function POST(request: Request) {
       }
     }
 
-    // Push order details automatically to Shadowfax panel
+    // Push order details automatically to Shipmozo panel
     try {
-      const shadowfaxRes = await pushOrderToShadowfax(newOrder);
-      if (shadowfaxRes.success) {
+      const shipmozoRes = await pushOrderToShipmozo(newOrder);
+      if (shipmozoRes.success) {
         await Order.findByIdAndUpdate(newOrder._id, {
-          shadowfaxPushed: true,
-          shadowfaxAwbNumber: shadowfaxRes.awbNumber || '',
-          shadowfaxCourierName: shadowfaxRes.courierName || 'Shadowfax Express',
-          shadowfaxStatus: shadowfaxRes.status || 'Pushed',
-          shadowfaxOrderId: shadowfaxRes.shadowfaxOrderId || orderId,
+          shipmozoPushed: true,
+          shipmozoReferenceId: shipmozoRes.pushData?.reference_id || orderId,
+          shipmozoAwbNumber: shipmozoRes.assignData?.awb_number || '',
+          shipmozoCourierName: shipmozoRes.assignData?.courier_company || '',
         });
       }
     } catch (sErr) {
-      console.warn('Background Shadowfax push notification failed:', sErr);
+      console.warn('Background Shipmozo push notification failed:', sErr);
     }
 
     return NextResponse.json({ success: true, order: newOrder }, { status: 201 });

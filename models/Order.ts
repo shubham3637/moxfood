@@ -17,8 +17,6 @@ export interface ICustomerDetails {
   pincode?: string;
   landmark?: string;
   deliverySlot?: string;
-  district?: string;
-  state?: string;
 }
 
 export interface IOrder extends Document {
@@ -35,12 +33,11 @@ export interface IOrder extends Document {
   razorpayPaymentId?: string;
   razorpaySignature?: string;
   notes?: string;
-  shadowfaxPushed?: boolean;
-  shadowfaxAwbNumber?: string;
-  shadowfaxCourierName?: string;
-  shadowfaxStatus?: string;
-  shadowfaxOrderId?: string;
-  shadowfaxWaybillNumber?: string;
+  shipmozoPushed?: boolean;
+  shipmozoAwbNumber?: string;
+  shipmozoCourierName?: string;
+  shipmozoStatus?: string;
+  shipmozoReferenceId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -66,8 +63,6 @@ const CustomerDetailsSchema = new Schema<ICustomerDetails>(
     pincode: { type: String, default: '' },
     landmark: { type: String, default: '' },
     deliverySlot: { type: String, default: 'Anytime Today' },
-    district: { type: String, default: '' },
-    state: { type: String, default: '' },
   },
   { _id: false }
 );
@@ -91,12 +86,11 @@ const OrderSchema: Schema<IOrder> = new Schema(
     razorpayPaymentId: { type: String, default: '' },
     razorpaySignature: { type: String, default: '' },
     notes: { type: String, default: '' },
-    shadowfaxPushed: { type: Boolean, default: false },
-    shadowfaxAwbNumber: { type: String, default: '' },
-    shadowfaxCourierName: { type: String, default: '' },
-    shadowfaxStatus: { type: String, default: '' },
-    shadowfaxOrderId: { type: String, default: '' },
-    shadowfaxWaybillNumber: { type: String, default: '' },
+    shipmozoPushed: { type: Boolean, default: false },
+    shipmozoAwbNumber: { type: String, default: '' },
+    shipmozoCourierName: { type: String, default: '' },
+    shipmozoStatus: { type: String, default: '' },
+    shipmozoReferenceId: { type: String, default: '' },
   },
   { timestamps: true }
 );

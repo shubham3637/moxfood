@@ -4,7 +4,7 @@ import dbConnect from '@/lib/db';
 import Order from '@/models/Order';
 import Product from '@/models/Product';
 import { RAZORPAY_KEY_SECRET } from '@/lib/constants';
-import { pushOrderToShadowfax } from '@/lib/shadowfax';
+import { pushOrderToShipmozo } from '@/lib/shipmozo';
 
 export async function POST(request: Request) {
   try {
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
 
     const isSignatureValid = expectedSignature === razorpay_signature;
 
-    // Calculate subtotal and dynamic delivery charge
+    // Calculate subtotal and delivery charge
     const subtotal = items.reduce((acc: number, item: any) => {
       return acc + Number(item.price) * Number(item.quantity);
     }, 0);
@@ -78,20 +78,19 @@ export async function POST(request: Request) {
       }
     }
 
-    // Push order details automatically to Shadowfax panel
+    // Push order details automatically to Shipmozo panel
     try {
-      const shadowfaxRes = await pushOrderToShadowfax(newOrder);
-      if (shadowfaxRes.success) {
+      const shipmozoRes = await pushOrderToShipmozo(newOrder);
+      if (shipmozoRes.success) {
         await Order.findByIdAndUpdate(newOrder._id, {
-          shadowfaxPushed: true,
-          shadowfaxAwbNumber: shadowfaxRes.awbNumber || '',
-          shadowfaxCourierName: shadowfaxRes.courierName || 'Shadowfax Express',
-          shadowfaxStatus: shadowfaxRes.status || 'Pushed',
-          shadowfaxOrderId: shadowfaxRes.shadowfaxOrderId || orderId,
+          shipmozoPushed: true,
+          shipmozoReferenceId: shipmozoRes.pushData?.reference_id || orderId,
+          shipmozoAwbNumber: shipmozoRes.assignData?.awb_number || '',
+          shipmozoCourierName: shipmozoRes.assignData?.courier_company || '',
         });
       }
     } catch (sErr) {
-      console.warn('Background Shadowfax push failed:', sErr);
+      console.warn('Background Shipmozo push failed:', sErr);
     }
 
     return NextResponse.json({
