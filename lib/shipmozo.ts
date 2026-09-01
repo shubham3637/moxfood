@@ -65,22 +65,22 @@ export async function pushOrderToShipmozo(order: any) {
     const fetchWarehouseId = await getShipmozoWarehouses();
     const warehouseId = fetchWarehouseId || '139140'; // Fallback to Gautam Trading default warehouse 139140
 
-    const rawName = (order.customerDetails?.name || '').trim();
+    const rawName = (order.customerDetails?.name || '').replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim();
     const consigneeName = rawName.length >= 3 && rawName.toLowerCase() !== 'void' ? rawName : 'Moxfood Customer';
 
     const cleanPhone = Number((order.customerDetails?.phone || '').replace(/\D/g, '')) || 7096396856;
     const cleanPincode = Number(order.customerDetails?.pincode) || 394105;
     const orderDate = new Date(order.createdAt || Date.now()).toISOString().split('T')[0];
 
-    const rawAddress = (order.customerDetails?.address || '').trim();
+    const rawAddress = (order.customerDetails?.address || '').replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim();
     const addressLineOne = rawAddress.length >= 6 ? rawAddress : 'Gautam Trading, Surat, Gujarat';
-    const landmark = (order.customerDetails?.landmark || '').trim();
-    const stateName = (order.customerDetails?.state || 'Gujarat').trim();
-    const districtName = (order.customerDetails?.district || 'Surat').trim();
+    const landmark = (order.customerDetails?.landmark || '').replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim();
+    const stateName = (order.customerDetails?.state || 'Gujarat').replace(/[\r\n]+/g, ' ').trim();
+    const districtName = (order.customerDetails?.district || 'Surat').replace(/[\r\n]+/g, ' ').trim();
 
     const productDetail = (order.items || []).map((item: any) => ({
-      name: item.name || 'Healthy Seed Pack',
-      sku_number: String(item.productId || 'SKU-101').slice(0, 30),
+      name: (item.name || 'Healthy Seed Pack').replace(/[\r\n]+/g, ' ').trim(),
+      sku_number: String(item.productId || 'SKU-101').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 30) || 'SKU-101',
       quantity: Number(item.quantity) || 1,
       discount: '',
       hsn: '',
@@ -131,7 +131,7 @@ export async function pushOrderToShipmozo(order: any) {
     console.log('Shipmozo API push result:', JSON.stringify(result));
 
     // Auto-assign courier if push succeeded
-    if (result.result === '1') {
+    if (result && (result.result === '1' || result.message === 'Success' || result.data?.Info?.includes('Success'))) {
       try {
         const autoAssignResult = await shipmozoFetch('/auto-assign-order', {
           method: 'POST',
@@ -144,14 +144,24 @@ export async function pushOrderToShipmozo(order: any) {
         };
       } catch (err) {
         console.warn('Auto-assign courier error:', err);
+        return {
+          success: true,
+          pushData: result.data,
+          assignData: null,
+        };
       }
     }
 
-    const errorMsg = result.data?.error || result.message || result.errors || 'Shipmozo push rejected request';
+    const errorMsg =
+      result?.data?.error ||
+      result?.data?.Info ||
+      result?.message ||
+      result?.errors ||
+      'Shipmozo push rejected request';
 
     return {
-      success: result.result === '1',
-      pushData: result.data || null,
+      success: false,
+      pushData: result?.data || null,
       message: errorMsg,
     };
   } catch (error: any) {
