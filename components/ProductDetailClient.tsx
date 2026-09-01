@@ -306,15 +306,28 @@ export default function ProductDetailClient({ product }: { product: any }) {
               </div>
             )}
 
-            {/* Trust Badges */}
-            <div className="grid grid-cols-2 gap-3 pt-2 text-xs text-slate-600 font-bold">
-              <div className="flex items-center gap-2 bg-blue-50/50 p-2.5 rounded-xl border border-blue-100">
-                <ShieldCheck size={18} className="text-blue-900 shrink-0" />
-                <span>{t('qualityFreshness')}</span>
+            {/* Trust Badges & Dispatch / Return Policy Notice */}
+            <div className="space-y-3 pt-2">
+              <div className="grid grid-cols-2 gap-3 text-xs text-slate-600 font-bold">
+                <div className="flex items-center gap-2 bg-blue-50/50 p-2.5 rounded-xl border border-blue-100">
+                  <ShieldCheck size={18} className="text-blue-900 shrink-0" />
+                  <span>{t('qualityFreshness')}</span>
+                </div>
+                <div className="flex items-center gap-2 bg-blue-50/50 p-2.5 rounded-xl border border-blue-100">
+                  <Truck size={18} className="text-pink-600 shrink-0" />
+                  <span>Dispatch 2-3 Days • Delivery 7-10 Days</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2 bg-blue-50/50 p-2.5 rounded-xl border border-blue-100">
-                <Truck size={18} className="text-pink-600 shrink-0" />
-                <span>{t('fastDelivery')}</span>
+
+              {/* Policy Highlights Card */}
+              <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl space-y-2 text-[11px] text-slate-700">
+                <div className="flex items-center gap-2 font-extrabold text-slate-900 font-heading">
+                  <span className="text-pink-600">🚫 No Return Policy on Food Items</span>
+                  <span className="text-[10px] text-slate-400 font-normal">(ફૂડ આઇટમ્સ માં કોઇ રિટર્ન નથી)</span>
+                </div>
+                <p className="text-[11px] text-slate-600 leading-relaxed font-semibold">
+                  📹 <strong>Notice:</strong> જો પાર્સલમાં વસ્તુ મિસિંગ કે ડેમેજ હોય તો પાર્સલ ખોલતા પહેલાં વીડિયો બનાવવો ફરજિયાત છે. (Please record an unboxing video BEFORE opening the parcel for missing/damaged claims.)
+                </p>
               </div>
             </div>
           </div>

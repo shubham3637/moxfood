@@ -31,18 +31,31 @@ export default function RefundPolicyPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-base font-extrabold text-slate-900 font-heading">2. Return & Replacement Eligibility</h2>
-          <p>
-            Because healthy seeds and grocery products are perishable food items, returns are accepted under the following circumstances:
-          </p>
-          <ul className="list-disc pl-5 space-y-1 text-slate-600">
-            <li>Product delivered was damaged, tampered, or defective upon delivery.</li>
-            <li>Incorrect item or weight pack was delivered by error.</li>
-            <li>Item delivered was past its expiration date.</li>
-          </ul>
-          <p className="text-xs text-slate-500 font-normal pt-1">
-            * Note: Return requests must be initiated within 24 hours of delivery with photo proof sent to our WhatsApp support number.
-          </p>
+          <h2 className="text-base font-extrabold text-slate-900 font-heading">2. Return &amp; Replacement Policy (રિટર્ન નીતિ)</h2>
+          <div className="bg-amber-50 border border-amber-200 p-4 rounded-2xl space-y-2 text-slate-800">
+            <div className="font-extrabold text-amber-900 flex items-center gap-2 text-sm font-heading">
+              <AlertCircle size={18} className="text-amber-600 shrink-0" />
+              <span>No Return Policy on Food Items (ફૂડ આઇટમ્સ માં કોઇ રિટર્ન નથી)</span>
+            </div>
+            <p className="text-xs leading-relaxed text-slate-700">
+              Because healthy seeds, superfoods, dry fruits, and grocery products are perishable food items, <strong>we do NOT accept returns once delivered</strong>.
+            </p>
+          </div>
+
+          <div className="bg-pink-50 border border-pink-200 p-4 rounded-2xl space-y-2 text-slate-800">
+            <div className="font-extrabold text-pink-900 flex items-center gap-2 text-sm font-heading">
+              📹 Mandatory Parcel Unboxing Video (પાર્સલ ખોલતા પહેલાં વીડિયો બનાવવો ફરજિયાત છે)
+            </div>
+            <p className="text-xs leading-relaxed text-slate-700">
+              In case of any missing or damaged items inside the delivered parcel:
+            </p>
+            <ul className="list-disc pl-5 space-y-1.5 text-xs text-slate-800 font-semibold">
+              <li>Customers <strong>MUST film a clear, uninterrupted video BEFORE opening the parcel package</strong>.</li>
+              <li>The video must clearly show the courier shipping label, outer box seal, and the complete unboxing process.</li>
+              <li>Claims for damaged or missing items without a continuous unboxing video recorded prior to package opening will not be accepted.</li>
+              <li>Please share the unboxing video to our WhatsApp support (+91 7096396856) within 24 hours of delivery.</li>
+            </ul>
+          </div>
         </section>
 
         <section className="space-y-3">

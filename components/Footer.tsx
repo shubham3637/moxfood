@@ -127,10 +127,57 @@ export default function Footer() {
         </div>
       </div>
 
+      {/* Store Dispatch, Delivery & Return Policy Banner */}
+      <div className="w-full max-w-7xl mx-auto px-4 mb-8">
+        <div className="bg-blue-900/60 border border-blue-800 rounded-2xl p-4 sm:p-5 text-xs text-slate-200 space-y-3 font-medium shadow-md">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Dispatch & Delivery */}
+            <div className="flex items-start gap-3 bg-blue-950/80 p-3 rounded-xl border border-blue-800/80">
+              <Truck size={20} className="text-pink-400 shrink-0 mt-0.5" />
+              <div>
+                <div className="font-extrabold text-white text-xs font-heading">
+                  Dispatch &amp; Delivery Timeline
+                </div>
+                <div className="text-[11px] text-slate-300 mt-0.5">
+                  <strong>Dispatch Time:</strong> 2-3 Days <br />
+                  <strong>Delivery Within:</strong> 7-10 Days (ડિસ્પેચ: 2-3 દિવસ, ડિલિવરી: 7-10 દિવસ)
+                </div>
+              </div>
+            </div>
+
+            {/* No Return on Food Items */}
+            <div className="flex items-start gap-3 bg-blue-950/80 p-3 rounded-xl border border-blue-800/80">
+              <ShieldCheck size={20} className="text-amber-400 shrink-0 mt-0.5" />
+              <div>
+                <div className="font-extrabold text-white text-xs font-heading">
+                  Return Policy (ફૂડ આઇટમ્સ નીતિ)
+                </div>
+                <div className="text-[11px] text-slate-300 mt-0.5">
+                  <strong>No Return on Food Items.</strong> (ફૂડ આઇટમ્સ માં કોઇ રિટર્ન નથી)
+                </div>
+              </div>
+            </div>
+
+            {/* Mandatory Unboxing Video Notice */}
+            <div className="flex items-start gap-3 bg-blue-950/80 p-3 rounded-xl border border-blue-800/80">
+              <FileText size={20} className="text-pink-400 shrink-0 mt-0.5" />
+              <div>
+                <div className="font-extrabold text-white text-xs font-heading">
+                  Damaged / Missing Item Claim
+                </div>
+                <div className="text-[11px] text-slate-300 mt-0.5">
+                  જો પાર્સલમાં વસ્તુ મિસિંગ કે ડેમેજ હોય તો પાર્સલ ખોલતા પહેલાં વીડિયો બનાવવો ફરજિયાત છે. (Record video BEFORE opening parcel)
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Copyright Bar */}
       <div className="border-t border-blue-900/80 pt-6 text-center text-xs text-slate-400 font-medium space-y-1">
-        <div>© {new Date().getFullYear()} Moxfood Healthy Seeds & Grocery Store. All Rights Reserved.</div>
-        <div className="text-[11px] text-slate-500">Fast Doorstep Delivery in Surat, Gujarat • 100% Quality Assurance</div>
+        <div>© {new Date().getFullYear()} Moxfood Healthy Seeds &amp; Grocery Store. All Rights Reserved.</div>
+        <div className="text-[11px] text-slate-500">Fast Doorstep Delivery • Dispatch 2-3 days • Delivery 7-10 days</div>
       </div>
     </footer>
   );

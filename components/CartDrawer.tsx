@@ -195,6 +195,17 @@ export default function CartDrawer() {
                 )}
               </div>
 
+              {/* Dispatch & Return Policy Info Notice Box */}
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-[11px] text-slate-700 space-y-1 font-medium">
+                <div className="font-bold text-slate-900 flex items-center justify-between">
+                  <span>🚚 Dispatch: 2-3 Days • Delivery: 7-10 Days</span>
+                  <span className="text-pink-600 font-extrabold">No Return</span>
+                </div>
+                <div className="text-[10px] text-slate-500 font-semibold leading-tight">
+                  📹 પાર્સલમાં વસ્તુ મિસિંગ કે ડેમેજ હોય તો પાર્સલ ખોલતા પહેલાં વીડિયો બનાવવો ફરજિયાત છે.
+                </div>
+              </div>
+
               {/* Direct Instant "Pay Now" Sticky Footer Bar */}
               <div className="flex items-center justify-between gap-3 pt-1">
                 <div className="flex flex-col text-left font-heading">

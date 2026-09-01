@@ -717,25 +717,41 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* Submit Payment Button inside form */}
-              <button
-                type="submit"
-                disabled={isSubmitting || !isMinWeightSatisfied}
-                className="w-full bg-gradient-to-r from-pink-600 via-rose-600 to-pink-600 hover:from-pink-500 hover:to-rose-500 text-white font-extrabold py-4 px-6 rounded-2xl shadow-xl shadow-pink-600/30 flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-50 cursor-pointer text-sm font-heading"
-              >
-                {isSubmitting ? (
-                  <>
-                    <RefreshCw size={18} className="animate-spin" />
-                    <span>{t('processingOrder')}</span>
-                  </>
-                ) : (
-                  <>
-                    <CreditCard size={20} />
-                    <span>Pay Now ₹{payableTotal}</span>
-                  </>
-                )}
-              </button>
-            </form>
+              {/* Dispatch, Delivery & Return Policy Notice Card */}
+                <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-2 text-xs text-slate-700 font-medium">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2">
+                    <span className="font-extrabold text-slate-900 flex items-center gap-1.5 font-heading">
+                      <Truck size={16} className="text-pink-600" />
+                      <span>Dispatch: 2-3 Days • Delivery: 7-10 Days</span>
+                    </span>
+                    <span className="bg-pink-100 text-pink-800 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-pink-200 font-heading">
+                      🚫 No Return on Food Items
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-slate-600 font-semibold leading-relaxed pt-0.5">
+                    📹 <strong>Notice:</strong> જો પાર્સલમાં વસ્તુ મિસિંગ કે ડેમેજ હોય તો પાર્સલ ખોલતા પહેલાં વીડિયો બનાવવો ફરજિયાત છે. (Please record an unboxing video BEFORE opening parcel for damage/missing claims.)
+                  </div>
+                </div>
+
+                {/* Submit Payment Button inside form */}
+                <button
+                  type="submit"
+                  disabled={isSubmitting || !isMinWeightSatisfied}
+                  className="w-full bg-gradient-to-r from-pink-600 via-rose-600 to-pink-600 hover:from-pink-500 hover:to-rose-500 text-white font-extrabold py-4 px-6 rounded-2xl shadow-xl shadow-pink-600/30 flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-50 cursor-pointer text-sm font-heading"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <RefreshCw size={18} className="animate-spin" />
+                      <span>{t('processingOrder')}</span>
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard size={20} />
+                      <span>Pay Now ₹{payableTotal}</span>
+                    </>
+                  )}
+                </button>
+              </form>
           </div>
         </div>
 

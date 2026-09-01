@@ -31,11 +31,19 @@ export default function ShippingPolicyPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-base font-extrabold text-slate-900 font-heading">2. Delivery Timelines</h2>
-          <ul className="list-disc pl-5 space-y-2 text-slate-600">
-            <li><strong className="text-slate-800">Local Express Delivery in Surat:</strong> Orders placed during business hours (8:00 AM - 9:00 PM) are delivered within <strong>15 to 30 minutes</strong> or during your chosen delivery time slot.</li>
-            <li><strong className="text-slate-800">Standard India Shipping:</strong> Out-of-station orders are dispatched within 24 hours and delivered within 2 to 5 business days.</li>
-          </ul>
+          <h2 className="text-base font-extrabold text-slate-900 font-heading">2. Dispatch &amp; Delivery Timelines (ડિસ્પેચ અને ડિલિવરી સમય)</h2>
+          <div className="bg-blue-50 border border-blue-200 p-4 rounded-2xl space-y-2 text-slate-800 text-xs sm:text-sm font-semibold">
+            <ul className="space-y-2 text-slate-700">
+              <li className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-pink-600"></span>
+                <span><strong className="text-slate-900 font-bold">Dispatch Time (ડિસ્પેચ સમય):</strong> 2 to 3 Days</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-blue-900"></span>
+                <span><strong className="text-slate-900 font-bold">Delivery Timeline (ડિલિવરી સમય):</strong> Within 7 to 10 Days across India</span>
+              </li>
+            </ul>
+          </div>
         </section>
 
         <section className="space-y-3">
