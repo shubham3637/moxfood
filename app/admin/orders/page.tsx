@@ -17,9 +17,40 @@ export default function AdminOrdersPage() {
   const [activeStatusTab, setActiveStatusTab] = useState('all');
   const [pushingOrderId, setPushingOrderId] = useState<string | null>(null);
 
+  const [recoverPaymentId, setRecoverPaymentId] = useState('');
+  const [recovering, setRecovering] = useState(false);
+  const [showRecoverModal, setShowRecoverModal] = useState(false);
+
   useEffect(() => {
     fetchOrders();
   }, [activeStatusTab]);
+
+  const handleRecoverOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!recoverPaymentId.trim()) return;
+
+    setRecovering(true);
+    try {
+      const res = await fetch('/api/admin/recover-razorpay', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentId: recoverPaymentId.trim() }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message || 'Order recovered successfully!');
+        setRecoverPaymentId('');
+        setShowRecoverModal(false);
+        fetchOrders();
+      } else {
+        alert('Recovery failed: ' + (data.error || 'Unknown error'));
+      }
+    } catch (err: any) {
+      alert('Error recovering order: ' + err.message);
+    } finally {
+      setRecovering(false);
+    }
+  };
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -104,13 +135,23 @@ export default function AdminOrdersPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-black text-slate-900 tracking-tight font-heading">
-          Order & Shipmozo Dispatch Management
-        </h1>
-        <p className="text-xs text-slate-500 font-medium">
-          Track customer orders, auto-push to Shipmozo, and update delivery & payment statuses
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight font-heading">
+            Order &amp; Shipmozo Dispatch Management
+          </h1>
+          <p className="text-xs text-slate-500 font-medium">
+            Track customer orders, auto-push to Shipmozo, and update delivery &amp; payment statuses
+          </p>
+        </div>
+
+        <button
+          onClick={() => setShowRecoverModal(true)}
+          className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-4 py-2.5 rounded-2xl shadow-md transition-all text-xs font-heading flex items-center gap-2 shrink-0 cursor-pointer"
+        >
+          <RefreshCw size={14} />
+          <span>Sync Missing Razorpay Order</span>
+        </button>
       </div>
 
       {/* Filter Tabs */}
@@ -314,6 +355,69 @@ export default function AdminOrdersPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Recover Missing Razorpay Order Modal */}
+      {showRecoverModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in font-medium">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="font-extrabold text-base text-slate-900 font-heading">
+                Sync / Recover Missing Razorpay Order
+              </h3>
+              <button
+                onClick={() => setShowRecoverModal(false)}
+                className="text-slate-400 hover:text-slate-700 font-bold p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600 leading-relaxed font-semibold">
+              Enter the <strong>Razorpay Payment ID</strong> from your Razorpay Dashboard (e.g. <span className="font-mono text-pink-600">pay_TWkcm7opthXGYz</span>). The system will fetch the payment from Razorpay and automatically create the order in your database &amp; push it to Shipmozo!
+            </p>
+
+            <form onSubmit={handleRecoverOrder} className="space-y-4">
+              <div>
+                <label className="block text-xs font-extrabold text-slate-800 mb-1 font-heading">
+                  Razorpay Payment ID *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. pay_TWkcm7opthXGYz"
+                  value={recoverPaymentId}
+                  onChange={(e) => setRecoverPaymentId(e.target.value.trim())}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 text-xs font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowRecoverModal(false)}
+                  className="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold font-heading hover:bg-slate-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={recovering || !recoverPaymentId}
+                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold shadow font-heading flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  {recovering ? (
+                    <>
+                      <RefreshCw size={14} className="animate-spin" />
+                      <span>Fetching...</span>
+                    </>
+                  ) : (
+                    <span>Fetch &amp; Sync Order</span>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
 import { RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET } from '@/lib/constants';
-
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { amount } = body;
+    const { amount, customerDetails, items } = body;
 
     if (!amount || Number(amount) <= 0) {
       return NextResponse.json({ success: false, error: 'Invalid order amount' }, { status: 400 });
@@ -16,10 +15,22 @@ export async function POST(request: Request) {
       key_secret: RAZORPAY_KEY_SECRET,
     });
 
+    const itemsSummary = Array.isArray(items)
+      ? items.map((i: any) => `${i.name} (${i.unit}) x${i.quantity}`).join(', ').slice(0, 240)
+      : '';
+
     const options = {
       amount: Math.round(Number(amount) * 100), // Amount in paise (e.g. ₹170 -> 17000)
       currency: 'INR',
       receipt: `rcpt_${Date.now()}`,
+      notes: {
+        customerName: (customerDetails?.name || '').slice(0, 40),
+        customerPhone: (customerDetails?.phone || '').slice(0, 15),
+        customerAddress: (customerDetails?.address || '').slice(0, 200),
+        customerPincode: (customerDetails?.pincode || '').slice(0, 10),
+        landmark: (customerDetails?.landmark || '').slice(0, 50),
+        itemsSummary,
+      },
     };
 
     const razorpayOrder = await instance.orders.create(options);
