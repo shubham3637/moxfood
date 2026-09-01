@@ -1,4 +1,5 @@
 import { APP_URL } from './constants';
+import { parseUnitWeightGrams } from '@/context/CartContext';
 
 export const SHIPMOZO_PUBLIC_KEY = process.env.SHIPMOZO_PUBLIC_KEY || '9oxs54uCSOUtZAnLhig6';
 export const SHIPMOZO_PRIVATE_KEY = process.env.SHIPMOZO_PRIVATE_KEY || 'X3Lw5G8u4Z9tpoERDKAh';
@@ -38,6 +39,27 @@ export async function getShipmozoWarehouses() {
   }
 }
 
+/**
+ * Calculates optimized box dimensions based on package weight (in grams)
+ */
+export function getShipmozoBoxDimensions(weightInGrams: number) {
+  const weightKg = weightInGrams / 1000;
+
+  if (weightKg <= 2) {
+    // 1-2 kg: Box 10 x 10 x 5 cm
+    return { length: 10, width: 10, height: 5 };
+  } else if (weightKg <= 3) {
+    // 2-3 kg: Box 20 x 15 x 10 cm
+    return { length: 20, width: 15, height: 10 };
+  } else if (weightKg <= 5) {
+    // 4-5 kg: Box 35 x 25 x 15 cm
+    return { length: 35, width: 25, height: 15 };
+  } else {
+    // > 5 kg: Box 40 x 30 x 20 cm
+    return { length: 40, width: 30, height: 20 };
+  }
+}
+
 export async function pushOrderToShipmozo(order: any) {
   try {
     const warehouseId = await getShipmozoWarehouses();
@@ -55,11 +77,13 @@ export async function pushOrderToShipmozo(order: any) {
       product_category: 'Grocery',
     }));
 
-    // Total weight estimate in grams (500g default)
-    const weightInGrams = (order.items || []).reduce(
-      (acc: number, item: any) => acc + 250 * (item.quantity || 1),
-      250
-    );
+    // Total weight estimate in grams
+    const weightInGrams = (order.items || []).reduce((acc: number, item: any) => {
+      const unitGrams = item.unit ? parseUnitWeightGrams(item.unit) : 250;
+      return acc + unitGrams * (item.quantity || 1);
+    }, 0) || 500;
+
+    const dimensions = getShipmozoBoxDimensions(weightInGrams);
 
     const payload = {
       order_id: order.orderId,
@@ -78,13 +102,13 @@ export async function pushOrderToShipmozo(order: any) {
       payment_type: order.paymentMethod === 'COD' ? 'COD' : 'PREPAID',
       cod_amount: order.paymentMethod === 'COD' ? String(order.totalAmount) : '',
       weight: weightInGrams,
-      length: 10,
-      width: 10,
-      height: 10,
+      length: dimensions.length,
+      width: dimensions.width,
+      height: dimensions.height,
       warehouse_id: warehouseId,
     };
 
-    console.log('Pushing order to Shipmozo:', payload.order_id);
+    console.log('Pushing order to Shipmozo:', payload.order_id, 'Dimensions:', dimensions);
     const result = await shipmozoFetch('/push-order', {
       method: 'POST',
       body: JSON.stringify(payload),

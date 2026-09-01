@@ -32,7 +32,15 @@ export async function POST(request: Request) {
     await dbConnect();
     const body = await request.json();
 
-    const { customerDetails, items, paymentMethod, deliveryCharge: bodyDeliveryCharge, notes } = body;
+    const {
+      customerDetails,
+      items,
+      paymentMethod,
+      deliveryCharge: bodyDeliveryCharge,
+      couponCode,
+      discountAmount: bodyDiscountAmount,
+      notes,
+    } = body;
 
     if (
       !customerDetails ||
@@ -60,7 +68,8 @@ export async function POST(request: Request) {
     }, 0);
 
     const deliveryCharge = Number(bodyDeliveryCharge) || 0;
-    const totalAmount = subtotal + deliveryCharge;
+    const discountAmount = Number(bodyDiscountAmount) || 0;
+    const totalAmount = Math.max(0, subtotal + deliveryCharge - discountAmount);
 
     // Generate unique Order ID
     const randomNum = Math.floor(100000 + Math.random() * 900000);
@@ -72,6 +81,8 @@ export async function POST(request: Request) {
       items,
       subtotal,
       deliveryCharge,
+      couponCode: couponCode || '',
+      discountAmount,
       totalAmount,
       paymentMethod: paymentMethod || 'UPI',
       paymentStatus: paymentMethod === 'UPI' ? 'Paid' : 'Pending',

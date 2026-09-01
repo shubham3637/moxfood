@@ -9,6 +9,7 @@ import {
   ShoppingBag,
   Grid,
   Image as ImageIcon,
+  Tag,
   LogOut,
   ChevronRight,
 } from 'lucide-react';
@@ -37,6 +38,11 @@ export default function AdminSidebar() {
       name: 'Manage Orders',
       path: '/admin/orders',
       icon: ShoppingBag,
+    },
+    {
+      name: 'Manage Coupons',
+      path: '/admin/coupons',
+      icon: Tag,
     },
     {
       name: 'Manage Hero Banners',

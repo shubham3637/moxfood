@@ -270,6 +270,12 @@ export default function AdminOrdersPage() {
                       <span>Delivery Charge:</span>
                       <span className="font-bold text-pink-600 font-heading">₹{ord.deliveryCharge}</span>
                     </div>
+                    {ord.discountAmount > 0 && (
+                      <div className="flex justify-between text-emerald-700">
+                        <span>Coupon ({ord.couponCode || 'DISCOUNT'}):</span>
+                        <span className="font-bold font-heading">- ₹{ord.discountAmount}</span>
+                      </div>
+                    )}
                   </div>
                   <div className="flex justify-between items-center text-sm font-black text-slate-900 pt-2 border-t border-pink-200 font-heading">
                     <span>Total Amount:</span>

@@ -18,6 +18,8 @@ export async function POST(request: Request) {
       customerDetails,
       items,
       deliveryCharge: clientDeliveryCharge,
+      couponCode,
+      discountAmount: clientDiscountAmount,
       weightSummary,
       notes,
     } = body;
@@ -37,14 +39,15 @@ export async function POST(request: Request) {
 
     const isSignatureValid = expectedSignature === razorpay_signature;
 
-    // Calculate subtotal and delivery charge
+    // Calculate subtotal, delivery charge, discount and total amount
     const subtotal = items.reduce((acc: number, item: any) => {
       return acc + Number(item.price) * Number(item.quantity);
     }, 0);
 
     const deliveryCharge =
       Number(clientDeliveryCharge) ?? Number(weightSummary?.shippingFee) ?? 0;
-    const totalAmount = subtotal + deliveryCharge;
+    const discountAmount = Number(clientDiscountAmount) || 0;
+    const totalAmount = Math.max(0, subtotal + deliveryCharge - discountAmount);
 
     const randomNum = Math.floor(100000 + Math.random() * 900000);
     const orderId = `MXF-${randomNum}`;
@@ -55,6 +58,8 @@ export async function POST(request: Request) {
       items,
       subtotal,
       deliveryCharge,
+      couponCode: couponCode || '',
+      discountAmount,
       totalAmount,
       paymentMethod: 'RAZORPAY',
       paymentStatus: isSignatureValid || razorpay_payment_id ? 'Paid' : 'Pending',

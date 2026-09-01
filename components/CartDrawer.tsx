@@ -2,7 +2,20 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight, Truck, ChevronDown, ChevronUp, CreditCard } from 'lucide-react';
+import {
+  X,
+  Trash2,
+  Plus,
+  Minus,
+  ShoppingBag,
+  ArrowRight,
+  Truck,
+  ChevronDown,
+  ChevronUp,
+  CreditCard,
+  AlertCircle,
+  Scale,
+} from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -17,6 +30,7 @@ export default function CartDrawer() {
     deliveryCharge,
     grandTotal,
     freeDeliveryThreshold,
+    totalWeightGrams,
   } = useCart();
 
   const { t, language } = useLanguage();
@@ -24,8 +38,7 @@ export default function CartDrawer() {
 
   if (!isCartOpen) return null;
 
-  const amountLeftForFreeDelivery = freeDeliveryThreshold - subtotal;
-  const freeDeliveryProgress = Math.min(100, (subtotal / freeDeliveryThreshold) * 100);
+  const isMinWeightSatisfied = totalWeightGrams >= 1000;
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-black/60 backdrop-blur-sm transition-opacity">
@@ -40,7 +53,8 @@ export default function CartDrawer() {
               <div>
                 <h2 className="font-extrabold text-base leading-none font-heading">{t('shoppingCart')}</h2>
                 <p className="text-[11px] text-blue-200 mt-0.5 font-semibold">
-                  {items.reduce((acc, item) => acc + item.quantity, 0)} {t('items')}
+                  {items.reduce((acc, item) => acc + item.quantity, 0)} {t('items')} • Weight:{' '}
+                  {totalWeightGrams < 1000 ? `${totalWeightGrams}g` : `${(totalWeightGrams / 1000).toFixed(1)}kg`}
                 </p>
               </div>
             </div>
@@ -53,31 +67,24 @@ export default function CartDrawer() {
             </button>
           </div>
 
-          {/* Free Delivery Progress Bar */}
-          <div className="bg-pink-50 px-4 py-2.5 border-b border-pink-100">
-            {subtotal >= freeDeliveryThreshold ? (
-              <div className="flex items-center gap-2 text-xs font-bold text-pink-900">
-                <Truck size={16} className="text-pink-600" />
-                <span>{t('unlockedFreeDelivery')}</span>
-              </div>
-            ) : (
+          {/* Weight Requirement Notice */}
+          {items.length > 0 && !isMinWeightSatisfied && (
+            <div className="bg-amber-50 px-4 py-2.5 border-b border-amber-200 flex items-center gap-2 text-xs font-bold text-amber-900">
+              <AlertCircle size={18} className="text-amber-600 shrink-0" />
               <div>
-                <div className="flex justify-between text-xs font-semibold text-blue-950 mb-1">
-                  <span className="flex items-center gap-1 font-bold">
-                    <Truck size={14} className="text-pink-600" />
-                    {t('saveFreeDelivery')}
-                  </span>
-                  <span className="text-pink-700 font-bold">{t('addMoreForFree', { amount: amountLeftForFreeDelivery })}</span>
+                <div>
+                  {language === 'gu'
+                    ? 'ઓછામાં ઓછું ૧ કિલો (1000g) વજન હોવું ફરજિયાત છે.'
+                    : 'Minimum 1 kg (1000g) order weight required.'}
                 </div>
-                <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-pink-600 transition-all duration-300 rounded-full"
-                    style={{ width: `${freeDeliveryProgress}%` }}
-                  />
+                <div className="text-[11px] font-semibold text-amber-700">
+                  {language === 'gu'
+                    ? `હાલનું વજન: ${totalWeightGrams}g (ઘટે છે: ${1000 - totalWeightGrams}g)`
+                    : `Current weight: ${totalWeightGrams}g (Short: ${1000 - totalWeightGrams}g)`}
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Cart Items List */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -199,14 +206,30 @@ export default function CartDrawer() {
                   </span>
                 </div>
 
-                <Link
-                  href="/checkout"
-                  onClick={() => setIsCartOpen(false)}
-                  className="flex-1 max-w-[200px] bg-gradient-to-r from-pink-600 via-rose-600 to-pink-600 hover:from-pink-500 hover:to-rose-500 text-white font-extrabold py-3 px-5 rounded-2xl shadow-lg shadow-pink-600/30 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer text-xs sm:text-sm font-heading"
-                >
-                  <CreditCard size={18} />
-                  <span>{language === 'gu' ? 'પેમેન્ટ કરો' : 'Pay Now'}</span>
-                </Link>
+                {isMinWeightSatisfied ? (
+                  <Link
+                    href="/checkout"
+                    onClick={() => setIsCartOpen(false)}
+                    className="flex-1 max-w-[200px] bg-gradient-to-r from-pink-600 via-rose-600 to-pink-600 hover:from-pink-500 hover:to-rose-500 text-white font-extrabold py-3 px-5 rounded-2xl shadow-lg shadow-pink-600/30 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer text-xs sm:text-sm font-heading"
+                  >
+                    <CreditCard size={18} />
+                    <span>{language === 'gu' ? 'પેમેન્ટ કરો' : 'Pay Now'}</span>
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      alert(
+                        language === 'gu'
+                          ? 'ઓછામાં ઓછું ૧ કિલો (1000g) ઓર્ડર વજન હોવું ફરજિયાત છે. કૃપા કરીને કાર્ટમાં વધુ વસ્તુઓ ઉમેરો.'
+                          : 'Minimum order weight must be 1 kg (1000g) to place an order. Please add more items.'
+                      )
+                    }
+                    className="flex-1 max-w-[200px] bg-slate-300 text-slate-500 font-extrabold py-3 px-5 rounded-2xl flex items-center justify-center gap-2 cursor-not-allowed text-xs sm:text-sm font-heading"
+                  >
+                    <span>{language === 'gu' ? 'Min 1 kg Add Karo' : 'Add Min 1 kg'}</span>
+                  </button>
+                )}
               </div>
             </div>
           )}

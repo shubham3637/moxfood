@@ -18,6 +18,9 @@ import {
   ChevronDown,
   ChevronUp,
   CreditCard,
+  Tag,
+  CheckCircle2,
+  X,
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -67,6 +70,16 @@ export default function CheckoutPage() {
 
   // Collapsible toggle for Bill Breakdown
   const [isBillDetailOpen, setIsBillDetailOpen] = useState(false);
+
+  // Coupon state
+  const [couponInput, setCouponInput] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    discountAmount: number;
+    message: string;
+  } | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState('');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -158,11 +171,55 @@ export default function CheckoutPage() {
 
   // ONLY calculate shipping fee when pincode is 6-digit & verified
   const deliveryCharge = pincodeStatus.verified ? billableKg * ratePerKg : 0;
-  const payableTotal = subtotal + deliveryCharge;
+  const discountAmount = appliedCoupon?.discountAmount || 0;
+  const rawPayableTotal = subtotal + deliveryCharge - discountAmount;
+  const payableTotal = Math.max(0, rawPayableTotal);
+
+  const isMinWeightSatisfied = totalWeightGrams >= 1000;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleApplyCoupon = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!couponInput.trim()) return;
+
+    setCouponError('');
+    setCouponLoading(true);
+
+    try {
+      const res = await fetch('/api/coupons/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: couponInput.trim(),
+          subtotal,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setAppliedCoupon({
+          code: data.couponCode,
+          discountAmount: data.discountAmount,
+          message: data.message,
+        });
+        setCouponInput('');
+      } else {
+        setCouponError(data.error || 'Failed to apply coupon');
+      }
+    } catch (err: any) {
+      setCouponError(err.message || 'Error applying coupon');
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponError('');
   };
 
   const showError = (msg: string) => {
@@ -171,6 +228,16 @@ export default function CheckoutPage() {
 
   const handleRazorpayPayment = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isMinWeightSatisfied) {
+      const msg =
+        language === 'gu'
+          ? 'ઓછામાં ઓછું ૧ કિલો (1000g) ઓર્ડર વજન હોવું ફરજિયાત છે. કૃપા કરીને કાર્ટમાં વધુ વસ્તુઓ ઉમેરો.'
+          : 'Minimum order weight must be 1 kg (1000g) to place an order. Please add more items.';
+      setErrorMsg(msg);
+      showError(msg);
+      return;
+    }
 
     if (!formData.name.trim() || !formData.phone.trim() || !formData.address.trim() || !formData.pincode.trim()) {
       const msg =
@@ -274,7 +341,9 @@ export default function CheckoutPage() {
                   quantity: item.quantity,
                   image: item.image,
                 })),
-                deliveryCharge: deliveryCharge,
+                deliveryCharge,
+                couponCode: appliedCoupon?.code || '',
+                discountAmount,
                 weightSummary: {
                   totalWeightGrams,
                   billableKg,
@@ -375,6 +444,25 @@ export default function CheckoutPage() {
           {t('checkoutTitle')}
         </h1>
 
+        {/* 1 kg Minimum Order Weight Warning Alert */}
+        {!isMinWeightSatisfied && (
+          <div className="p-4 bg-amber-50 border border-amber-300 text-amber-900 text-xs font-extrabold rounded-2xl flex items-center gap-3">
+            <AlertCircle size={22} className="text-amber-600 shrink-0" />
+            <div>
+              <div className="font-heading text-sm">
+                {language === 'gu'
+                  ? 'ઓછામાં ઓછું ૧ કિલો (1000g) વજન હોવું જરૂરી છે.'
+                  : 'Minimum 1 kg (1000g) order weight required.'}
+              </div>
+              <div className="text-[11px] font-semibold text-amber-700 font-mono">
+                {language === 'gu'
+                  ? `હાલનું વજન: ${totalWeightGrams}g. કૃપા કરીને વધુ વસ્તુઓ ઉમેરી 1000g પૂરું કરો.`
+                  : `Current weight: ${totalWeightGrams}g. Please add items to reach 1000g.`}
+              </div>
+            </div>
+          </div>
+        )}
+
         {errorMsg && (
           <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-xs font-bold rounded-2xl animate-shake flex items-center justify-between">
             <span>⚠️ {errorMsg}</span>
@@ -391,7 +479,8 @@ export default function CheckoutPage() {
                 <span>1. {t('orderSummary')}</span>
               </div>
               <span className="text-xs text-pink-600 font-bold bg-pink-50 px-3 py-1 rounded-full border border-pink-100 font-heading">
-                {items.reduce((acc, item) => acc + item.quantity, 0)} {t('items')}
+                {items.reduce((acc, item) => acc + item.quantity, 0)} {t('items')} •{' '}
+                {totalWeightGrams < 1000 ? `${totalWeightGrams}g` : `${(totalWeightGrams / 1000).toFixed(1)}kg`}
               </span>
             </h3>
 
@@ -460,6 +549,63 @@ export default function CheckoutPage() {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Coupon Code Section */}
+          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-3">
+            <h3 className="font-extrabold text-xs text-slate-800 uppercase tracking-wider flex items-center gap-1.5 font-heading">
+              <Tag size={16} className="text-pink-600" />
+              <span>{language === 'gu' ? 'ડિસ્કાઉન્ટ કુપન કોડ (Apply Coupon)' : 'Apply Promotional Coupon Code'}</span>
+            </h3>
+
+            {appliedCoupon ? (
+              <div className="bg-emerald-50 border border-emerald-200 p-3.5 rounded-2xl flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 size={18} className="text-emerald-600 shrink-0" />
+                  <div>
+                    <div className="font-extrabold text-emerald-900 font-heading font-mono">
+                      {appliedCoupon.code} APPLIED (-₹{appliedCoupon.discountAmount})
+                    </div>
+                    <div className="text-[11px] text-emerald-700 font-medium">
+                      {appliedCoupon.message}
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleRemoveCoupon}
+                  className="p-1 text-emerald-700 hover:text-red-600 rounded-lg transition-colors cursor-pointer"
+                  title="Remove Coupon"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleApplyCoupon} className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="e.g. MOX10"
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                  className="flex-1 bg-slate-50 border border-slate-300 rounded-2xl px-4 py-2.5 text-xs text-slate-900 font-mono font-bold uppercase focus:outline-none focus:ring-2 focus:ring-pink-500"
+                />
+                <button
+                  type="submit"
+                  disabled={couponLoading || !couponInput.trim()}
+                  className="bg-slate-900 hover:bg-pink-600 text-white font-extrabold px-5 py-2.5 rounded-2xl text-xs shadow transition-all disabled:opacity-40 cursor-pointer font-heading flex items-center gap-1 shrink-0"
+                >
+                  {couponLoading ? <RefreshCw size={14} className="animate-spin" /> : <span>Apply</span>}
+                </button>
+              </form>
+            )}
+
+            {couponError && (
+              <div className="text-[11px] text-red-600 font-bold flex items-center gap-1 pt-1">
+                <AlertCircle size={14} />
+                <span>{couponError}</span>
+              </div>
+            )}
           </div>
 
           {/* Step 2: Customer Information & Delivery Address */}
@@ -574,7 +720,7 @@ export default function CheckoutPage() {
               {/* Submit Payment Button inside form */}
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !isMinWeightSatisfied}
                 className="w-full bg-gradient-to-r from-pink-600 via-rose-600 to-pink-600 hover:from-pink-500 hover:to-rose-500 text-white font-extrabold py-4 px-6 rounded-2xl shadow-xl shadow-pink-600/30 flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-50 cursor-pointer text-sm font-heading"
               >
                 {isSubmitting ? (
@@ -654,6 +800,16 @@ export default function CheckoutPage() {
                   )}
                 </div>
 
+                {/* Coupon Discount Row */}
+                {discountAmount > 0 && (
+                  <div className="flex justify-between items-center text-emerald-700">
+                    <span className="flex items-center gap-1 font-bold">
+                      <Tag size={14} /> Coupon Discount ({appliedCoupon?.code}):
+                    </span>
+                    <span className="font-bold font-heading text-sm">- ₹{discountAmount}</span>
+                  </div>
+                )}
+
                 {/* Pincode Error Banner */}
                 {pincodeStatus.error && (
                   <div className="bg-red-50 p-3 rounded-xl border border-red-200 text-[11px] flex items-center gap-1.5 text-red-600 font-bold">
@@ -685,7 +841,7 @@ export default function CheckoutPage() {
           <button
             type="button"
             onClick={handleRazorpayPayment}
-            disabled={isSubmitting}
+            disabled={isSubmitting || !isMinWeightSatisfied}
             className="bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-extrabold text-sm sm:text-base px-6 sm:px-10 py-3 sm:py-3.5 rounded-2xl shadow-lg shadow-pink-600/30 flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50 cursor-pointer font-heading"
           >
             {isSubmitting ? (

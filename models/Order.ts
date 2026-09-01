@@ -25,6 +25,8 @@ export interface IOrder extends Document {
   items: IOrderItem[];
   subtotal: number;
   deliveryCharge: number;
+  couponCode?: string;
+  discountAmount?: number;
   totalAmount: number;
   paymentMethod: 'COD' | 'UPI' | 'RAZORPAY';
   paymentStatus: 'Pending' | 'Paid';
@@ -74,6 +76,8 @@ const OrderSchema: Schema<IOrder> = new Schema(
     items: { type: [OrderItemSchema], required: true },
     subtotal: { type: Number, required: true },
     deliveryCharge: { type: Number, required: true, default: 0 },
+    couponCode: { type: String, default: '' },
+    discountAmount: { type: Number, default: 0 },
     totalAmount: { type: Number, required: true },
     paymentMethod: { type: String, enum: ['COD', 'UPI', 'RAZORPAY'], default: 'RAZORPAY' },
     paymentStatus: { type: String, enum: ['Pending', 'Paid'], default: 'Pending' },
