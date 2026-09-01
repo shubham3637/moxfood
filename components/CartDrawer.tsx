@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useLanguage } from '@/context/LanguageContext';
+import BulkOrderWhatsAppModal from '@/components/BulkOrderWhatsAppModal';
 
 export default function CartDrawer() {
   const {
@@ -35,10 +36,12 @@ export default function CartDrawer() {
 
   const { t, language } = useLanguage();
   const [isBillDetailOpen, setIsBillDetailOpen] = useState(false);
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
 
   if (!isCartOpen) return null;
 
   const isMinWeightSatisfied = totalWeightGrams >= 1000;
+  const isMaxWeightExceeded = totalWeightGrams > 5000;
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-black/60 backdrop-blur-sm transition-opacity">
@@ -67,7 +70,7 @@ export default function CartDrawer() {
             </button>
           </div>
 
-          {/* Weight Requirement Notice */}
+          {/* Weight Requirement Notice (< 1 kg) */}
           {items.length > 0 && !isMinWeightSatisfied && (
             <div className="bg-amber-50 px-4 py-2.5 border-b border-amber-200 flex items-center gap-2 text-xs font-bold text-amber-900">
               <AlertCircle size={18} className="text-amber-600 shrink-0" />
@@ -81,6 +84,25 @@ export default function CartDrawer() {
                   {language === 'gu'
                     ? `હાલનું વજન: ${totalWeightGrams}g (ઘટે છે: ${1000 - totalWeightGrams}g)`
                     : `Current weight: ${totalWeightGrams}g (Short: ${1000 - totalWeightGrams}g)`}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Weight Requirement Notice (> 5 kg) */}
+          {items.length > 0 && isMaxWeightExceeded && (
+            <div className="bg-emerald-50 px-4 py-2.5 border-b border-emerald-200 flex items-center gap-2 text-xs font-bold text-emerald-900">
+              <AlertCircle size={18} className="text-emerald-600 shrink-0" />
+              <div>
+                <div>
+                  {language === 'gu'
+                    ? '૫ કિલોથી વધુ વજનના ઓર્ડર માટે વોટ્સએપ પર સંપર્ક કરો.'
+                    : 'For orders above 5 kg, please place order on WhatsApp.'}
+                </div>
+                <div className="text-[11px] font-semibold text-emerald-700">
+                  {language === 'gu'
+                    ? `હાલનું વજન: ${(totalWeightGrams / 1000).toFixed(1)} kg (> 5 kg)`
+                    : `Current weight: ${(totalWeightGrams / 1000).toFixed(1)} kg (> 5 kg)`}
                 </div>
               </div>
             </div>
@@ -217,7 +239,15 @@ export default function CartDrawer() {
                   </span>
                 </div>
 
-                {isMinWeightSatisfied ? (
+                {isMaxWeightExceeded ? (
+                  <button
+                    type="button"
+                    onClick={() => setIsBulkModalOpen(true)}
+                    className="flex-1 max-w-[210px] bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3 px-4 rounded-2xl shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer text-xs sm:text-sm font-heading"
+                  >
+                    <span>{language === 'gu' ? 'WhatsApp Order (>5kg)' : 'Order on WhatsApp'}</span>
+                  </button>
+                ) : isMinWeightSatisfied ? (
                   <Link
                     href="/checkout"
                     onClick={() => setIsCartOpen(false)}
@@ -246,6 +276,14 @@ export default function CartDrawer() {
           )}
         </div>
       </div>
+
+      {/* Bulk Order WhatsApp Modal (> 5 kg) */}
+      <BulkOrderWhatsAppModal
+        isOpen={isBulkModalOpen}
+        onClose={() => setIsBulkModalOpen(false)}
+        totalWeightGrams={totalWeightGrams}
+        items={items}
+      />
     </div>
   );
 }

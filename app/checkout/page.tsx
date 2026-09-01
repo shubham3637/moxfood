@@ -26,6 +26,7 @@ import { useCart } from '@/context/CartContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { RAZORPAY_KEY_ID } from '@/lib/constants';
 import { calculateShippingFee } from '@/lib/shipping';
+import BulkOrderWhatsAppModal from '@/components/BulkOrderWhatsAppModal';
 
 interface PincodeStatus {
   loading: boolean;
@@ -71,6 +72,7 @@ export default function CheckoutPage() {
 
   // Collapsible toggle for Bill Breakdown
   const [isBillDetailOpen, setIsBillDetailOpen] = useState(false);
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
 
   // Coupon state
   const [couponInput, setCouponInput] = useState('');
@@ -176,6 +178,7 @@ export default function CheckoutPage() {
   const payableTotal = Math.max(0, rawPayableTotal);
 
   const isMinWeightSatisfied = totalWeightGrams >= 1000;
+  const isMaxWeightExceeded = totalWeightGrams > 5000;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -228,6 +231,11 @@ export default function CheckoutPage() {
 
   const handleRazorpayPayment = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isMaxWeightExceeded) {
+      setIsBulkModalOpen(true);
+      return;
+    }
 
     if (!isMinWeightSatisfied) {
       const msg =
@@ -459,6 +467,33 @@ export default function CheckoutPage() {
                   : `Current weight: ${totalWeightGrams}g. Please add items to reach 1000g.`}
               </div>
             </div>
+          </div>
+        )}
+
+        {/* > 5 kg Bulk Order Warning Alert */}
+        {isMaxWeightExceeded && (
+          <div className="p-4 bg-emerald-50 border border-emerald-300 text-emerald-950 text-xs font-bold rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
+            <div className="flex items-center gap-3">
+              <AlertCircle size={24} className="text-emerald-600 shrink-0" />
+              <div>
+                <div className="font-heading text-sm font-black text-emerald-900">
+                  {language === 'gu' ? '૫ કિલોથી વધુ ઓર્ડર (Bulk Order)' : 'Bulk Order (> 5 kg)'}
+                </div>
+                <div className="text-xs font-semibold text-emerald-800 mt-0.5">
+                  {language === 'gu'
+                    ? `તમારું વજન ${(totalWeightGrams / 1000).toFixed(1)} kg છે. ૫ કિલોથી વધુ વજનના ઓર્ડર માટે વેબસાઇટ પરથી ચુકવણી થશે નહીં. કૃપા કરીને વોટ્સએપ પર ઓર્ડર આપો.`
+                    : `Cart weight is ${(totalWeightGrams / 1000).toFixed(1)} kg. Online checkout is restricted above 5 kg. Please place order on WhatsApp.`}
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsBulkModalOpen(true)}
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-5 py-2.5 rounded-xl shadow transition-all cursor-pointer font-heading flex items-center justify-center gap-2 text-xs shrink-0"
+            >
+              <span>{language === 'gu' ? 'વોટ્સએપ પર ઓર્ડર કરો' : 'Order on WhatsApp'}</span>
+            </button>
           </div>
         )}
 
@@ -733,23 +768,33 @@ export default function CheckoutPage() {
                 </div>
 
                 {/* Submit Payment Button inside form */}
-                <button
-                  type="submit"
-                  disabled={isSubmitting || !isMinWeightSatisfied}
-                  className="w-full bg-gradient-to-r from-pink-600 via-rose-600 to-pink-600 hover:from-pink-500 hover:to-rose-500 text-white font-extrabold py-4 px-6 rounded-2xl shadow-xl shadow-pink-600/30 flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-50 cursor-pointer text-sm font-heading"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <RefreshCw size={18} className="animate-spin" />
-                      <span>{t('processingOrder')}</span>
-                    </>
-                  ) : (
-                    <>
-                      <CreditCard size={20} />
-                      <span>Pay Now ₹{payableTotal}</span>
-                    </>
-                  )}
-                </button>
+                {isMaxWeightExceeded ? (
+                  <button
+                    type="button"
+                    onClick={() => setIsBulkModalOpen(true)}
+                    className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-4 px-6 rounded-2xl shadow-xl shadow-emerald-600/30 flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer text-sm font-heading"
+                  >
+                    <span>{language === 'gu' ? 'વોટ્સએપ પર ઓર્ડર કરો (> ૫ kg)' : 'Order on WhatsApp (> 5 kg)'}</span>
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={isSubmitting || !isMinWeightSatisfied}
+                    className="w-full bg-gradient-to-r from-pink-600 via-rose-600 to-pink-600 hover:from-pink-500 hover:to-rose-500 text-white font-extrabold py-4 px-6 rounded-2xl shadow-xl shadow-pink-600/30 flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-50 cursor-pointer text-sm font-heading"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <RefreshCw size={18} className="animate-spin" />
+                        <span>{t('processingOrder')}</span>
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard size={20} />
+                        <span>Pay Now ₹{payableTotal}</span>
+                      </>
+                    )}
+                  </button>
+                )}
               </form>
           </div>
         </div>
@@ -853,23 +898,41 @@ export default function CheckoutPage() {
             </span>
           </div>
 
-          <button
-            type="button"
-            onClick={handleRazorpayPayment}
-            disabled={isSubmitting || !isMinWeightSatisfied}
-            className="bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-extrabold text-sm sm:text-base px-6 sm:px-10 py-3 sm:py-3.5 rounded-2xl shadow-lg shadow-pink-600/30 flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50 cursor-pointer font-heading"
-          >
-            {isSubmitting ? (
-              <RefreshCw size={20} className="animate-spin" />
-            ) : (
-              <>
-                <span>{language === 'gu' ? 'પેમેન્ટ કરો (Pay Now)' : 'Pay Now'}</span>
-                <CreditCard size={18} />
-              </>
-            )}
-          </button>
+          {isMaxWeightExceeded ? (
+            <button
+              type="button"
+              onClick={() => setIsBulkModalOpen(true)}
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm px-6 sm:px-10 py-3 sm:py-3.5 rounded-2xl shadow-lg shadow-emerald-600/30 flex items-center gap-2 transition-all active:scale-95 cursor-pointer font-heading"
+            >
+              <span>{language === 'gu' ? 'WhatsApp Order (> 5kg)' : 'Order on WhatsApp'}</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleRazorpayPayment}
+              disabled={isSubmitting || !isMinWeightSatisfied}
+              className="bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-extrabold text-sm sm:text-base px-6 sm:px-10 py-3 sm:py-3.5 rounded-2xl shadow-lg shadow-pink-600/30 flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50 cursor-pointer font-heading"
+            >
+              {isSubmitting ? (
+                <RefreshCw size={20} className="animate-spin" />
+              ) : (
+                <>
+                  <span>{language === 'gu' ? 'પેમેન્ટ કરો (Pay Now)' : 'Pay Now'}</span>
+                  <CreditCard size={18} />
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
+
+      {/* Bulk Order WhatsApp Modal (> 5 kg) */}
+      <BulkOrderWhatsAppModal
+        isOpen={isBulkModalOpen}
+        onClose={() => setIsBulkModalOpen(false)}
+        totalWeightGrams={totalWeightGrams}
+        items={items}
+      />
     </>
   );
 }
