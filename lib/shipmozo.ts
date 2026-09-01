@@ -1,9 +1,28 @@
 import { APP_URL } from './constants';
-import { parseUnitWeightGrams } from '@/context/CartContext';
 
 export const SHIPMOZO_PUBLIC_KEY = process.env.SHIPMOZO_PUBLIC_KEY || '9oxs54uCSOUtZAnLhig6';
 export const SHIPMOZO_PRIVATE_KEY = process.env.SHIPMOZO_PRIVATE_KEY || 'X3Lw5G8u4Z9tpoERDKAh';
 export const SHIPMOZO_BASE_URL = 'https://shipping-api.com/app/api/v1';
+
+// Server-safe helper to parse unit string into weight in grams
+export function parseUnitWeightGrams(unitStr: string): number {
+  if (!unitStr) return 1000;
+  const str = unitStr.toLowerCase().trim();
+
+  // Match e.g. "250 g", "500g", "250 gram"
+  const gramMatch = str.match(/(\d+(?:\.\d+)?)\s*(?:g|gm|gram|grams)\b/);
+  if (gramMatch) {
+    return parseFloat(gramMatch[1]);
+  }
+
+  // Match e.g. "1 kg", "5.5kg", "5 litre"
+  const kgMatch = str.match(/(\d+(?:\.\d+)?)\s*(?:kg|kilo|litre|l)\b/);
+  if (kgMatch) {
+    return parseFloat(kgMatch[1]) * 1000;
+  }
+
+  return 1000; // default 1 kg
+}
 
 export async function shipmozoFetch(endpoint: string, options: RequestInit = {}) {
   const url = `${SHIPMOZO_BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
