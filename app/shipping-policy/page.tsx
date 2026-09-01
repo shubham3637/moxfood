@@ -47,10 +47,58 @@ export default function ShippingPolicyPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-base font-extrabold text-slate-900 font-heading">3. Delivery Charges</h2>
-          <p>
-            A minimal fixed store delivery fee of <strong>₹30</strong> applies to standard home delivery orders. Any promotional free delivery thresholds will be clearly indicated during checkout.
-          </p>
+          <h2 className="text-base font-extrabold text-slate-900 font-heading">3. Delivery Charges Rate Card (શિપિંગ ચાર્જ દરો)</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-medium">
+            {/* Gujarat Rates */}
+            <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-2">
+              <h3 className="font-extrabold text-slate-900 text-sm font-heading flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-pink-600"></span>
+                <span>Gujarat (ગુજરાત શિપિંગ ચાર્જ)</span>
+              </h3>
+              <ul className="space-y-1 text-slate-700 font-semibold font-mono">
+                <li className="flex justify-between border-b border-slate-200 pb-1">
+                  <span>1 kg:</span> <span>₹40</span>
+                </li>
+                <li className="flex justify-between border-b border-slate-200 pb-1">
+                  <span>2 kg:</span> <span>₹60</span>
+                </li>
+                <li className="flex justify-between border-b border-slate-200 pb-1">
+                  <span>3 kg:</span> <span>₹100</span>
+                </li>
+                <li className="flex justify-between border-b border-slate-200 pb-1">
+                  <span>4 kg &amp; 5 kg:</span> <span>₹140</span>
+                </li>
+                <li className="flex justify-between text-pink-600 font-bold">
+                  <span>&gt;5 kg:</span> <span>₹40 × kg</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Out of Gujarat Rates */}
+            <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-2">
+              <h3 className="font-extrabold text-slate-900 text-sm font-heading flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-blue-900"></span>
+                <span>Out of Gujarat (ગુજરાત બહાર શિપિંગ ચાર્જ)</span>
+              </h3>
+              <ul className="space-y-1 text-slate-700 font-semibold font-mono">
+                <li className="flex justify-between border-b border-slate-200 pb-1">
+                  <span>1 kg:</span> <span>₹60</span>
+                </li>
+                <li className="flex justify-between border-b border-slate-200 pb-1">
+                  <span>2 kg:</span> <span>₹90</span>
+                </li>
+                <li className="flex justify-between border-b border-slate-200 pb-1">
+                  <span>3 kg:</span> <span>₹120</span>
+                </li>
+                <li className="flex justify-between border-b border-slate-200 pb-1">
+                  <span>4 kg &amp; 5 kg:</span> <span>₹180</span>
+                </li>
+                <li className="flex justify-between text-blue-900 font-bold">
+                  <span>&gt;5 kg:</span> <span>₹60 × kg</span>
+                </li>
+              </ul>
+            </div>
+          </div>
         </section>
 
         <section className="space-y-3">

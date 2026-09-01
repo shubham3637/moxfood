@@ -25,6 +25,7 @@ import {
 import { useCart } from '@/context/CartContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { RAZORPAY_KEY_ID } from '@/lib/constants';
+import { calculateShippingFee } from '@/lib/shipping';
 
 interface PincodeStatus {
   loading: boolean;
@@ -165,12 +166,11 @@ export default function CheckoutPage() {
     return () => clearTimeout(timer);
   }, [formData.pincode]);
 
-  // Dynamic Shipping Charge Calculation (Gujarat = ₹40/kg, Out of Gujarat = ₹70/kg)
+  // Dynamic Tier-Based Shipping Charge Calculation
   const billableKg = Math.max(1, Math.ceil(totalWeightGrams / 1000));
-  const ratePerKg = pincodeStatus.isGujarat ? 40 : 70;
 
   // ONLY calculate shipping fee when pincode is 6-digit & verified
-  const deliveryCharge = pincodeStatus.verified ? billableKg * ratePerKg : 0;
+  const deliveryCharge = pincodeStatus.verified ? calculateShippingFee(totalWeightGrams, pincodeStatus.isGujarat) : 0;
   const discountAmount = appliedCoupon?.discountAmount || 0;
   const rawPayableTotal = subtotal + deliveryCharge - discountAmount;
   const payableTotal = Math.max(0, rawPayableTotal);
@@ -347,7 +347,6 @@ export default function CheckoutPage() {
                 weightSummary: {
                   totalWeightGrams,
                   billableKg,
-                  ratePerKg,
                   shippingFee: deliveryCharge,
                 },
                 notes: formData.notes.trim(),
@@ -805,7 +804,7 @@ export default function CheckoutPage() {
                 <div className="flex justify-between items-center text-slate-600">
                   <div className="flex items-center gap-1">
                     <Truck size={14} className="text-blue-900" />
-                    <span>Shipping Fee ({pincodeStatus.isGujarat ? 'Gujarat ₹40/kg' : 'Out of Gujarat ₹70/kg'}):</span>
+                    <span>Shipping Fee:</span>
                   </div>
                   {pincodeStatus.verified ? (
                     <span className="font-bold text-pink-600 font-heading text-sm">₹{deliveryCharge}</span>
