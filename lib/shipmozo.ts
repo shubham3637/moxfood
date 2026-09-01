@@ -62,18 +62,29 @@ export function getShipmozoBoxDimensions(weightInGrams: number) {
 
 export async function pushOrderToShipmozo(order: any) {
   try {
-    const warehouseId = await getShipmozoWarehouses();
+    const fetchWarehouseId = await getShipmozoWarehouses();
+    const warehouseId = fetchWarehouseId || '139140'; // Fallback to Gautam Trading default warehouse 139140
+
+    const rawName = (order.customerDetails?.name || '').trim();
+    const consigneeName = rawName.length >= 3 && rawName.toLowerCase() !== 'void' ? rawName : 'Moxfood Customer';
+
     const cleanPhone = Number((order.customerDetails?.phone || '').replace(/\D/g, '')) || 7096396856;
-    const cleanPincode = Number(order.customerDetails?.pincode) || 395006;
+    const cleanPincode = Number(order.customerDetails?.pincode) || 394105;
     const orderDate = new Date(order.createdAt || Date.now()).toISOString().split('T')[0];
+
+    const rawAddress = (order.customerDetails?.address || '').trim();
+    const addressLineOne = rawAddress.length >= 6 ? rawAddress : 'Gautam Trading, Surat, Gujarat';
+    const landmark = (order.customerDetails?.landmark || '').trim();
+    const stateName = (order.customerDetails?.state || 'Gujarat').trim();
+    const districtName = (order.customerDetails?.district || 'Surat').trim();
 
     const productDetail = (order.items || []).map((item: any) => ({
       name: item.name || 'Healthy Seed Pack',
-      sku_number: item.productId || 'SKU-101',
-      quantity: item.quantity || 1,
+      sku_number: String(item.productId || 'SKU-101').slice(0, 30),
+      quantity: Number(item.quantity) || 1,
       discount: '',
       hsn: '',
-      unit_price: item.price || 100,
+      unit_price: Number(item.price) || 100,
       product_category: 'Grocery',
     }));
 
@@ -83,36 +94,41 @@ export async function pushOrderToShipmozo(order: any) {
       return acc + unitGrams * (item.quantity || 1);
     }, 0) || 500;
 
+    // Convert grams to KG (e.g., 1000g -> 1.0 kg)
+    const weightInKg = Math.max(0.1, Number((weightInGrams / 1000).toFixed(2)));
+
     const dimensions = getShipmozoBoxDimensions(weightInGrams);
 
     const payload = {
       order_id: order.orderId,
       order_date: orderDate,
       order_type: 'ESSENTIALS',
-      consignee_name: order.customerDetails?.name || 'Customer',
+      consignee_name: consigneeName,
       consignee_phone: cleanPhone,
       consignee_alternate_phone: '',
       consignee_email: 'support@moxfood.com',
-      consignee_address_line_one: order.customerDetails?.address || 'Surat, Gujarat',
-      consignee_address_line_two: order.customerDetails?.landmark || '',
+      consignee_address_line_one: addressLineOne,
+      consignee_address_line_two: landmark,
       consignee_pin_code: cleanPincode,
-      consignee_city: 'Surat',
-      consignee_state: 'Gujarat',
+      consignee_city: districtName || 'Surat',
+      consignee_state: stateName || 'Gujarat',
       product_detail: productDetail,
       payment_type: order.paymentMethod === 'COD' ? 'COD' : 'PREPAID',
       cod_amount: order.paymentMethod === 'COD' ? String(order.totalAmount) : '',
-      weight: weightInGrams,
+      weight: weightInKg, // Weight in KG
       length: dimensions.length,
       width: dimensions.width,
       height: dimensions.height,
       warehouse_id: warehouseId,
     };
 
-    console.log('Pushing order to Shipmozo:', payload.order_id, 'Dimensions:', dimensions);
+    console.log('Pushing order to Shipmozo:', payload.order_id, 'Weight (kg):', weightInKg, 'Warehouse:', warehouseId);
     const result = await shipmozoFetch('/push-order', {
       method: 'POST',
       body: JSON.stringify(payload),
     });
+
+    console.log('Shipmozo API push result:', JSON.stringify(result));
 
     // Auto-assign courier if push succeeded
     if (result.result === '1') {
@@ -131,10 +147,12 @@ export async function pushOrderToShipmozo(order: any) {
       }
     }
 
+    const errorMsg = result.data?.error || result.message || result.errors || 'Shipmozo push rejected request';
+
     return {
       success: result.result === '1',
       pushData: result.data || null,
-      message: result.message || 'Push order response received',
+      message: errorMsg,
     };
   } catch (error: any) {
     console.error('Shipmozo Push Order Exception:', error);
