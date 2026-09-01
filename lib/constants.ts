@@ -10,4 +10,7 @@ export const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET || 'ELUDg
 export const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || 'rzp_live_TWEE6u2LHgERej';
 export const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || 'PerdBAGHLhqnwzWldU7xk5fi';
 
+// export const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || 'rzp_test_TWlYWz4EcZIl03';
+// export const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || '19cE9XXtDUErWm1x5rQh77kr';
+
 export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://moxfood.com';
