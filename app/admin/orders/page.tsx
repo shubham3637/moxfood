@@ -17,7 +17,15 @@ export default function AdminOrdersPage() {
   const [activeStatusTab, setActiveStatusTab] = useState('all');
   const [pushingOrderId, setPushingOrderId] = useState<string | null>(null);
 
-  const [recoverPaymentId, setRecoverPaymentId] = useState('');
+  const [recoverForm, setRecoverForm] = useState({
+    paymentId: '',
+    name: '',
+    phone: '',
+    address: '',
+    pincode: '',
+    landmark: '',
+    itemSummary: '',
+  });
   const [recovering, setRecovering] = useState(false);
   const [showRecoverModal, setShowRecoverModal] = useState(false);
 
@@ -27,26 +35,48 @@ export default function AdminOrdersPage() {
 
   const handleRecoverOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!recoverPaymentId.trim()) return;
+    if (!recoverForm.paymentId.trim()) return;
 
     setRecovering(true);
     try {
       const res = await fetch('/api/admin/recover-razorpay', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paymentId: recoverPaymentId.trim() }),
+        body: JSON.stringify({
+          paymentId: recoverForm.paymentId.trim(),
+          forceUpdate: true,
+          customerDetails: {
+            name: recoverForm.name.trim(),
+            phone: recoverForm.phone.trim(),
+            address: recoverForm.address.trim(),
+            pincode: recoverForm.pincode.trim(),
+            landmark: recoverForm.landmark.trim(),
+          },
+          items: recoverForm.itemSummary.trim()
+            ? [
+                {
+                  productId: 'MANUAL-SYNC-101',
+                  name: recoverForm.itemSummary.trim(),
+                  unit: '1 kg',
+                  price: 100,
+                  quantity: 1,
+                  image: '/logo.png',
+                },
+              ]
+            : undefined,
+        }),
       });
       const data = await res.json();
       if (data.success) {
-        alert(data.message || 'Order recovered successfully!');
-        setRecoverPaymentId('');
+        alert(data.message || 'Order synced successfully!');
+        setRecoverForm({ paymentId: '', name: '', phone: '', address: '', pincode: '', landmark: '', itemSummary: '' });
         setShowRecoverModal(false);
         fetchOrders();
       } else {
-        alert('Recovery failed: ' + (data.error || 'Unknown error'));
+        alert('Sync failed: ' + (data.error || 'Unknown error'));
       }
     } catch (err: any) {
-      alert('Error recovering order: ' + err.message);
+      alert('Error syncing order: ' + err.message);
     } finally {
       setRecovering(false);
     }
@@ -378,7 +408,7 @@ export default function AdminOrdersPage() {
               Enter the <strong>Razorpay Payment ID</strong> from your Razorpay Dashboard (e.g. <span className="font-mono text-pink-600">pay_TWkcm7opthXGYz</span>). The system will fetch the payment from Razorpay and automatically create the order in your database &amp; push it to Shipmozo!
             </p>
 
-            <form onSubmit={handleRecoverOrder} className="space-y-4">
+            <form onSubmit={handleRecoverOrder} className="space-y-3">
               <div>
                 <label className="block text-xs font-extrabold text-slate-800 mb-1 font-heading">
                   Razorpay Payment ID *
@@ -387,13 +417,101 @@ export default function AdminOrdersPage() {
                   type="text"
                   required
                   placeholder="e.g. pay_TWkcm7opthXGYz"
-                  value={recoverPaymentId}
-                  onChange={(e) => setRecoverPaymentId(e.target.value.trim())}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 text-xs font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  value={recoverForm.paymentId}
+                  onChange={(e) => setRecoverForm({ ...recoverForm, paymentId: e.target.value.trim() })}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-2.5 text-xs font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="border-t border-slate-100 pt-3 space-y-2.5">
+                <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider font-heading">
+                  Optional Details Override / Fill (મરજિયાત વિગતો):
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-0.5 font-heading">
+                      Full Customer Name
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Ramesh Patel"
+                      value={recoverForm.name}
+                      onChange={(e) => setRecoverForm({ ...recoverForm, name: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-0.5 font-heading">
+                      WhatsApp Mobile Number
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 9624719200"
+                      value={recoverForm.phone}
+                      onChange={(e) => setRecoverForm({ ...recoverForm, phone: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-0.5 font-heading">
+                    Full Delivery Address
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="House/Plot No, Street, Area, City"
+                    value={recoverForm.address}
+                    onChange={(e) => setRecoverForm({ ...recoverForm, address: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-0.5 font-heading">
+                      Postal PIN Code
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 395006"
+                      value={recoverForm.pincode}
+                      onChange={(e) => setRecoverForm({ ...recoverForm, pincode: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-0.5 font-heading">
+                      Nearby Landmark
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Near Temple/School"
+                      value={recoverForm.landmark}
+                      onChange={(e) => setRecoverForm({ ...recoverForm, landmark: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-0.5 font-heading">
+                    Ordered Items Summary
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Raw Pumpkin Seeds 1kg, Chia Seeds 500g"
+                    value={recoverForm.itemSummary}
+                    onChange={(e) => setRecoverForm({ ...recoverForm, itemSummary: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setShowRecoverModal(false)}
@@ -403,16 +521,16 @@ export default function AdminOrdersPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={recovering || !recoverPaymentId}
-                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold shadow font-heading flex items-center gap-1.5 disabled:opacity-50"
+                  disabled={recovering || !recoverForm.paymentId}
+                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold shadow font-heading flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
                 >
                   {recovering ? (
                     <>
                       <RefreshCw size={14} className="animate-spin" />
-                      <span>Fetching...</span>
+                      <span>Syncing...</span>
                     </>
                   ) : (
-                    <span>Fetch &amp; Sync Order</span>
+                    <span>Sync &amp; Save Order</span>
                   )}
                 </button>
               </div>
