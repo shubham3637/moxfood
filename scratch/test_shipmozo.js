@@ -1,54 +1,49 @@
-async function testPush() {
+async function testPushCancelledOrder() {
   const url = 'https://shipping-api.com/app/api/v1/push-order';
 
-  // 1. Fetch Warehouses first
-  const whRes = await fetch('https://shipping-api.com/app/api/v1/get-warehouses', {
-    method: 'GET',
-    headers: {
-      'public-key': '9oxs54uCSOUtZAnLhig6',
-      'private-key': 'X3Lw5G8u4Z9tpoERDKAh',
-      'Content-Type': 'application/json',
-    },
-  });
-  const whData = await whRes.json();
-  console.log('Warehouses Data:', JSON.stringify(whData, null, 2));
-
-  const warehouseId = whData.data && whData.data.length > 0 ? String(whData.data[0].id) : '1';
-
   const payload = {
-    order_id: 'MXF-TEST-' + Math.floor(Math.random() * 10000),
+    order_id: 'MXF-493373',
     order_date: '2026-09-01',
     order_type: 'ESSENTIALS',
-    consignee_name: 'Gautam Patel',
-    consignee_phone: '9624719200',
+    consignee_name: 'GAUTAM KUKADIYA',
+    consignee_phone: '7623917911',
     consignee_alternate_phone: '',
     consignee_email: 'support@moxfood.com',
-    consignee_address_line_one: 'Varachha Road, Surat',
-    consignee_address_line_two: 'Near Station',
-    consignee_pin_code: 395006,
+    consignee_address_line_one: 'silver maxima apartment, near vip circle silver business hub H401',
+    consignee_address_line_two: '',
+    consignee_pin_code: 394105,
     consignee_city: 'Surat',
     consignee_state: 'Gujarat',
     product_detail: [
       {
-        name: 'Pumpkin Seeds',
-        sku_number: 'SKU-101',
+        name: 'Flex/Alsi Seeds',
+        sku_number: 'SKU-FLEX',
         quantity: 1,
         discount: '',
         hsn: '',
-        unit_price: 100,
+        unit_price: 85,
+        product_category: 'Grocery',
+      },
+      {
+        name: 'Watermelon/ Magjtari',
+        sku_number: 'SKU-WM',
+        quantity: 1,
+        discount: '',
+        hsn: '',
+        unit_price: 350,
         product_category: 'Grocery',
       },
     ],
     payment_type: 'PREPAID',
     cod_amount: '',
-    weight: 1.0, // Weight in KG
+    weight: 1.0, // 1 kg
     length: 10,
     width: 10,
     height: 5,
-    warehouse_id: warehouseId,
+    warehouse_id: '139140',
   };
 
-  console.log('Sending payload:', payload);
+  console.log('Sending payload for MXF-493373:', payload);
 
   const response = await fetch(url, {
     method: 'POST',
@@ -64,4 +59,4 @@ async function testPush() {
   console.log('Shipmozo API Push Response:', JSON.stringify(data, null, 2));
 }
 
-testPush();
+testPushCancelledOrder();

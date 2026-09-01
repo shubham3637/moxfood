@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     if (shipmozoRes.success) {
       await Order.findByIdAndUpdate(order._id, {
         shipmozoPushed: true,
-        shipmozoReferenceId: shipmozoRes.pushData?.reference_id || orderId,
+        shipmozoReferenceId: shipmozoRes.pushData?.refrence_id || shipmozoRes.pushData?.reference_id || orderId,
         shipmozoAwbNumber: shipmozoRes.assignData?.awb_number || '',
         shipmozoCourierName: shipmozoRes.assignData?.courier_company || '',
       });
