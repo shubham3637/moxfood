@@ -79,12 +79,12 @@ export default function Navbar() {
               <PhoneCall size={13} /> +91 7096396856
             </a>
             <a
-              href="https://www.instagram.com/gautamoilandsugar?igsh=MTN2YXV3cDB1bmgxaw=="
+              href="https://www.instagram.com/gautamtrading_?igsi=MTN2YXV3cDB1bmgxaw=="
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 hover:text-pink-200 transition-colors bg-black/20 px-2.5 py-0.5 rounded-full border border-white/20 font-heading"
             >
-              <InstagramIcon size={13} className="text-pink-300" /> @gautamoilandsugar
+              <InstagramIcon size={13} className="text-pink-300" /> @gautamtrading_
             </a>
             <span className="flex items-center gap-1.5"><ShieldCheck size={13} /> {t('qualityBadge')}</span>
           </div>

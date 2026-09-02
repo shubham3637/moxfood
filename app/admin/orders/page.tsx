@@ -29,9 +29,28 @@ export default function AdminOrdersPage() {
   const [recovering, setRecovering] = useState(false);
   const [showRecoverModal, setShowRecoverModal] = useState(false);
 
+  const [draftOrders, setDraftOrders] = useState<any[]>([]);
+
   useEffect(() => {
-    fetchOrders();
+    if (activeStatusTab === 'Draft Checkouts') {
+      fetchDraftOrders();
+    } else {
+      fetchOrders();
+    }
   }, [activeStatusTab]);
+
+  const fetchDraftOrders = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/admin/draft-orders');
+      const data = await res.json();
+      setDraftOrders(data.draftOrders || []);
+    } catch (err) {
+      console.error('Failed to fetch draft orders:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleRecoverOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -186,26 +205,161 @@ export default function AdminOrdersPage() {
 
       {/* Filter Tabs */}
       <div className="flex flex-wrap gap-2 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm text-xs font-bold font-heading">
-        {['all', 'Pending', 'Processing', 'Out for Delivery', 'Delivered', 'Cancelled'].map((st) => (
+        {['all', 'Pending', 'Processing', 'Out for Delivery', 'Delivered', 'Cancelled', 'Draft Checkouts'].map((st) => (
           <button
             key={st}
             onClick={() => setActiveStatusTab(st)}
             className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer ${
               activeStatusTab === st
-                ? 'bg-pink-600 text-white shadow'
+                ? st === 'Draft Checkouts'
+                  ? 'bg-amber-500 text-slate-950 shadow font-black'
+                  : 'bg-pink-600 text-white shadow'
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
-            {st === 'all' ? 'All Orders' : st}
+            {st === 'all' ? 'All Orders' : st === 'Draft Checkouts' ? '⚠️ Incomplete / Failed Checkouts' : st}
           </button>
         ))}
       </div>
 
-      {/* Orders List */}
+      {/* Orders List / Drafts List */}
       {loading ? (
         <div className="text-center py-16">
           <RefreshCw size={32} className="animate-spin text-pink-600 mx-auto" />
         </div>
+      ) : activeStatusTab === 'Draft Checkouts' ? (
+        draftOrders.length === 0 ? (
+          <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-sm space-y-2">
+            <ShoppingBag size={32} className="text-slate-300 mx-auto" />
+            <h3 className="font-extrabold text-slate-800 text-base font-heading">No Draft Checkouts</h3>
+            <p className="text-xs text-slate-400 font-medium">No pre-payment checkout drafts recorded yet.</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="bg-amber-50 border border-amber-200 p-3 rounded-2xl text-xs font-bold text-amber-900 flex items-center gap-2">
+              <AlertCircle size={16} className="text-amber-600 shrink-0" />
+              <span>
+                These are pre-payment checkout attempts. If a customer paid via UPI but the browser closed, use the Payment ID to sync it into confirmed orders.
+              </span>
+            </div>
+
+            {draftOrders.map((dft) => (
+              <div
+                key={dft._id}
+                className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4 hover:border-amber-400 transition-colors"
+              >
+                {/* Top Row */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="font-mono font-black text-amber-700 text-xs bg-amber-50 px-3 py-1 rounded-xl border border-amber-200 font-heading">
+                      Draft: #{dft.draftId}
+                    </span>
+                    <span className="text-xs font-mono text-slate-500 font-semibold">
+                      RZP Order: {dft.razorpayOrderId}
+                    </span>
+                    <span className="text-xs text-slate-400 font-medium">
+                      {new Date(dft.createdAt).toLocaleString('en-IN', {
+                        dateStyle: 'medium',
+                        timeStyle: 'short',
+                      })}
+                    </span>
+                  </div>
+
+                  <div>
+                    <span
+                      className={`text-xs font-extrabold px-3 py-1 rounded-full border font-heading ${
+                        dft.status === 'Converted'
+                          ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                          : 'bg-amber-100 text-amber-900 border-amber-300'
+                      }`}
+                    >
+                      Status: {dft.status || 'Initiated'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Customer Details & Address */}
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 text-xs">
+                  <div className="md:col-span-8 bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-1.5 font-medium">
+                    <div className="font-bold text-slate-900 text-sm font-heading flex items-center gap-2">
+                      <span>👤 {dft.customerDetails?.name || 'Moxfood Customer'}</span>
+                    </div>
+                    <div className="text-slate-600 flex items-center gap-2 font-mono font-bold">
+                      <Phone size={13} className="text-pink-600" />
+                      <span>{dft.customerDetails?.phone}</span>
+                      <a
+                        href={`https://wa.me/91${(dft.customerDetails?.phone || '').replace(/\D/g, '')}?text=${encodeURIComponent(
+                          `Hello ${dft.customerDetails?.name}, your Moxfood order draft (#${dft.draftId}) is saved. Do you need assistance placing the order?`
+                        )}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full flex items-center gap-1 font-heading"
+                      >
+                        <MessageSquare size={11} /> WhatsApp Customer
+                      </a>
+                    </div>
+                    <div className="text-slate-700 leading-relaxed font-semibold">
+                      <strong>Full Address:</strong> {dft.customerDetails?.address}
+                    </div>
+                    {dft.customerDetails?.pincode && (
+                      <div className="text-slate-600">
+                        <strong>Pincode:</strong>{' '}
+                        <span className="font-bold text-pink-600">{dft.customerDetails?.pincode}</span>
+                        {dft.customerDetails?.landmark && (
+                          <span className="ml-2 text-slate-500 font-normal">
+                            (Landmark: {dft.customerDetails?.landmark})
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="md:col-span-4 bg-amber-50/60 p-4 rounded-2xl border border-amber-200/80 flex flex-col justify-between font-semibold">
+                    <div className="space-y-1 text-slate-700">
+                      <div className="flex justify-between">
+                        <span>Subtotal:</span>
+                        <span className="font-bold text-slate-900 font-heading">₹{dft.subtotal}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Pkg &amp; Handling:</span>
+                        <span className="font-bold text-pink-600 font-heading">₹{dft.deliveryCharge}</span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center text-sm font-black text-slate-900 pt-2 border-t border-amber-200 font-heading">
+                      <span>Total Amount:</span>
+                      <span className="text-amber-900 text-base font-heading">₹{dft.totalAmount}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Items Breakdown */}
+                <div className="space-y-2">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 font-heading">
+                    Draft Cart Items ({dft.items?.length || 0} Items):
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                    {(dft.items || []).map((it: any, i: number) => (
+                      <div
+                        key={i}
+                        className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex items-center justify-between text-xs font-medium"
+                      >
+                        <div>
+                          <div className="font-bold text-slate-900 font-heading">{it.name}</div>
+                          <div className="text-[11px] text-slate-500">
+                            {it.unit} • Qty: {it.quantity}
+                          </div>
+                        </div>
+                        <div className="font-bold text-slate-800 font-heading">
+                          ₹{it.price * it.quantity}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )
       ) : orders.length === 0 ? (
         <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-sm space-y-2">
           <ShoppingBag size={32} className="text-slate-300 mx-auto" />

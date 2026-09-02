@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
 import dbConnect from '@/lib/db';
 import Order from '@/models/Order';
+import DraftOrder from '@/models/DraftOrder';
 import { RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET } from '@/lib/constants';
 import { pushOrderToShipmozo } from '@/lib/shipmozo';
 
@@ -31,10 +32,14 @@ export async function POST(request: Request) {
 
     let payment: any = null;
     let orderNotes: any = {};
+    let draftOrder: any = null;
 
     try {
       payment = await instance.payments.fetch(paymentId);
       if (payment && payment.order_id) {
+        // Try finding saved pre-payment DraftOrder in MongoDB first
+        draftOrder = await DraftOrder.findOne({ razorpayOrderId: payment.order_id });
+        
         try {
           const rzpOrder = await instance.orders.fetch(payment.order_id);
           orderNotes = rzpOrder.notes || {};
@@ -52,11 +57,12 @@ export async function POST(request: Request) {
       ...((payment && payment.notes) || {}),
     };
 
-    const totalAmount = payment ? Number(payment.amount) / 100 : Number(body.totalAmount) || 0;
+    const totalAmount = payment ? Number(payment.amount) / 100 : Number(body.totalAmount) || draftOrder?.totalAmount || 0;
 
-    // Extract customer details with priority: manual input > notes > payment object > fallback defaults
+    // Extract customer details with priority: manual input > draftOrder > notes > payment object > fallback defaults
     const name =
       manualDetails?.name?.trim() ||
+      draftOrder?.customerDetails?.name ||
       notes.customerName ||
       notes.name ||
       payment?.email?.split('@')[0] ||
@@ -64,30 +70,36 @@ export async function POST(request: Request) {
 
     const phone =
       manualDetails?.phone?.trim() ||
+      draftOrder?.customerDetails?.phone ||
       notes.customerPhone ||
       notes.phone ||
       (payment?.contact ? String(payment.contact).replace(/^\+91/, '') : '');
 
     const address =
       manualDetails?.address?.trim() ||
+      draftOrder?.customerDetails?.address ||
       notes.customerAddress ||
       notes.address ||
       'Address provided during Payment';
 
     const pincode =
       manualDetails?.pincode?.trim() ||
+      draftOrder?.customerDetails?.pincode ||
       notes.customerPincode ||
       notes.pincode ||
       '395006';
 
     const landmark =
       manualDetails?.landmark?.trim() ||
+      draftOrder?.customerDetails?.landmark ||
       notes.landmark ||
       '';
 
     const items =
       manualItems && manualItems.length > 0
         ? manualItems
+        : (draftOrder?.items && draftOrder.items.length > 0)
+        ? draftOrder.items
         : [
             {
               productId: 'REC-ITEM-101',

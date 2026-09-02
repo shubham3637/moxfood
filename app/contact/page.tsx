@@ -107,12 +107,12 @@ export default function ContactPage() {
                 <div>
                   <span className="text-[10px] text-slate-400 uppercase font-bold block">Instagram Handle</span>
                   <a
-                    href="https://www.instagram.com/gautamoilandsugar?igsh=MTN2YXV3cDB1bmgxaw=="
+                    href="https://www.instagram.com/gautamtrading_?igsi=MTN2YXV3cDB1bmgxaw=="
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-purple-600 font-extrabold font-heading hover:underline"
                   >
-                    @gautamoilandsugar
+                    @gautamtrading_
                   </a>
                 </div>
               </div>

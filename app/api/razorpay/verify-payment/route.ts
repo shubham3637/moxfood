@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import dbConnect from '@/lib/db';
 import Order from '@/models/Order';
+import DraftOrder from '@/models/DraftOrder';
 import Product from '@/models/Product';
 import { RAZORPAY_KEY_SECRET } from '@/lib/constants';
 import { pushOrderToShipmozo } from '@/lib/shipmozo';
@@ -44,6 +45,9 @@ export async function POST(request: Request) {
       });
     }
 
+    // Try finding pre-payment DraftOrder in MongoDB
+    const draftOrder = razorpay_order_id ? await DraftOrder.findOne({ razorpayOrderId: razorpay_order_id }) : null;
+
     // Generate expected signature for verification
     const expectedSignature = crypto
       .createHmac('sha256', RAZORPAY_KEY_SECRET)
@@ -52,8 +56,10 @@ export async function POST(request: Request) {
 
     const isSignatureValid = expectedSignature === razorpay_signature;
 
+    const rawItems = (items && items.length > 0) ? items : (draftOrder?.items || []);
+
     // Calculate subtotal, delivery charge, discount and total amount
-    const sanitizedItems = (items || []).map((item: any) => ({
+    const sanitizedItems = (rawItems || []).map((item: any) => ({
       productId: item.productId || 'UNKNOWN-PROD',
       name: item.name || 'Grocery Item',
       altNameGujarati: item.altNameGujarati || '',
@@ -68,8 +74,9 @@ export async function POST(request: Request) {
     }, 0);
 
     const deliveryCharge =
-      Number(clientDeliveryCharge) ?? Number(weightSummary?.shippingFee) ?? 0;
-    const discountAmount = Number(clientDiscountAmount) || 0;
+      Number(clientDeliveryCharge) ?? draftOrder?.deliveryCharge ?? Number(weightSummary?.shippingFee) ?? 0;
+    const discountAmount = Number(clientDiscountAmount) ?? draftOrder?.discountAmount ?? 0;
+    const finalCouponCode = couponCode || draftOrder?.couponCode || '';
     const totalAmount = Math.max(0, subtotal + deliveryCharge - discountAmount);
 
     const randomNum = Math.floor(100000 + Math.random() * 900000);
@@ -78,17 +85,17 @@ export async function POST(request: Request) {
     const newOrder = await Order.create({
       orderId,
       customerDetails: {
-        name: customerDetails?.name || 'Moxfood Customer',
-        phone: customerDetails?.phone || '',
-        address: customerDetails?.address || '',
-        pincode: customerDetails?.pincode || '',
-        landmark: customerDetails?.landmark || '',
+        name: customerDetails?.name || draftOrder?.customerDetails?.name || 'Moxfood Customer',
+        phone: customerDetails?.phone || draftOrder?.customerDetails?.phone || '',
+        address: customerDetails?.address || draftOrder?.customerDetails?.address || '',
+        pincode: customerDetails?.pincode || draftOrder?.customerDetails?.pincode || '',
+        landmark: customerDetails?.landmark || draftOrder?.customerDetails?.landmark || '',
         deliverySlot: 'Anytime Today',
       },
       items: sanitizedItems,
       subtotal,
       deliveryCharge,
-      couponCode: couponCode || '',
+      couponCode: finalCouponCode,
       discountAmount,
       totalAmount,
       paymentMethod: 'RAZORPAY',
@@ -99,6 +106,10 @@ export async function POST(request: Request) {
       razorpaySignature: razorpay_signature || '',
       notes: notes || '',
     });
+
+    if (draftOrder) {
+      await DraftOrder.findByIdAndUpdate(draftOrder._id, { status: 'Converted', paymentStatus: 'Paid' });
+    }
 
     // Stock update for ordered products
     for (const item of sanitizedItems) {

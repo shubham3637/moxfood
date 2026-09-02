@@ -293,11 +293,28 @@ export default function CheckoutPage() {
         return;
       }
 
-      // 1. Create Order via Razorpay Backend API
+      // 1. Create Order & Pre-Payment Draft via Razorpay Backend API
       const orderRes = await fetch('/api/razorpay/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: payableTotal }),
+        body: JSON.stringify({
+          amount: payableTotal,
+          customerDetails: {
+            name: formData.name.trim(),
+            phone: formData.phone.trim(),
+            address: formData.address.trim(),
+            pincode: formData.pincode.trim(),
+            landmark: formData.landmark.trim(),
+            state: pincodeStatus.stateName,
+            district: pincodeStatus.district,
+            deliverySlot: 'Anytime Today',
+          },
+          items,
+          subtotal,
+          deliveryCharge,
+          discountAmount,
+          couponCode: appliedCoupon?.code || '',
+        }),
       });
 
       const orderData = await orderRes.json();

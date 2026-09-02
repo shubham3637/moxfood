@@ -1,14 +1,19 @@
 import { NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
+import dbConnect from '@/lib/db';
+import DraftOrder from '@/models/DraftOrder';
 import { RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET } from '@/lib/constants';
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { amount, customerDetails, items } = body;
+    const { amount, customerDetails, items, subtotal, deliveryCharge, discountAmount, couponCode } = body;
 
     if (!amount || Number(amount) <= 0) {
       return NextResponse.json({ success: false, error: 'Invalid order amount' }, { status: 400 });
     }
+
+    await dbConnect();
 
     const instance = new Razorpay({
       key_id: RAZORPAY_KEY_ID,
@@ -35,9 +40,49 @@ export async function POST(request: Request) {
 
     const razorpayOrder = await instance.orders.create(options);
 
+    // Save pre-payment DraftOrder in MongoDB table BEFORE payment popup opens
+    const draftId = `DFT-${Date.now().toString().slice(-6)}-${Math.floor(100 + Math.random() * 900)}`;
+
+    const draftOrderData = {
+      draftId,
+      razorpayOrderId: razorpayOrder.id,
+      customerDetails: {
+        name: (customerDetails?.name || '').trim(),
+        phone: (customerDetails?.phone || '').trim(),
+        address: (customerDetails?.address || '').trim(),
+        pincode: (customerDetails?.pincode || '').trim(),
+        landmark: (customerDetails?.landmark || '').trim(),
+        state: (customerDetails?.state || '').trim(),
+        district: (customerDetails?.district || '').trim(),
+        deliverySlot: customerDetails?.deliverySlot || 'Anytime Today',
+      },
+      items: Array.isArray(items)
+        ? items.map((it: any) => ({
+            productId: String(it.productId),
+            name: String(it.name),
+            unit: String(it.unit || '1 pack'),
+            price: Number(it.price) || 0,
+            quantity: Number(it.quantity) || 1,
+            image: String(it.image || ''),
+          }))
+        : [],
+      subtotal: Number(subtotal) || Number(amount),
+      deliveryCharge: Number(deliveryCharge) || 0,
+      couponCode: couponCode || '',
+      discountAmount: Number(discountAmount) || 0,
+      totalAmount: Number(amount),
+      paymentMethod: 'RAZORPAY',
+      paymentStatus: 'Pending' as const,
+      status: 'Initiated' as const,
+    };
+
+    await DraftOrder.create(draftOrderData);
+    console.log('Saved pre-payment DraftOrder in MongoDB:', draftId, 'Razorpay Order:', razorpayOrder.id);
+
     return NextResponse.json({
       success: true,
       order: razorpayOrder,
+      draftId,
       keyId: RAZORPAY_KEY_ID,
     });
   } catch (error: any) {
