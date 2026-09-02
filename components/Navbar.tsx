@@ -137,14 +137,14 @@ export default function Navbar() {
 
             {/* Instagram Quick Link Button (Mobile/Desktop) */}
             <a
-              href="https://www.instagram.com/gautamoilandsugar?igsh=MTN2YXV3cDB1bmgxaw=="
+              href="https://www.instagram.com/gautamtrading_?igsi=MTN2YXV3cDB1bmgxaw=="
               target="_blank"
               rel="noopener noreferrer"
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-[11px] sm:text-xs font-extrabold px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 transition-all shadow-md cursor-pointer font-heading shrink-0"
-              title="Follow us on Instagram @gautamoilandsugar"
+              title="Follow us on Instagram @gautamtrading_"
             >
               <InstagramIcon size={15} />
-              <span className="hidden sm:inline">@gautamoilandsugar</span>
+              <span className="hidden sm:inline">@gautamtrading_</span>
             </a>
 
             {/* Interactive Cart Button Drawer Trigger */}
@@ -224,7 +224,7 @@ export default function Navbar() {
             </Link>
 
             <a
-              href="https://www.instagram.com/gautamoilandsugar?igsh=MTN2YXV3cDB1bmgxaw=="
+              href="https://www.instagram.com/gautamtrading_?igsi=MTN2YXV3cDB1bmgxaw=="
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setIsMobileMenuOpen(false)}
@@ -232,7 +232,7 @@ export default function Navbar() {
             >
               <span className="flex items-center gap-2">
                 <InstagramIcon size={16} />
-                Instagram (@gautamoilandsugar)
+                Instagram (@gautamtrading_)
               </span>
               <ChevronRight size={16} />
             </a>
