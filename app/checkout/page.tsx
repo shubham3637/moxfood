@@ -13,6 +13,7 @@ import {
   Minus,
   AlertCircle,
   Truck,
+  Package,
   Scale,
   RefreshCw,
   ChevronDown,
@@ -829,14 +830,32 @@ export default function CheckoutPage() {
                   </span>
                 </div>
 
-                {/* Delivery Charge Row */}
+                {/* Free Delivery Row */}
                 <div className="flex justify-between items-center text-slate-600">
                   <div className="flex items-center gap-1">
-                    <Truck size={14} className="text-blue-900" />
-                    <span>Shipping Fee:</span>
+                    <Truck size={14} className="text-emerald-600" />
+                    <span>{language === 'gu' ? 'ડિલિવરી ચાર્જ (Shipping):' : 'Delivery Charge:'}</span>
+                  </div>
+                  <span className="font-extrabold text-emerald-600 font-heading text-xs uppercase bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                    FREE
+                  </span>
+                </div>
+
+                {/* Packaging & Handling Fee Row */}
+                <div className="flex justify-between items-center text-slate-600">
+                  <div className="flex items-center gap-1">
+                    <Package size={14} className="text-blue-900" />
+                    <span>
+                      {language === 'gu' ? 'પેકિંગ અને હેન્ડલિંગ ફી:' : 'Packaging & Handling Fee:'}
+                    </span>
                   </div>
                   {pincodeStatus.verified ? (
-                    <span className="font-bold text-pink-600 font-heading text-sm">₹{deliveryCharge}</span>
+                    <div className="text-right font-heading">
+                      <span className="font-bold text-pink-600 text-sm">₹{deliveryCharge}</span>
+                      <span className="block text-[10px] text-slate-500 font-normal">
+                        ({pincodeStatus.isGujarat ? (language === 'gu' ? 'સમગ્ર ગુજરાત ₹૪૦/kg' : 'All Gujarat ₹40/kg') : (language === 'gu' ? 'ગુજરાત બહાર ₹૫૦/kg' : 'Out of Gujarat ₹50/kg')})
+                      </span>
+                    </div>
                   ) : (
                     <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
                       Enter Pincode Above

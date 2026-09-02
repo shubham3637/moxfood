@@ -198,12 +198,24 @@ Please process home delivery for this order. Thank you!`;
             <span>Subtotal:</span>
             <span className="font-bold text-slate-900">₹{order.subtotal}</span>
           </div>
-          <div className="flex justify-between text-slate-700">
+          <div className="flex justify-between items-center text-slate-700">
             <span>Delivery Charge:</span>
+            <span className="font-extrabold text-emerald-600 text-[11px] bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 uppercase">
+              FREE
+            </span>
+          </div>
+          <div className="flex justify-between text-slate-700">
+            <span>Packaging &amp; Handling Fee:</span>
             <span className="font-bold text-pink-600">₹{order.deliveryCharge}</span>
           </div>
+          {order.discountAmount > 0 && (
+            <div className="flex justify-between text-emerald-700 font-bold">
+              <span>Coupon Discount ({order.couponCode || 'DISCOUNT'}):</span>
+              <span>- ₹{order.discountAmount}</span>
+            </div>
+          )}
           <div className="flex justify-between text-base font-black text-slate-900 pt-2 border-t border-pink-200 font-heading">
-            <span>Total Amount:</span>
+            <span>Total Amount Paid:</span>
             <span className="text-blue-900">₹{order.totalAmount}</span>
           </div>
         </div>

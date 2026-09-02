@@ -337,8 +337,14 @@ export default function AdminOrdersPage() {
                       <span>Subtotal:</span>
                       <span className="font-bold text-slate-900 font-heading">₹{ord.subtotal}</span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between items-center text-slate-700">
                       <span>Delivery Charge:</span>
+                      <span className="font-extrabold text-emerald-600 text-[10px] bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 uppercase">
+                        FREE
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Pkg &amp; Handling:</span>
                       <span className="font-bold text-pink-600 font-heading">₹{ord.deliveryCharge}</span>
                     </div>
                     {ord.discountAmount > 0 && (

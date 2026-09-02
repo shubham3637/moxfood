@@ -202,16 +202,20 @@ export default function CartDrawer() {
                 </button>
 
                 {isBillDetailOpen && (
-                  <div className="p-3 border-t border-slate-200 bg-white space-y-1.5 text-xs font-semibold text-slate-600 animate-fade-in">
+                  <div className="p-3 border-t border-slate-200 bg-white space-y-1.5 text-xs font-semibold text-slate-600 animate-fade-in font-heading">
                     <div className="flex justify-between">
                       <span>{t('subtotal')}</span>
                       <span className="font-bold text-slate-800">₹{subtotal}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span>{t('deliveryCharge')}</span>
-                      <span className="font-bold text-pink-600">
-                        {deliveryCharge === 0 ? t('free') : `₹${deliveryCharge}`}
+                    <div className="flex justify-between items-center text-slate-600">
+                      <span>{language === 'gu' ? 'ડિલિવરી ચાર્જ:' : 'Delivery Charge:'}</span>
+                      <span className="font-extrabold text-emerald-600 text-[11px] bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 uppercase">
+                        FREE
                       </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span>{language === 'gu' ? 'પેકિંગ અને હેન્ડલિંગ ફી:' : 'Packaging & Handling Fee:'}</span>
+                      <span className="font-bold text-pink-600">₹{deliveryCharge}</span>
                     </div>
                   </div>
                 )}
