@@ -1,16 +1,10 @@
 /**
- * Calculate packaging & handling fee based on package weight (grams) and location (Gujarat vs Out of Gujarat).
+ * Calculate packaging & handling fee based on package weight (grams).
  *
- * Rates:
- * All over Gujarat: ₹40 per kg (kg * 40)
- * Out of Gujarat: ₹50 per kg (kg * 50)
+ * Rate:
+ * All over India: Flat ₹10 per kg (kg * 10)
  */
-export function calculateShippingFee(totalWeightGrams: number, isGujarat: boolean): number {
+export function calculateShippingFee(totalWeightGrams: number, isGujarat?: boolean): number {
   const kg = Math.max(1, Math.ceil(totalWeightGrams / 1000));
-
-  if (isGujarat) {
-    return kg * 40; // ₹40 per kg
-  } else {
-    return kg * 50; // ₹50 per kg
-  }
+  return kg * 10; // ₹10 per kg all over India
 }

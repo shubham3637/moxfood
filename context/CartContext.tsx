@@ -148,8 +148,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, 0);
 
   const billableKg = totalWeightGrams > 0 ? Math.max(1, Math.ceil(totalWeightGrams / 1000)) : 0;
-  // Default base shipping fee (Gujarat rate ₹40/kg)
-  const deliveryCharge = items.length === 0 ? 0 : billableKg * 40;
+  // Default base fee (Flat ₹10/kg all over India)
+  const deliveryCharge = items.length === 0 ? 0 : billableKg * 10;
   const grandTotal = subtotal + deliveryCharge;
 
   return (
