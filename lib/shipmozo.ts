@@ -24,6 +24,26 @@ export function parseUnitWeightGrams(unitStr: string): number {
   return 1000; // default 1 kg
 }
 
+export function calculateOrderTotalWeightGrams(items: any[]): number {
+  if (!items || !Array.isArray(items)) return 0;
+  return items.reduce((sum, item) => {
+    const unitWeight = parseUnitWeightGrams(item.unit || '');
+    const qty = Number(item.quantity) || 1;
+    return sum + unitWeight * qty;
+  }, 0);
+}
+
+export function formatWeight(grams: number): string {
+  if (!grams || grams <= 0) return '0 gm';
+  if (grams >= 1000) {
+    const kg = grams / 1000;
+    const kgStr = kg % 1 === 0 ? kg.toString() : kg.toFixed(2).replace(/\.?0+$/, '');
+    return `${kgStr} kg`;
+  }
+  return `${grams} gm`;
+}
+
+
 export async function shipmozoFetch(endpoint: string, options: RequestInit = {}) {
   const url = `${SHIPMOZO_BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
   

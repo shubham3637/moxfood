@@ -9,13 +9,23 @@ import {
   Truck,
   CheckCircle2,
   AlertCircle,
+  Calendar,
+  Filter,
+  Scale,
+  DollarSign,
+  X,
 } from 'lucide-react';
+import { calculateOrderTotalWeightGrams, formatWeight } from '@/lib/shipmozo';
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeStatusTab, setActiveStatusTab] = useState('all');
   const [pushingOrderId, setPushingOrderId] = useState<string | null>(null);
+
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [quickDatePreset, setQuickDatePreset] = useState('all');
 
   const [recoverForm, setRecoverForm] = useState({
     paymentId: '',
@@ -31,22 +41,87 @@ export default function AdminOrdersPage() {
 
   const [draftOrders, setDraftOrders] = useState<any[]>([]);
 
+  const handlePresetChange = (preset: string) => {
+    setQuickDatePreset(preset);
+    const today = new Date();
+    const formatDate = (d: Date) => {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    if (preset === 'today') {
+      const str = formatDate(today);
+      setStartDate(str);
+      setEndDate(str);
+    } else if (preset === 'yesterday') {
+      const yest = new Date();
+      yest.setDate(yest.getDate() - 1);
+      const str = formatDate(yest);
+      setStartDate(str);
+      setEndDate(str);
+    } else if (preset === '7days') {
+      const past = new Date();
+      past.setDate(past.getDate() - 6);
+      setStartDate(formatDate(past));
+      setEndDate(formatDate(today));
+    } else if (preset === 'thisMonth') {
+      const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+      setStartDate(formatDate(firstDay));
+      setEndDate(formatDate(today));
+    } else {
+      setStartDate('');
+      setEndDate('');
+    }
+  };
+
+  const clearDateFilter = () => {
+    setStartDate('');
+    setEndDate('');
+    setQuickDatePreset('all');
+  };
+
   useEffect(() => {
     if (activeStatusTab === 'Draft Checkouts') {
       fetchDraftOrders();
     } else {
       fetchOrders();
     }
-  }, [activeStatusTab]);
+  }, [activeStatusTab, startDate, endDate]);
 
   const fetchDraftOrders = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/draft-orders');
+      const params = new URLSearchParams();
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+      const qStr = params.toString();
+      const res = await fetch(`/api/admin/draft-orders${qStr ? `?${qStr}` : ''}`);
       const data = await res.json();
       setDraftOrders(data.draftOrders || []);
     } catch (err) {
       console.error('Failed to fetch draft orders:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchOrders = async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (activeStatusTab !== 'all') {
+        params.append('status', activeStatusTab);
+      }
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+      const qStr = params.toString();
+      const res = await fetch(`/api/orders${qStr ? `?${qStr}` : ''}`);
+      const data = await res.json();
+      setOrders(data.orders || []);
+    } catch (err) {
+      console.error('Failed to fetch orders:', err);
     } finally {
       setLoading(false);
     }
@@ -98,23 +173,6 @@ export default function AdminOrdersPage() {
       alert('Error syncing order: ' + err.message);
     } finally {
       setRecovering(false);
-    }
-  };
-
-  const fetchOrders = async () => {
-    setLoading(true);
-    try {
-      let url = '/api/orders';
-      if (activeStatusTab !== 'all') {
-        url += `?status=${activeStatusTab}`;
-      }
-      const res = await fetch(url);
-      const data = await res.json();
-      setOrders(data.orders || []);
-    } catch (err) {
-      console.error('Failed to fetch orders:', err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -201,6 +259,116 @@ export default function AdminOrdersPage() {
           <RefreshCw size={14} />
           <span>Sync Missing Razorpay Order</span>
         </button>
+      </div>
+
+      {/* Date Filter & Summary Toolbar */}
+      <div className="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm space-y-3">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          {/* Quick Date Presets */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-black text-slate-700 font-heading flex items-center gap-1.5 mr-1">
+              <Calendar size={15} className="text-pink-600" />
+              <span>Filter by Date:</span>
+            </span>
+
+            {[
+              { key: 'all', label: 'All Time' },
+              { key: 'today', label: 'Today' },
+              { key: 'yesterday', label: 'Yesterday' },
+              { key: '7days', label: 'Last 7 Days' },
+              { key: 'thisMonth', label: 'This Month' },
+            ].map((p) => (
+              <button
+                key={p.key}
+                onClick={() => handlePresetChange(p.key)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer font-heading ${
+                  quickDatePreset === p.key && !startDate && !endDate
+                    ? 'bg-slate-900 text-white shadow'
+                    : quickDatePreset === p.key && (startDate || endDate)
+                    ? 'bg-pink-600 text-white shadow'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Custom Date Pickers */}
+          <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
+            <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-2xl border border-slate-200">
+              <span className="text-slate-500 font-medium">From:</span>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => {
+                  setStartDate(e.target.value);
+                  setQuickDatePreset('custom');
+                }}
+                className="bg-transparent text-slate-900 focus:outline-none cursor-pointer"
+              />
+            </div>
+
+            <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-2xl border border-slate-200">
+              <span className="text-slate-500 font-medium">To:</span>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => {
+                  setEndDate(e.target.value);
+                  setQuickDatePreset('custom');
+                }}
+                className="bg-transparent text-slate-900 focus:outline-none cursor-pointer"
+              />
+            </div>
+
+            {(startDate || endDate) && (
+              <button
+                onClick={clearDateFilter}
+                className="bg-red-50 hover:bg-red-100 text-red-600 px-2.5 py-1.5 rounded-xl border border-red-200 flex items-center gap-1 cursor-pointer transition-colors"
+                title="Clear date filter"
+              >
+                <X size={14} />
+                <span>Clear</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Filter Summary Badges */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-100 text-xs">
+          <div className="bg-blue-50/70 p-3 rounded-2xl border border-blue-100 flex items-center justify-between">
+            <span className="text-slate-600 font-medium flex items-center gap-1.5">
+              <ShoppingBag size={14} className="text-blue-600" /> Total Orders
+            </span>
+            <span className="font-mono font-black text-blue-900 text-sm">
+              {activeStatusTab === 'Draft Checkouts' ? draftOrders.length : orders.length}
+            </span>
+          </div>
+
+          <div className="bg-emerald-50/70 p-3 rounded-2xl border border-emerald-100 flex items-center justify-between">
+            <span className="text-slate-600 font-medium flex items-center gap-1.5">
+              <DollarSign size={14} className="text-emerald-600" /> Total Sales Revenue
+            </span>
+            <span className="font-mono font-black text-emerald-900 text-sm">
+              ₹{(activeStatusTab === 'Draft Checkouts' ? draftOrders : orders).reduce((sum, o) => sum + (o.totalAmount || 0), 0)}
+            </span>
+          </div>
+
+          <div className="bg-pink-50/70 p-3 rounded-2xl border border-pink-100 flex items-center justify-between">
+            <span className="text-slate-600 font-medium flex items-center gap-1.5">
+              <Scale size={14} className="text-pink-600" /> Total Dispatch Weight
+            </span>
+            <span className="font-mono font-black text-pink-900 text-sm">
+              {formatWeight(
+                (activeStatusTab === 'Draft Checkouts' ? draftOrders : orders).reduce(
+                  (sum, o) => sum + calculateOrderTotalWeightGrams(o.items || []),
+                  0
+                )
+              )}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Filter Tabs */}
@@ -323,6 +491,12 @@ export default function AdminOrdersPage() {
                       <div className="flex justify-between">
                         <span>Pkg &amp; Handling:</span>
                         <span className="font-bold text-pink-600 font-heading">₹{dft.deliveryCharge}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Total Weight:</span>
+                        <span className="font-bold text-amber-950 font-heading">
+                          {formatWeight(calculateOrderTotalWeightGrams(dft.items || []))}
+                        </span>
                       </div>
                     </div>
                     <div className="flex justify-between items-center text-sm font-black text-slate-900 pt-2 border-t border-amber-200 font-heading">
@@ -500,6 +674,12 @@ export default function AdminOrdersPage() {
                     <div className="flex justify-between">
                       <span>Pkg &amp; Handling:</span>
                       <span className="font-bold text-pink-600 font-heading">₹{ord.deliveryCharge}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Total Weight:</span>
+                      <span className="font-bold text-blue-950 font-heading">
+                        {formatWeight(calculateOrderTotalWeightGrams(ord.items || []))}
+                      </span>
                     </div>
                     {ord.discountAmount > 0 && (
                       <div className="flex justify-between text-emerald-700">

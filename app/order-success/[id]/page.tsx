@@ -13,6 +13,8 @@ import {
   RefreshCw,
 } from 'lucide-react';
 
+import { calculateOrderTotalWeightGrams, formatWeight } from '@/lib/shipmozo';
+
 export default function OrderSuccessPage(props: { params: Promise<{ id: string }> }) {
   const { id } = use(props.params);
   const [order, setOrder] = useState<any>(null);
@@ -58,6 +60,9 @@ export default function OrderSuccessPage(props: { params: Promise<{ id: string }
     );
   }
 
+  const totalWeightGrams = calculateOrderTotalWeightGrams(order.items || []);
+  const totalWeightFormatted = formatWeight(totalWeightGrams);
+
   const storePhone = '917096396856';
   const whatsappText = `🛒 *MOXFOOD - ORDER RECEIPT* 🛒
 *Order ID:* #${order.orderId}
@@ -70,6 +75,7 @@ export default function OrderSuccessPage(props: { params: Promise<{ id: string }
 *Ordered Items:*
 ${order.items.map((it: any) => `• ${it.name} (${it.unit}) x ${it.quantity} = ₹${it.price * it.quantity}`).join('\n')}
 
+*Total Weight:* ${totalWeightFormatted}
 *Total Amount:* ₹${order.totalAmount}
 
 Please process home delivery for this order. Thank you!`;
@@ -207,6 +213,10 @@ Please process home delivery for this order. Thank you!`;
           <div className="flex justify-between text-slate-700">
             <span>Packaging &amp; Handling Fee:</span>
             <span className="font-bold text-pink-600">₹{order.deliveryCharge}</span>
+          </div>
+          <div className="flex justify-between text-slate-700">
+            <span>Total Order Weight:</span>
+            <span className="font-bold text-blue-900">{totalWeightFormatted}</span>
           </div>
           {order.discountAmount > 0 && (
             <div className="flex justify-between text-emerald-700 font-bold">

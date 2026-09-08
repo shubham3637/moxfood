@@ -9,10 +9,26 @@ export async function GET(request: Request) {
     await dbConnect();
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
 
     const queryFilter: any = {};
     if (status && status !== 'all') {
       queryFilter.status = status;
+    }
+
+    if (startDate || endDate) {
+      queryFilter.createdAt = {};
+      if (startDate) {
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0);
+        queryFilter.createdAt.$gte = start;
+      }
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        queryFilter.createdAt.$lte = end;
+      }
     }
 
     const orders = await Order.find(queryFilter).sort({ createdAt: -1 });

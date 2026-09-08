@@ -23,6 +23,7 @@ import {
   Navigation,
 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { calculateOrderTotalWeightGrams, formatWeight } from '@/lib/shipmozo';
 
 function TrackOrderContent() {
   const searchParams = useSearchParams();
@@ -395,6 +396,10 @@ function TrackOrderContent() {
                         <div className="flex justify-between text-slate-600">
                           <span>Store Delivery:</span>
                           <span className="font-bold">₹{order.deliveryCharge}</span>
+                        </div>
+                        <div className="flex justify-between text-slate-600">
+                          <span>Total Weight:</span>
+                          <span className="font-bold text-blue-900">{formatWeight(calculateOrderTotalWeightGrams(order.items || []))}</span>
                         </div>
                         <div className="flex justify-between font-black text-slate-900 pt-1 border-t border-slate-200">
                           <span>Total Amount:</span>
