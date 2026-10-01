@@ -38,6 +38,12 @@ export async function POST(request: Request) {
     });
 
     if (existingOrder) {
+      if (razorpay_order_id) {
+        await DraftOrder.updateMany(
+          { razorpayOrderId: razorpay_order_id },
+          { status: 'Converted', paymentStatus: 'Paid' }
+        );
+      }
       return NextResponse.json({
         success: true,
         verified: true,
@@ -107,8 +113,11 @@ export async function POST(request: Request) {
       notes: notes || '',
     });
 
-    if (draftOrder) {
-      await DraftOrder.findByIdAndUpdate(draftOrder._id, { status: 'Converted', paymentStatus: 'Paid' });
+    if (draftOrder || razorpay_order_id) {
+      await DraftOrder.updateMany(
+        { razorpayOrderId: razorpay_order_id },
+        { status: 'Converted', paymentStatus: 'Paid' }
+      );
     }
 
     // Stock update for ordered products
@@ -123,21 +132,6 @@ export async function POST(request: Request) {
           console.warn(`Failed to update stock for product ${item.productId}:`, err);
         }
       }
-    }
-
-    // Push order details automatically to Shipmozo panel
-    try {
-      const shipmozoRes = await pushOrderToShipmozo(newOrder);
-      if (shipmozoRes.success) {
-        await Order.findByIdAndUpdate(newOrder._id, {
-          shipmozoPushed: true,
-          shipmozoReferenceId: shipmozoRes.pushData?.reference_id || orderId,
-          shipmozoAwbNumber: shipmozoRes.assignData?.awb_number || '',
-          shipmozoCourierName: shipmozoRes.assignData?.courier_company || '',
-        });
-      }
-    } catch (sErr) {
-      console.warn('Background Shipmozo push failed:', sErr);
     }
 
     return NextResponse.json({

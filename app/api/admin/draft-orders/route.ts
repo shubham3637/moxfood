@@ -1,10 +1,29 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import DraftOrder from '@/models/DraftOrder';
+import Order from '@/models/Order';
 
 export async function GET(request: Request) {
   try {
     await dbConnect();
+
+    // Auto-update status for draft orders that have a matching confirmed Order in DB
+    try {
+      const confirmedOrders = await Order.find({ razorpayOrderId: { $exists: true, $ne: '' } }, { razorpayOrderId: 1 });
+      const confirmedRzpIds: string[] = confirmedOrders
+        .map((o) => o.razorpayOrderId)
+        .filter((id): id is string => Boolean(id));
+
+      if (confirmedRzpIds.length > 0) {
+        await DraftOrder.updateMany(
+          { razorpayOrderId: { $in: confirmedRzpIds }, status: 'Initiated' },
+          { status: 'Converted', paymentStatus: 'Paid' }
+        );
+      }
+    } catch (sErr) {
+      console.warn('Auto-reconcile draft orders error:', sErr);
+    }
+
     const { searchParams } = new URL(request.url);
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');

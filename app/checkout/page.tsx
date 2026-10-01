@@ -346,9 +346,9 @@ export default function CheckoutPage() {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
+                razorpay_order_id: response.razorpay_order_id || razorpayOrder.id,
                 razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
+                razorpay_signature: response.razorpay_signature || '',
                 customerDetails: {
                   name: formData.name.trim(),
                   phone: formData.phone.trim(),

@@ -140,11 +140,11 @@ export async function POST(request: Request) {
         existingOrder.paymentStatus = 'Paid';
         await existingOrder.save();
 
-        // Push update to Shipmozo if needed
-        try {
-          await pushOrderToShipmozo(existingOrder);
-        } catch (e) {
-          console.warn('Shipmozo update failed:', e);
+        if (payment?.order_id) {
+          await DraftOrder.updateMany(
+            { razorpayOrderId: payment.order_id },
+            { status: 'Converted', paymentStatus: 'Paid' }
+          );
         }
 
         return NextResponse.json({
@@ -152,6 +152,13 @@ export async function POST(request: Request) {
           message: `Order #${existingOrder.orderId} successfully re-synced and updated with full details!`,
           order: existingOrder,
         });
+      }
+
+      if (payment?.order_id) {
+        await DraftOrder.updateMany(
+          { razorpayOrderId: payment.order_id },
+          { status: 'Converted', paymentStatus: 'Paid' }
+        );
       }
 
       return NextResponse.json({
@@ -190,11 +197,11 @@ export async function POST(request: Request) {
       notes: `Synced Payment ID: ${paymentId}. Bank RRN: ${payment?.acquirer_data?.rrn || payment?.vpa || 'N/A'}`,
     });
 
-    // Auto-push to Shipmozo
-    try {
-      await pushOrderToShipmozo(newOrder);
-    } catch (e) {
-      console.warn('Shipmozo push warning during order sync:', e);
+    if (payment?.order_id) {
+      await DraftOrder.updateMany(
+        { razorpayOrderId: payment.order_id },
+        { status: 'Converted', paymentStatus: 'Paid' }
+      );
     }
 
     return NextResponse.json({

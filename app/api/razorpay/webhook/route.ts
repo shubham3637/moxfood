@@ -22,8 +22,8 @@ export async function POST(request: Request) {
 
     const event = eventPayload.event;
 
-    // Handle payment.captured or order.paid events
-    if (event === 'payment.captured' || event === 'order.paid') {
+    // Handle payment.captured, payment.authorized, or order.paid events
+    if (event === 'payment.captured' || event === 'payment.authorized' || event === 'order.paid') {
       await dbConnect();
 
       const payment = eventPayload.payload?.payment?.entity || {};
@@ -43,6 +43,12 @@ export async function POST(request: Request) {
         // Ensure paymentStatus is Paid
         if (existingOrder.paymentStatus !== 'Paid') {
           await Order.findByIdAndUpdate(existingOrder._id, { paymentStatus: 'Paid' });
+        }
+        if (razorpayOrderId) {
+          await DraftOrder.updateMany(
+            { razorpayOrderId },
+            { status: 'Converted', paymentStatus: 'Paid' }
+          );
         }
         return NextResponse.json({ success: true, message: 'Order already exists' });
       }
@@ -106,15 +112,11 @@ export async function POST(request: Request) {
         notes: `Auto-captured via Razorpay Webhook (${event}). Bank RRN: ${payment.acquirer_data?.rrn || payment.vpa || 'N/A'}`,
       });
 
-      if (draftOrder) {
-        await DraftOrder.findByIdAndUpdate(draftOrder._id, { status: 'Converted', paymentStatus: 'Paid' });
-      }
-
-      // Push to Shipmozo automatically
-      try {
-        await pushOrderToShipmozo(newOrder);
-      } catch (e) {
-        console.warn('Shipmozo push warning in Webhook:', e);
+      if (draftOrder || razorpayOrderId) {
+        await DraftOrder.updateMany(
+          { razorpayOrderId: razorpayOrderId },
+          { status: 'Converted', paymentStatus: 'Paid' }
+        );
       }
 
       return NextResponse.json({
