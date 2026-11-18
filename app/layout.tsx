@@ -105,8 +105,6 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(storeSchema) }}
         />
-      </head>
-      <body className="min-h-screen flex flex-col bg-slate-50 text-slate-900 antialiased selection:bg-pink-600 selection:text-white">
         {/* Meta Pixel Code */}
         <Script
           id="fb-pixel"
@@ -137,6 +135,8 @@ export default function RootLayout({
           />
         </noscript>
         {/* End Meta Pixel Code */}
+      </head>
+      <body className="min-h-screen flex flex-col bg-slate-50 text-slate-900 antialiased selection:bg-pink-600 selection:text-white">
         <LanguageProvider>
           <ToastProvider>
             <CartProvider>
