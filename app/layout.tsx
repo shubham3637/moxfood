@@ -118,6 +118,8 @@ export default function RootLayout({
               'https://connect.facebook.net/en_US/fbevents.js');
               fbq('init', '1185990303999556');
               fbq('track', 'PageView');
+              // Standard e-commerce events (AddToCart, ViewContent, InitiateCheckout, AddPaymentInfo, Purchase)
+              // are dynamically triggered on their respective actions via @/lib/pixel to ensure accurate ad attribution.
             `,
           }}
         />

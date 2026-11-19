@@ -28,6 +28,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { RAZORPAY_KEY_ID } from '@/lib/constants';
 import { calculateShippingFee } from '@/lib/shipping';
 import BulkOrderWhatsAppModal from '@/components/BulkOrderWhatsAppModal';
+import { trackInitiateCheckout, trackAddPaymentInfo } from '@/lib/pixel';
 
 interface PincodeStatus {
   loading: boolean;
@@ -181,6 +182,13 @@ export default function CheckoutPage() {
   const isMinWeightSatisfied = totalWeightGrams >= 1000;
   const isMaxWeightExceeded = totalWeightGrams > 5000;
 
+  // Meta Pixel: Track InitiateCheckout when checkout loads with items
+  useEffect(() => {
+    if (items && items.length > 0) {
+      trackInitiateCheckout(items, payableTotal || subtotal);
+    }
+  }, [items.length]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -292,6 +300,9 @@ export default function CheckoutPage() {
         setIsSubmitting(false);
         return;
       }
+
+      // Meta Pixel: Track AddPaymentInfo
+      trackAddPaymentInfo(payableTotal, 'Razorpay');
 
       // 1. Create Order & Pre-Payment Draft via Razorpay Backend API
       const orderRes = await fetch('/api/razorpay/create-order', {

@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 
 import { calculateOrderTotalWeightGrams, formatWeight } from '@/lib/shipmozo';
+import { trackPurchase } from '@/lib/pixel';
 
 export default function OrderSuccessPage(props: { params: Promise<{ id: string }> }) {
   const { id } = use(props.params);
@@ -31,6 +32,12 @@ export default function OrderSuccessPage(props: { params: Promise<{ id: string }
       const data = await res.json();
       if (data.success) {
         setOrder(data.order);
+        // Meta Pixel: Track Purchase event
+        trackPurchase({
+          id: String(data.order.orderId || data.order._id || id),
+          totalAmount: Number(data.order.totalAmount) || 0,
+          items: data.order.items || [],
+        });
       }
     } catch (err) {
       console.error('Failed to fetch order success page details:', err);

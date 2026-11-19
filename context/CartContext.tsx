@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { trackAddToCart } from '@/lib/pixel';
 
 export interface CartItem {
   productId: string;
@@ -86,6 +87,17 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [items, isLoaded]);
 
   const addToCart = (product: any, quantityToAdd: number = 1) => {
+    // Meta Pixel: Track AddToCart event
+    const trackedId =
+      product.cartId ||
+      (product._id ? `${product._id}_${product.unit || 'default'}` : (product.id || product.productId));
+    trackAddToCart({
+      id: String(trackedId || ''),
+      name: product.name || 'Product',
+      price: Number(product.price) || 0,
+      quantity: quantityToAdd,
+    });
+
     setItems((prevItems) => {
       // Support weight variant unique ID: product.cartId or product._id + unit
       const id =

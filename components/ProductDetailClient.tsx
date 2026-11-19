@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { trackViewContent } from '@/lib/pixel';
 import {
   ArrowLeft,
   ShoppingBag,
@@ -56,6 +57,18 @@ export default function ProductDetailClient({ product }: { product: any }) {
     currentMrp > currentPrice
       ? Math.round(((currentMrp - currentPrice) / currentMrp) * 100)
       : 0;
+
+  // Meta Pixel: Track ViewContent on product page load
+  useEffect(() => {
+    if (product) {
+      trackViewContent({
+        id: String(product._id || product.slug || ''),
+        name: product.name || '',
+        price: Number(currentPrice || product.price || 0),
+        category: product.category,
+      });
+    }
+  }, [product, currentPrice]);
 
   const handlePrevImage = () => {
     setActiveImageIndex((prev) => (prev === 0 ? imageList.length - 1 : prev - 1));
