@@ -1,4 +1,4 @@
-export const FB_PIXEL_ID = '1185990303999556';
+export const FB_PIXEL_ID = '1498360108839014';
 
 // Global helper to trigger Meta Pixel events safely
 export const fbq = (...args: any[]) => {
